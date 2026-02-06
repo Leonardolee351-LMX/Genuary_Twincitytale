@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twin City Tides | A Border Chronicle</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ 
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        borderGray: '#E5E5E5', /* Lighter border for white theme */
+                        narrativeBg: '#FFFFFF', /* White background */
+                        accentCyan: '#00997A', /* Darker teal for better contrast on white */
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Noto Serif SC', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <style>
+        body {
+            background-color: #FFFFFF;
+            color: #1A1A1A;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            cursor: crosshair;
+        }
+
+        /* Cinematic Scrolling Animation */
+        @keyframes movieCredits {
+            from { transform: translateY(100%); }
+            to { transform: translateY(-130%); }
+        }
+        .credits-scroll {
+            animation: movieCredits 50s linear infinite;
+        }
+
+        /* Hide Scrollbar */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        .viewport-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Narrative Stepper Styles */
+        .nav-line {
+            height: 1px;
+            background: rgba(0,0,0,0.1); /* Darker line for white bg */
+            position: relative;
+            flex-grow: 1;
+        }
+        .nav-dot-container {
+            position: relative;
+            padding: 15px; 
+            margin: -15px;
+            cursor: pointer;
+            z-index: 60;
+        }
+        .nav-dot {
+            width: 6px;
+            height: 6px;
+            background: #CCC; /* Lighter dot for inactive state */
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-dot.active {
+            background: #00997A;
+            box-shadow: 0 0 12px rgba(0, 153, 122, 0.4);
+            transform: scale(1.8);
+        }
+
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 8s linear infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        const NextButton = ({ onClick, text = "CONTINUE" }) => (
+            <button 
+                onClick={onClick}
+                className="px-8 py-3 border border-black/10 hover:border-accentCyan hover:text-accentCyan text-black/80 transition-all duration-500 font-mono tracking-widest text-[10px] group bg-white/50 backdrop-blur-sm z-50 pointer-events-auto"
+            >
+                {text} <i className="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+            </button>
+        );
+
+        const chapters = [
+            { id: 0, title: "Title Page", subtitle: "Intro", type: "hero" },
+            { id: 1, title: "Recovery", subtitle: "Resurgence", type: "chapter_intro", chapter: "01" },
+            { id: 2, title: "Tidal Data", subtitle: "The Wave", type: "data_viz" },
+            { id: 3, title: "Checkpoints", subtitle: "Gateways", type: "chapter_intro", chapter: "02" },
+            { id: 4, title: "Folding Time", subtitle: "Efficiency", type: "split_view" }, // Page 5 - To be blank
+            { id: 5, title: "Sentience", subtitle: "Faces", type: "chapter_intro", chapter: "03" },
+            { id: 6, title: "Profiles", subtitle: "People", type: "persona_grid" }, // Page 7 - To be blank
+            { id: 7, title: "Reflection", subtitle: "Epilogue", type: "credits" }
+        ];
+
+        // 1. Hero Page (Modified for White Mode)
+        const HeroPage = ({ onNext }) => (
+            <div className="viewport-container text-center px-6">
+                <div className="absolute inset-0 z-0 overflow-hidden opacity-10">
+                    <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1541410945376-a7872f540035?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center grayscale"></div>
+                </div>
+                <div className="relative z-10">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.5 }}>
+                        <div className="font-mono text-accentCyan tracking-[0.4em] text-xs mb-6 uppercase">2023 - 2025 BORDER CHRONICLE</div>
+                        <h1 className="text-7xl md:text-[10rem] font-black tracking-tighter leading-none mb-4 text-black">298 Million</h1>
+                        <h2 className="text-xl md:text-3xl font-serif text-black/60 tracking-[0.3em] mb-12 uppercase">Twin City Tides: A Living Document</h2>
+                        <button 
+                            onClick={onNext}
+                            className="px-8 py-3 border border-black/10 hover:border-accentCyan hover:text-accentCyan text-black/80 transition-all duration-500 font-mono tracking-widest text-[10px] group"
+                        >
+                            ENTERING THE BORDER <i className="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                        </button>
+                    </motion.div>
+                </div>
+            </div>
+        );
+
+        // 2. Chapter Intro (Modified for White Mode)
+        const ChapterIntro = ({ data, onNext }) => (
+            <div className="viewport-container px-12 md:px-32 justify-start">
+                <div className="absolute right-0 top-0 h-full w-1/3 bg-black/5 skew-x-[-15deg] translate-x-32 z-0"></div>
+                <div className="relative z-10 max-w-4xl">
+                    <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1 }}>
+                        <div className="flex items-center gap-6 mb-12">
+                            <span className="text-5xl font-mono text-black/10">{data.chapter}</span>
+                            <div className="h-px w-20 bg-accentCyan"></div>
+                        </div>
+                        <h2 className="text-6xl md:text-8xl font-serif font-black mb-8 tracking-tight text-black uppercase">{data.title}</h2>
+                        <p className="text-xl md:text-2xl text-black/50 font-light max-w-2xl leading-relaxed font-serif mb-12">
+                            A story of flow, transition, and the redefinition of living boundaries. When numbers become breath, geography is no longer an obstacle.
+                        </p>
+                        <NextButton onClick={onNext} text="ENTER CHAPTER" />
+                    </motion.div>
+                </div>
+            </div>
+        );
+
+        // 3. Data Viz (Integrated 1-1.html)
+        const DataVizPage = ({ onNext }) => (
+            <div className="viewport-container w-full h-full relative">
+                <iframe 
+                    src="1-1.html" 
+                    className="w-full h-full border-0" 
+                    title="The Resurgence"
+                />
+                <div className="absolute bottom-8 right-8 z-50">
+                    <NextButton onClick={onNext} text="NEXT CHAPTER" />
+                </div>
+            </div>
+        );
+
+        // 4. Split View (Integrated 2-0.html)
+        const SplitViewPage = ({ onNext }) => (
+            <div className="viewport-container w-full h-full relative">
+                <iframe 
+                    src="2-0.html" 
+                    className="w-full h-full border-0" 
+                    title="Folding Time Analysis"
+                />
+                <div className="absolute bottom-8 right-8 z-50">
+                    <NextButton onClick={onNext} text="NEXT CHAPTER" />
+                </div>
+            </div>
+        );
+
+        // 5. Persona Grid (Integrated Navigation for People)
+        const PersonaGrid = () => {
+            const [activePage, setActivePage] = useState(null);
+
+            const pages = [
+                { id: '3-1', title: 'Cross-Temporal', subtitle: 'Analysis', url: '3-1.html', desc: 'Space-time evolution of border crossings.' },
+                { id: '3-2', title: 'Persona', subtitle: 'Profiles', url: '3-2.html', desc: 'Individual stories from the commuter tide.' },
+                { id: '3-3', title: 'Timeline', subtitle: 'Cross-Border', url: '3-3.html', desc: 'A day in the life of the twin cities.' },
+                { id: '4-1', title: 'Future', subtitle: 'Questions', url: '4-1future_question.html', desc: 'Emerging issues and future outlooks.' },
+            ];
+
+            return (
+                <div className="viewport-container w-full h-full relative">
+                    <AnimatePresence mode="wait">
+                        {activePage ? (
+                            <motion.div 
+                                key="detail"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="w-full h-full bg-white relative"
+                            >
+                                <button 
+                                    onClick={() => setActivePage(null)}
+                                    className="absolute top-4 right-4 z-50 px-4 py-2 bg-white/90 backdrop-blur border border-black/10 rounded-full text-[10px] font-mono uppercase tracking-widest hover:bg-black/5 hover:text-accentCyan transition-colors shadow-sm"
+                                >
+                                    <i className="ph ph-x mr-2"></i>Close View
+                                </button>
+                                <iframe src={activePage} className="w-full h-full border-0" title="Detail View" />
+                            </motion.div>
+                        ) : (
+                            <motion.div 
+                                key="grid"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="w-full h-full flex items-center justify-center p-8 md:p-20"
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
+                                    {pages.map((page, index) => (
+                                        <div 
+                                            key={page.id}
+                                            onClick={() => setActivePage(page.url)}
+                                            className="group relative overflow-hidden bg-white border border-black/5 hover:border-accentCyan/50 transition-all duration-500 cursor-pointer h-64 flex flex-col justify-between p-8 hover:shadow-xl hover:-translate-y-1"
+                                        >
+                                            <div className="absolute top-0 right-0 w-24 h-24 bg-accentCyan/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-700"></div>
+                                            
+                                            <div>
+                                                <div className="font-mono text-[10px] text-black/40 tracking-widest uppercase mb-3">{page.subtitle}</div>
+                                                <h3 className="font-serif text-3xl text-black/80 group-hover:text-accentCyan transition-colors duration-300">{page.title}</h3>
+                                            </div>
+                                            
+                                            <div className="flex justify-between items-end">
+                                                <p className="text-xs text-black/50 max-w-[70%] font-sans leading-relaxed">{page.desc}</p>
+                                                <div className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center group-hover:bg-accentCyan group-hover:text-white group-hover:border-transparent transition-all duration-300">
+                                                    <i className="ph ph-arrow-right"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        // 6. Reflection / Credits (Modified for White Mode)
+        const CreditsPage = () => (
+            <div className="viewport-container bg-white overflow-hidden">
+                <div className="absolute inset-0 credits-scroll flex flex-col items-center pt-[100vh] pb-24">
+                    <div className="text-accentCyan font-mono text-[10px] tracking-[0.5em] mb-8 uppercase">Final Data Summary</div>
+                    <h2 className="text-4xl md:text-5xl font-serif mb-32 tracking-widest uppercase text-black">The Border Report</h2>
+                    
+                    <div className="space-y-40 text-center max-w-2xl px-6">
+                        <div>
+                            <div className="text-[10px] text-black/40 uppercase tracking-[0.4em] mb-6">Total Crossings 2024</div>
+                            <div className="text-5xl font-bold font-mono text-black/90 tracking-tighter">298,000,000+</div>
+                        </div>
+                        <div>
+                            <div className="text-[10px] text-black/40 uppercase tracking-[0.4em] mb-6">Average Cost Index</div>
+                            <div className="text-3xl font-light text-black/70 font-mono">CNY 80.00 / 0.5 Hours</div>
+                        </div>
+                        <div>
+                            <div className="text-[10px] text-black/40 uppercase tracking-[0.4em] mb-6">Core Insight</div>
+                            <div className="text-2xl font-serif text-black/60 leading-relaxed px-10">
+                                76% of visitors are seeking "Lifestyle" over "Commerce."<br/>The border is evolving from a geographic fence to a functional node.
+                            </div>
+                        </div>
+                        <div className="pt-20">
+                            <div className="text-accentCyan font-serif italic text-xl">"Where the border ends, life begins."</div>
+                        </div>
+                        <div className="pt-40 text-black/20 text-[10px] font-mono tracking-widest">
+                            DIRECTED BY TWIN CITY CHRONICLES<br/>DATA SOURCED FROM 2023-2025 RECORDS
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // --- Main App Component ---
+
+        const App = () => {
+            const [step, setStep] = useState(0);
+            const [direction, setDirection] = useState(1);
+
+            const goToStep = (target) => {
+                if (target === step) return;
+                setDirection(target > step ? 1 : -1);
+                setStep(target);
+            };
+
+            const next = () => { if (step < chapters.length - 1) goToStep(step + 1); };
+            const prev = () => { if (step > 0) goToStep(step - 1); };
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next();
+                    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prev();
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [step]);
+
+            return (
+                <div className="w-screen h-screen bg-narrativeBg select-none overflow-hidden flex flex-col relative">
+                    
+                    {/* Fixed Narrative Navigation (Modified for White Mode) */}
+                    <nav className="fixed bottom-12 left-0 w-full z-[100] px-10 flex justify-center pointer-events-none">
+                        <div className="w-full max-w-5xl flex items-center justify-between pointer-events-auto">
+                            {chapters.map((c, i) => (
+                                <React.Fragment key={c.id}>
+                                    <div 
+                                        onClick={() => goToStep(i)}
+                                        className="nav-dot-container group"
+                                    >
+                                        <div className={`nav-dot ${step === i ? 'active' : ''}`}></div>
+                                        <div className={`absolute -top-10 left-1/2 -translate-x-1/2 text-[9px] font-mono whitespace-nowrap transition-all duration-500 tracking-widest ${step === i ? 'opacity-100 translate-y-0 text-accentCyan' : 'opacity-0 translate-y-2 text-black/20'}`}>
+                                            {c.subtitle.toUpperCase()}
+                                        </div>
+                                    </div>
+                                    {i < chapters.length - 1 && <div className="nav-line"></div>}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    </nav>
+
+                    {/* Top Progress Indicator (Modified for White Mode) */}
+                    <header className="fixed top-10 left-10 z-[100] pointer-events-none">
+                        <div className="font-mono text-[9px] tracking-[0.6em] text-black/40 uppercase">
+                            INDEX {step.toString().padStart(2, '0')} / {chapters[step].title.toUpperCase()}
+                        </div>
+                    </header>
+
+                    {/* Content Layer */}
+                    <main className="flex-1 relative z-10">
+                        <AnimatePresence mode="wait" custom={direction}>
+                            <motion.div
+                                key={step}
+                                custom={direction}
+                                initial={{ opacity: 0, x: direction * 40 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -direction * 40 }}
+                                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                                className="absolute inset-0"
+                            >
+                                {step === 0 && <HeroPage onNext={next} />}
+                                {chapters[step].type === "chapter_intro" && <ChapterIntro data={chapters[step]} />}
+                                {chapters[step].type === "data_viz" && <DataVizPage />}
+                                {chapters[step].type === "split_view" && <SplitViewPage />}
+                                {chapters[step].type === "persona_grid" && <PersonaGrid />}
+                                {chapters[step].type === "credits" && <CreditsPage />}
+                            </motion.div>
+                        </AnimatePresence>
+                    </main>
+
+                    {/* System Status Hint (Modified for White Mode) */}
+                    <div className="fixed bottom-12 right-12 z-[100] hidden md:flex items-center gap-4 text-black/20 text-[8px] font-mono tracking-[0.4em]">
+                        <div className="w-1 h-1 bg-accentCyan rounded-full animate-pulse"></div>
+                        ARCHIVE STREAM SYNCHRONIZED
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

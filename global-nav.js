@@ -18,8 +18,8 @@
             title: "RECOVERY", 
             subtitle: "Chapter 1\nREBOOTED BOUNDARY", 
             subchapters: [
-                { title: "1.1 Recovery", url: "1-1.html" },
-                { title: "1.2 Counterflow", url: "1-1.html" }
+                { title: "1.1 Recovery", url: "Chapter1.HTML" },
+                { title: "1.2 Counterflow", url: "Chapter1.HTML" }
             ]
         },
         { 
@@ -27,19 +27,19 @@
             title: "THE FOLDED CITY", 
             subtitle: "Chapter 2\nFOLDED CITY", 
             subchapters: [
-                { title: "2.1 Flows", url: "2-0.html" },
-                { title: "2.2 Analysis", url: "2-0.html" },
-                { title: "2.3 Dual City", url: "2-0.html" }
+                { title: "2.1 Flows", url: "Chapter2.HTML" },
+                { title: "2.2 Analysis", url: "Chapter2.HTML" },
+                { title: "2.3 Dual City", url: "Chapter2.HTML" }
             ]
         },
         { 
             id: 3, 
-            title: "THE HUMAN SCALE", 
+            title: "CONCRETE LIVES", 
             subtitle: "Chapter 3\nCONCRETE LIVES", 
             subchapters: [
-                { title: "3.1 Persona", url: "3-2.html" },
-                { title: "3.2 Timeline", url: "3-3.html" },
-                { title: "3.3 Phenomenon", url: "3-3fix.html" }
+                { title: "3.1 Persona", url: "Chapter3_Persona.HTML" },
+                { title: "3.2 Timeline", url: "Chapter3_Timeline.HTML" },
+                { title: "3.3 Phenomenon", url: "Chapter3_Phenomenon.HTML" }
             ]
         },
         { id: 4, title: "Epilogue", subtitle: "Epilogue" }
@@ -53,11 +53,11 @@
 
     if (stepParam !== null) {
         currentStep = parseFloat(stepParam);
-    } else if (path.includes("1-1")) {
+    } else if (path.includes("Chapter1.HTML") || path.includes("1-1")) {
         currentStep = 2; // Chapter 1
-    } else if (path.includes("2-0")) {
+    } else if (path.includes("Chapter2.HTML")) {
         currentStep = 3; // Chapter 2
-    } else if (path.includes("3-2") || path.includes("3-3") || path.includes("3-3fix")) {
+    } else if (path.includes("Chapter3_Persona.HTML") || path.includes("Chapter3_Timeline.HTML") || path.includes("Chapter3_Phenomenon.HTML")) {
         currentStep = 4; // Chapter 3
     } 
 
@@ -107,17 +107,17 @@
         // Subchapters (Hover)
         if (chapter.subchapters) {
             const subContainer = document.createElement('div');
-            subContainer.className = "absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center opacity-0 group-hover/item:opacity-100 transition-opacity duration-300 pointer-events-none group-hover/item:pointer-events-auto";
+            subContainer.className = "absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center transition-all duration-300 pointer-events-none group-hover/item:pointer-events-auto";
             subContainer.onclick = (e) => e.stopPropagation();
             
             // Line
             const line = document.createElement('div');
-            line.className = "w-px h-32 bg-[#00997A]/30 origin-bottom scale-y-0 group-hover/item:scale-y-100 transition-transform duration-500 ease-out delay-75";
+            line.className = "w-px h-[16rem] bg-gradient-to-t from-[#00997A]/50 to-transparent origin-bottom scale-y-0 group-hover/item:scale-y-100 transition-transform duration-500 ease-out";
             subContainer.appendChild(line);
 
             // Sub-items Wrapper
             const itemsWrapper = document.createElement('div');
-            itemsWrapper.className = "absolute bottom-0 w-48 h-32 flex flex-col-reverse justify-around items-center py-2";
+            itemsWrapper.className = "absolute bottom-0 w-64 h-[16rem] flex flex-col-reverse justify-around items-center pt-6 pb-12";
 
             chapter.subchapters.forEach((sub, subIndex) => {
                 const subItem = document.createElement('div');
@@ -133,8 +133,16 @@
                     }
                 };
 
+                // Determine if this specific subchapter is active based on current URL
+                let isSubActive = false;
+                if (sub.stepIndex !== undefined) {
+                     isSubActive = (currentStep === sub.stepIndex);
+                } else if (sub.url) {
+                     isSubActive = path.includes(sub.url);
+                }
+
                 const subLabel = document.createElement('div');
-                subLabel.className = "bg-white/95 backdrop-blur px-3 py-1 border border-black/5 rounded shadow-sm text-[10px] font-medium text-black/60 hover:text-[#00997A] hover:border-[#00997A]/30 transition-colors cursor-pointer hover:scale-105 whitespace-nowrap";
+                subLabel.className = `bg-white/80 backdrop-blur-sm px-6 py-2 rounded-xl text-xs font-mono tracking-widest uppercase border border-slate-200 transition-all duration-300 cursor-pointer hover:scale-110 whitespace-nowrap ${isSubActive ? 'text-[#00997A] font-bold' : 'text-slate-400 font-medium hover:text-[#00997A] hover:font-bold'}`;
                 subLabel.textContent = sub.title;
 
                 subItem.appendChild(subLabel);

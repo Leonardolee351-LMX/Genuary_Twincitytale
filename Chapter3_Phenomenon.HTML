@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borders Grow, Commute and City Still Misaligned</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0E7490', // Cyan 700
+                        secondary: '#06B6D4', // Cyan 500
+                        accent: '#ECFEFF', // Cyan 50
+                        slate: { 850: '#1e293b' },
+                        warning: '#F59E0B', // Amber 500 - For Friction
+                        danger: '#F43F5E', // Rose 500 - For Critical Gaps
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        serif: ['"Noto Serif"', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out forwards',
+                        'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'dash': 'dash 2s linear infinite',
+                        'wave': 'wave 2s ease-in-out infinite',
+                        'flow': 'flow 1.5s linear infinite',
+                        'bounce-slight': 'bounceSlight 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+                        slideUp: { '0%': { transform: 'translateY(40px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        dash: { 'to': { strokeDashoffset: '-20' } },
+                        wave: { '0%, 100%': { transform: 'scaleY(1)' }, '50%': { transform: 'scaleY(0.5)' } },
+                        flow: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(200%)' } },
+                        bounceSlight: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-5px)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0F172A;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 20px 40px -4px rgba(14, 116, 144, 0.1);
+            border-color: #06B6D4;
+        }
+
+        /* Typography */
+        .section-tag { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            letter-spacing: 0.1em; 
+            text-transform: uppercase; 
+            color: #94a3b8; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            margin-bottom: 1rem; 
+        }
+        .section-tag::before { content: ''; width: 8px; height: 8px; background: currentColor; border-radius: 50%; }
+
+        /* Nav Capsule */
+        .nav-capsule {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 4px;
+            border-radius: 100px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 4px;
+        }
+        .nav-btn {
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active { background: #0f172a; color: white; }
+        .nav-btn:hover:not(.active) { background: rgba(0,0,0,0.04); }
+
+        /* Hide Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: rgba(148, 163, 184, 0.5); border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- 0. VISUAL UTILITIES & BACKGROUND ---
+
+        const ParticleBackground = () => {
+            const mountRef = useRef(null);
+            useEffect(() => {
+                if(!mountRef.current) return;
+                const canvas = document.createElement('canvas');
+                canvas.style.position = 'fixed';
+                canvas.style.top = '0';
+                canvas.style.left = '0';
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+                canvas.style.zIndex = '-1';
+                canvas.style.pointerEvents = 'none';
+                mountRef.current.appendChild(canvas);
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+
+                const particlesGeometry = new THREE.BufferGeometry();
+                const particlesCount = 700;
+                const posArray = new Float32Array(particlesCount * 3);
+                
+                for(let i = 0; i < particlesCount * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 25;
+                }
+
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                const material = new THREE.PointsMaterial({ size: 0.03, color: 0x0E7490, transparent: true, opacity: 0.3 });
+                const particlesMesh = new THREE.Points(particlesGeometry, material);
+                scene.add(particlesMesh);
+                camera.position.z = 5;
+
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    particlesMesh.rotation.y += 0.0002;
+                    particlesMesh.rotation.x -= 0.0001;
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                const handleResize = () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                };
+                window.addEventListener('resize', handleResize);
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    mountRef.current.removeChild(canvas);
+                    particlesGeometry.dispose();
+                    material.dispose();
+                    renderer.dispose();
+                };
+            }, []);
+            return <div ref={mountRef} />;
+        };
+
+        const Navigation = () => (
+            <div className="nav-capsule">
+                <a href="Chapter3_Persona.HTML" className="nav-btn">3.1 Persona</a>
+                <a href="Chapter3_Timeline.HTML" className="nav-btn">3.2 Timeline</a>
+                <a href="Chapter3_Phenomenon.HTML" className="nav-btn active">3.3 Phenomenon</a>
+            </div>
+        );
+
+        // --- 1. NEW ARCHIVE VISUALIZATIONS (DASHBOARD) ---
+        
+        // 1.1 Donut Chart for Left Dashboard
+        const DonutChart = () => {
+            const r = 40;
+            const c = 2 * Math.PI * r;
+            // Data: 54, 22, 15, 9
+            return (
+                <div className="relative w-32 h-32 md:w-40 md:h-40 flex items-center justify-center shrink-0">
+                    <svg className="w-full h-full transform -rotate-90">
+                        {/* Background */}
+                        <circle cx="50%" cy="50%" r={r} stroke="#f1f5f9" strokeWidth="12" fill="transparent" />
+                        
+                        {/* 54% - Shopping (Primary) */}
+                        <circle cx="50%" cy="50%" r={r} stroke="#0E7490" strokeWidth="12" fill="transparent" 
+                            strokeDasharray={c} strokeDashoffset={c * (1 - 0.54)} strokeLinecap="round" className="opacity-90" />
+                        
+                        {/* 22% - Friends (Secondary) - Starts at 54% */}
+                        <circle cx="50%" cy="50%" r={r} stroke="#06B6D4" strokeWidth="12" fill="transparent" 
+                            strokeDasharray={`${c * 0.22} ${c * 0.78}`} strokeDashoffset={-c * 0.55} strokeLinecap="round" className="opacity-90" />
+                            
+                        {/* 15% - Business (Slate) - Starts at 76% */}
+                        <circle cx="50%" cy="50%" r={r} stroke="#94a3b8" strokeWidth="12" fill="transparent" 
+                            strokeDasharray={`${c * 0.15} ${c * 0.85}`} strokeDashoffset={-c * 0.78} strokeLinecap="round" className="opacity-90" />
+                    </svg>
+                    <div className="absolute flex flex-col items-center">
+                        <span className="text-xl md:text-2xl font-bold text-slate-700 font-mono">2017</span>
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">Archive</span>
+                    </div>
+                </div>
+            );
+        };
+
+        // 1.2 Group Micro-Visualizations for Right Dashboard
+        const CommuterViz = () => (
+            <div className="h-10 w-full relative flex items-center justify-center overflow-hidden border-t border-b border-slate-100 my-2">
+                <div className="absolute inset-x-0 top-1/2 h-0.5 bg-slate-100"></div>
+                <div className="flex w-full justify-between px-2 text-slate-300 text-xs font-mono"><span>SZ</span><span>HK</span></div>
+                <div className="w-1.5 h-1.5 bg-primary rounded-full absolute animate-flow shadow-sm" style={{animationDuration: '1.2s'}}></div>
+                <div className="w-1.5 h-1.5 bg-secondary rounded-full absolute animate-flow shadow-sm" style={{animationDuration: '1.8s', animationDirection: 'reverse'}}></div>
+            </div>
+        );
+
+        const RaiderViz = () => (
+            <div className="h-10 w-full flex items-center justify-center gap-3 my-2">
+                <div className="relative">
+                    <i className="ph-fill ph-shopping-bag text-2xl text-secondary animate-bounce-slight"></i>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-warning rounded-full border-2 border-white"></div>
+                </div>
+                <div className="flex gap-1">
+                    <div className="w-1 h-3 bg-slate-200 rounded-full"></div>
+                    <div className="w-1 h-4 bg-slate-300 rounded-full"></div>
+                    <div className="w-1 h-2 bg-slate-200 rounded-full"></div>
+                </div>
+            </div>
+        );
+
+        const ElderlyViz = () => (
+            <div className="h-10 w-full flex items-center justify-center relative my-2">
+                <div className="flex flex-col items-center">
+                    <i className="ph-duotone ph-house-line text-2xl text-slate-400"></i>
+                    <i className="ph-bold ph-arrow-up text-primary text-xs absolute -top-1 animate-pulse"></i>
+                </div>
+                <span className="text-[9px] font-mono text-slate-400 ml-2">HK <i className="ph-arrow-right"></i> SZ</span>
+            </div>
+        );
+
+        const StudentViz = () => (
+            <div className="h-10 w-full flex items-center justify-center gap-2 my-2">
+                <i className="ph-fill ph-graduation-cap text-2xl text-slate-600"></i>
+                <div className="w-2 h-2 bg-primary rounded-full animate-ping opacity-75"></div>
+                <i className="ph-duotone ph-book-open text-xl text-slate-400"></i>
+            </div>
+        );
+
+
+        // --- 2. EXISTING & SHARED COMPONENTS ---
+
+        const AnimatedBar = ({ label, percentage, colorClass, icon }) => {
+            const [width, setWidth] = useState(0);
+            useEffect(() => {
+                const timer = setTimeout(() => setWidth(percentage), 300);
+                return () => clearTimeout(timer);
+            }, [percentage]);
+
+            return (
+                <div className="mb-5 last:mb-0">
+                    <div className="flex justify-between mb-1.5 text-sm font-semibold text-slate-600 items-center">
+                        <div className="flex items-center gap-2">
+                            <i className={`${icon} text-slate-400`}></i>
+                            <span>{label}</span>
+                        </div>
+                        <span className={`font-mono text-base ${colorClass.replace('bg-', 'text-')}`}>{percentage}%</span>
+                    </div>
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                            className={`h-full rounded-full transition-all duration-1000 ease-out ${colorClass}`} 
+                            style={{ width: `${width}%` }}
+                        ></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const PersonaFlow = () => {
+            return (
+                <div className="relative h-24 w-full overflow-hidden flex items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                    <div className="absolute inset-y-0 left-1/2 w-0.5 bg-slate-300"></div> {/* The Border */}
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} 
+                            className="absolute w-2 h-2 rounded-full bg-primary opacity-60 animate-flow"
+                            style={{ 
+                                top: `${20 + Math.random() * 60}%`, 
+                                left: '0', 
+                                animationDelay: `${i * 0.5}s`,
+                                animationDuration: `${2 + Math.random()}s`
+                            }}
+                        />
+                    ))}
+                     {[...Array(3)].map((_, i) => (
+                        <div key={`r-${i}`} 
+                            className="absolute w-2 h-2 rounded-full bg-warning opacity-60 animate-flow"
+                            style={{ 
+                                top: `${20 + Math.random() * 60}%`, 
+                                right: '0', 
+                                animationDirection: 'reverse',
+                                animationDelay: `${i * 0.7}s`,
+                                animationDuration: `${3 + Math.random()}s`
+                            }}
+                        />
+                    ))}
+                    <div className="absolute bg-white px-2 py-1 text-[10px] font-mono font-bold text-slate-500 border border-slate-200 rounded">BORDER</div>
+                </div>
+            );
+        };
+
+        const CatchmentViz = () => (
+            <div className="flex items-end justify-center gap-4 h-full pb-2">
+                <div className="flex flex-col items-center">
+                    <div className="w-8 bg-primary/20 border border-primary rounded-t-md relative group">
+                        <div className="h-12 w-full"></div>
+                        <span className="absolute -top-6 text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Jobs</span>
+                    </div>
+                </div>
+                <div className="flex flex-col items-center">
+                    <div className="w-8 bg-warning/20 border border-warning rounded-t-md relative group">
+                        <div className="h-4 w-full"></div>
+                         <span className="absolute -top-6 text-xs font-bold text-warning opacity-0 group-hover:opacity-100 transition-opacity">Home</span>
+                    </div>
+                </div>
+                <div className="absolute top-2 right-2 text-warning font-mono text-xs font-bold">-45%</div>
+            </div>
+        );
+
+        const GapViz = () => (
+            <div className="flex items-center justify-between h-full px-4 relative">
+                <div className="w-3 h-3 rounded-full bg-slate-400"></div>
+                <div className="flex-1 h-0.5 bg-slate-300 mx-2 relative border-t-2 border-dashed border-slate-300">
+                    <i className="ph-person-simple-walk absolute -top-4 left-1/2 -translate-x-1/2 text-slate-400 animate-pulse text-lg"></i>
+                </div>
+                <div className="w-3 h-3 rounded-full bg-slate-400"></div>
+                <div className="absolute bottom-2 w-full text-center text-[10px] font-mono text-slate-500">5km Void</div>
+            </div>
+        );
+
+        const ChainViz = () => (
+            <div className="flex flex-col justify-center h-full px-2 gap-2">
+                <div className="w-full flex h-4 rounded-full overflow-hidden">
+                    <div className="w-[30%] bg-primary flex items-center justify-center text-[8px] text-white">Cross</div>
+                    <div className="w-[70%] bg-warning flex items-center justify-center text-[8px] text-white relative overflow-hidden">
+                        <div className="absolute inset-0 bg-white/20 animate-shimmer"></div>
+                        Transfers
+                    </div>
+                </div>
+                <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                    <span>Gate</span>
+                    <span>Door</span>
+                </div>
+            </div>
+        );
+
+        const WaveViz = () => (
+            <div className="flex items-center justify-center h-full gap-1">
+                {[...Array(5)].map((_, i) => (
+                    <div key={i} 
+                        className="w-1.5 bg-warning rounded-full animate-wave"
+                        style={{ 
+                            height: '60%', 
+                            animationDelay: `${i * 0.1}s`,
+                            backgroundColor: i === 2 ? '#F59E0B' : '#FCD34D' 
+                        }} 
+                    />
+                ))}
+            </div>
+        );
+
+        const BatteryViz = () => (
+            <div className="flex items-center justify-center h-full">
+                <div className="w-12 h-6 border-2 border-slate-400 rounded-md p-0.5 relative flex">
+                    <div className="h-full bg-danger w-[20%] animate-pulse"></div>
+                    <div className="absolute -right-1.5 top-1.5 w-1 h-2 bg-slate-400 rounded-r-sm"></div>
+                </div>
+                <span className="ml-2 text-danger font-mono font-bold text-sm">&lt;3h</span>
+            </div>
+        );
+
+        const Header = () => (
+            <header className="space-y-6 max-w-4xl mx-auto text-center pt-20 animate-slide-up">
+                <div className="flex items-center justify-center gap-4">
+                    <span className="h-[1px] w-12 bg-slate-300"></span>
+                    <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold tracking-widest uppercase font-mono border border-slate-200">Critical Analysis</span>
+                    <span className="h-[1px] w-12 bg-slate-300"></span>
+                </div>
+                
+                <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-850 leading-tight">
+                  <span className="inline-block">Borders Grow,</span>
+                  <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Commute and City Still Misaligned</span>
+                </h1>
+                
+                <p className="text-lg md:text-xl text-slate-500 font-serif italic leading-relaxed max-w-2xl mx-auto">
+                    "Crossing is easy; staying is hard: poor catchment, weak links, lost time."
+                </p>
+            </header>
+        );
+
+        // --- UPDATED ARCHIVE SECTION ---
+
+        const ArchiveSection = () => {
+            const groups = [
+                { id: "01", title: "SZ–HK Commuters", viz: <CommuterViz/> },
+                { id: "02", title: "Weekend Raiders", viz: <RaiderViz/> },
+                { id: "03", title: "Elderly Moving North", viz: <ElderlyViz/> },
+                { id: "04", title: "Postgrad Commuters", viz: <StudentViz/> },
+            ];
+
+            return (
+                <section className="mb-24 animate-slide-up" style={{animationDelay: '0.2s'}}>
+                    <div className="section-tag">Quantitative Archive: 2017</div>
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+                        
+                        {/* LEFT: DASHBOARD (Updated with Donut) */}
+                        <div className="lg:col-span-7 glass-card p-6 md:p-8 rounded-3xl">
+                            <div className="flex justify-between mb-8 items-center border-b border-slate-100 pb-4">
+                                <h3 className="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <i className="ph-chart-pie-slice text-primary"></i>
+                                    Cross-Border Purpose
+                                </h3>
+                                <span className="font-mono text-slate-400 font-bold text-[10px] bg-slate-50 px-2 py-1 rounded border border-slate-200">REF: 2017 SURVEY</span>
+                            </div>
+                            
+                            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                                {/* Visual */}
+                                <DonutChart />
+                                
+                                {/* Data Bars */}
+                                <div className="flex-1 w-full space-y-4">
+                                    <AnimatedBar label="Shopping/Leisure" percentage={54} colorClass="bg-primary" icon="ph-shopping-bag" />
+                                    <AnimatedBar label="Visit Friends/Family" percentage={22} colorClass="bg-secondary" icon="ph-users" />
+                                    <AnimatedBar label="Business/Work" percentage={15} colorClass="bg-slate-400" icon="ph-briefcase" />
+                                </div>
+                            </div>
+
+                            <div className="mt-8 text-slate-500 text-xs leading-relaxed bg-slate-50/50 p-4 rounded-xl border border-dashed border-slate-200">
+                                <i className="ph-info mr-1 text-primary"></i> 2017 crossings were strongly one-way (South to North for luxury, North to South for work). Luohu and Lok Ma Chau dominated the flow before the structural shift.
+                            </div>
+                        </div>
+
+                        {/* RIGHT: GROUPS (Updated with Viz) */}
+                        <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+                            {groups.map(g => (
+                                <div key={g.id} className="glass-card p-4 rounded-2xl flex flex-col justify-between hover:border-secondary group transition-all cursor-default">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="font-mono text-[10px] text-slate-300 group-hover:text-secondary">{g.id}</span>
+                                    </div>
+                                    <div className="mb-2">
+                                        {g.viz}
+                                    </div>
+                                    <h4 className="font-bold text-slate-700 text-xs md:text-sm leading-tight text-center">{g.title}</h4>
+                                </div>
+                            ))}
+                            
+                            {/* Summary Stat Card */}
+                            <div className="col-span-2 glass-card p-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl flex items-center justify-between shadow-lg">
+                                <div>
+                                    <div className="text-secondary text-[10px] uppercase tracking-widest font-bold mb-1">Avg Frequency</div>
+                                    <div className="text-xs text-slate-400">Weekly trips per person</div>
+                                </div>
+                                <div className="text-4xl font-mono font-bold text-white flex items-baseline gap-1">
+                                    2.8 <span className="text-sm font-normal text-slate-400">trips</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const AnalysisSection = () => (
+            <section className="mb-24 animate-slide-up" style={{animationDelay: '0.4s'}}>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    <div className="lg:col-span-4 space-y-6">
+                        <div className="section-tag text-primary">Qualitative Analysis</div>
+                        <div className="font-mono text-3xl font-bold tracking-tight text-slate-850">2024_OBSERVATION</div>
+                        <h3 className="text-2xl font-bold text-slate-800">Post‑pandemic Cross‑border Living</h3>
+                        <p className="text-slate-500 leading-relaxed text-sm">
+                            Post‑pandemic border controls and dual‑city contrasts are drawing more people into cross‑border living. The vivid everyday streams shared on social media reveal a rapid convergence at the border.
+                        </p>
+                    </div>
+
+                    <div className="lg:col-span-8 glass-card p-10 bg-slate-50/50 border-dashed border-slate-300 rounded-3xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-20"><i className="ph-quotes-fill text-6xl"></i></div>
+                        
+                        <div className="relative z-10">
+                            <p className="text-xl text-slate-700 font-serif italic leading-relaxed mb-8">
+                                "Cross-border is no longer arrival, but lateral extension of life. From earning in HK, living in SZ to seeking emotional substitutes northbound."
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 border-t border-slate-200 pt-8">
+                                <div className="space-y-2">
+                                    <h4 className="font-bold text-slate-800 text-sm">Blurred Borders</h4>
+                                    <PersonaFlow />
+                                    <p className="text-[10px] text-slate-400 mt-2">Twin cities drift to one city.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-bold text-slate-800 text-sm">Work–Home Reconfigured</h4>
+                                    <div className="h-12 w-full bg-slate-100 rounded-lg flex items-center justify-center gap-2 text-xs font-mono text-slate-500">
+                                        <span>HK($)</span> <i className="ph-arrows-left-right"></i> <span>SZ(🏠)</span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 mt-2">Remote work optimizes cost.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-bold text-slate-800 text-sm">Individual Experiments</h4>
+                                    <div className="h-12 w-full bg-slate-100 rounded-lg flex items-center justify-center">
+                                         <span className="text-xs font-bold text-primary">Survival Test</span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 mt-2">Time vs. Money identity.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const DeepDiveSection = ({ number, title, subtitle, desc, cards }) => (
+            <section className="grid md:grid-cols-[1fr_2fr] gap-12 py-16 border-t border-slate-200/60">
+                <div className="sticky top-24 h-fit self-start">
+                    <span className="font-mono text-5xl font-bold text-slate-200 block mb-2">{number}</span>
+                    <h2 className="text-3xl font-bold leading-tight text-slate-850">
+                        {title}<br/><span className={subtitle.includes("Pain") || subtitle.includes("Poverty") ? "text-warning" : "text-secondary"}>{subtitle}</span>
+                    </h2>
+                </div>
+                
+                <div className="space-y-8">
+                    <p className="text-slate-600 text-lg leading-relaxed">{desc}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {cards.map((card, idx) => (
+                            <div key={idx} className={`glass-card p-6 rounded-2xl flex flex-col justify-between group cursor-pointer hover:border-${card.alert ? 'warning' : 'primary'} ${card.span ? 'md:col-span-2' : ''}`}>
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${card.alert ? 'bg-warning/10 text-warning' : 'bg-primary/10 text-primary'}`}>
+                                            <i className={card.icon}></i>
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 text-sm">{card.title}</h3>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className={`block text-2xl font-mono font-bold ${card.alert ? 'text-warning' : 'text-primary'} group-hover:scale-110 transition-transform`}>{card.stat}</span>
+                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{card.label}</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="h-16 w-full bg-white/50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-slate-100">
+                                    {card.viz}
+                                </div>
+                                
+                                <p className="text-xs text-slate-500 font-medium">{card.text}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Footer = () => (
+            <footer className="py-24 mt-12 border-t border-slate-200 text-center">
+                <p className="text-xl md:text-2xl text-slate-600 font-serif italic leading-relaxed max-w-3xl mx-auto mb-12">
+                    "Structural imbalance creates rigid cross-border demand, chain inefficiency amplifies time costs, and time poverty conversely compresses the depth of cross-border life."
+                </p>
+                <a href="#" className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-full font-bold hover:bg-primary transition-colors shadow-lg hover:shadow-cyan-500/30 group">
+                    <span>Next Page: EPILOGUE</span>
+                    <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </footer>
+        );
+
+        // --- 3. MAIN APP ---
+
+        const App = () => {
+            const structuralData = [
+                { 
+                    title: "Weak Catchment", 
+                    icon: "ph ph-buildings", 
+                    stat: "-45%", 
+                    label: "Job/Home", 
+                    alert: true,
+                    viz: <CatchmentViz />,
+                    text: "Port areas lack jobs, housing, services." 
+                },
+                { 
+                    title: "Functional Gaps", 
+                    icon: "ph ph-link-break", 
+                    stat: ">5km", 
+                    label: "Distance", 
+                    alert: true,
+                    viz: <GapViz />,
+                    text: "Large low-efficiency spaces separate nodes." 
+                },
+                { 
+                    title: "Uneven Heat", 
+                    icon: "ph ph-thermometer-cold", 
+                    stat: "10:1", 
+                    label: "Density (SZ:HK)", 
+                    alert: false,
+                    span: true,
+                    viz: <div className="flex gap-1 h-full items-end pb-2"><div className="w-8 bg-primary h-full rounded-t"></div><div className="w-8 bg-slate-300 h-[10%] rounded-t"></div></div>,
+                    text: "One side absorbs; the other can’t convert—structural gap." 
+                }
+            ];
+
+            const chainData = [
+                { 
+                    title: "Chain Lengthening", 
+                    icon: "ph ph-timer", 
+                    stat: "70%", 
+                    label: "Transfer Time", 
+                    alert: true,
+                    viz: <ChainViz />,
+                    text: "Crossing is fast; reaching the door is slow." 
+                },
+                { 
+                    title: "Uncertainty", 
+                    icon: "ph ph-question", 
+                    stat: "±30m", 
+                    label: "Variance", 
+                    alert: true,
+                    viz: <WaveViz />,
+                    text: "Unpredictability is the lasting burden." 
+                }
+            ];
+
+            const lifeData = [
+                {
+                    title: "Time Poverty",
+                    icon: "ph ph-hourglass-low",
+                    stat: "<3h",
+                    label: "Free Time/Day",
+                    alert: true,
+                    span: true,
+                    viz: <BatteryViz />,
+                    text: "Compressed life time undermines sustained community participation."
+                }
+            ];
+
+            return (
+                <div className="w-full min-h-screen relative overflow-hidden px-6 md:px-12 lg:px-20">
+                    <ParticleBackground />
+                    <Navigation />
+                    
+                    <div className="max-w-7xl mx-auto space-y-16 mt-20 relative z-10">
+                        <Header />
+                        <ArchiveSection />
+                        <AnalysisSection />
+                        
+                        <DeepDiveSection 
+                            number="01" 
+                            title="Structural Issues" 
+                            subtitle="Asymmetric growth makes ports mere corridors" 
+                            desc="Shenzhen's port areas often host high-intensity industry and commerce, while the Hong Kong border zone has long been a 'buffer zone'. This density difference forces flows to move further into the city."
+                            cards={structuralData}
+                        />
+
+                        <DeepDiveSection 
+                            number="02" 
+                            title="Chain Issues" 
+                            subtitle="Pain isn’t crossing; it’s after crossing" 
+                            desc="Faster crossing solves 'border traversal' efficiency; but the real cross-border commute experience is determined by the whole chain. The time black hole lies in the 'last mile' transfers."
+                            cards={chainData}
+                        />
+
+                        <DeepDiveSection 
+                            number="03" 
+                            title="Life Consequences" 
+                            subtitle="Time Poverty limits integration depth" 
+                            desc="When daily commuting fragments time, cross-border life feels more like 'rushing' than 'living in the same city'. Time consumption directly reduces community participation."
+                            cards={lifeData}
+                        />
+
+                        <Footer />
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+    <script src="global-nav.js"></script>
+</body>
+</html>

@@ -27,7 +27,7 @@
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                        serif: ['Noto Serif SC', 'serif'],
+                        serif: ['Inter', 'serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                 }
@@ -41,6 +41,8 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Framer Motion -->
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
         body {
@@ -107,6 +109,18 @@
         .animate-spin-slow {
             animation: spin-slow 8s linear infinite;
         }
+
+        /* Archive Styles */
+        .content-scroller { width: 100%; height: 100%; overflow-y: auto; padding-top: 4rem; padding-bottom: 4rem; }
+        .content-scroller::-webkit-scrollbar { width: 6px; }
+        .content-scroller::-webkit-scrollbar-track { background: transparent; }
+        .content-scroller::-webkit-scrollbar-thumb { background: rgba(14, 116, 144, 0.1); border-radius: 3px; }
+        .content-scroller::-webkit-scrollbar-thumb:hover { background: rgba(14, 116, 144, 0.3); }
+        .archive-sheet { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.05); }
+        .list-row { transition: all 0.2s ease; border-bottom: 1px solid rgba(226, 232, 240, 0.6); }
+        .list-row:last-child { border-bottom: none; }
+        .list-row:hover { background: rgba(236, 254, 255, 0.6); padding-left: 1rem; padding-right: 1rem; border-radius: 8px; border-bottom-color: transparent; margin: 0 -1rem; z-index: 10; }
+        .meta-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.05em; text-transform: uppercase; color: #64748b; display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; background: #f1f5f9; }
     </style>
 </head>
 <body>
@@ -145,12 +159,12 @@
                 chapter: "01",
                 image: "images/第一章插图.jpg",
                 description: [
-                    "The long-suppressed border is awakening from a state of <span class='text-highlight'>'Emergency Pause'</span>.",
-                    "As gates open, the connection between Shenzhen and Hong Kong tightens. This flow is not merely a traffic recovery, but a deep reboot of <span class='text-highlight'>dual-city life</span>."
+                    "The full resumption of cross-border travel in February 2023 marked a crucial watershed in the history of Shenzhen-Hong Kong relations. The long-constrained border began to loosen, and the first to return was not a grand narrative but a sense of certainty that it was safe to venture out. ",
+                    "We conducted data cleaning on the data from January 2021 to December 2025 through the open data set of the Hong Kong government and obtained the daily entry and exit figures of different control points. Through this data visualization chart, we can more clearly perceive the recovery of cross-border travel after the pandemic and the joy and rhythm of life in the northward flow of people. "
                 ],
                 subchapters: [
-                    { title: "1.1 Recovery", url: "1-1.html" },
-                    { title: "1.2 Counterflow", url: "1-1.html" }
+                    { title: "1.1 Recovery", url: "Chapter1.HTML" },
+                    { title: "1.2 Counterflow", url: "Chapter1.HTML" }
                 ]
             },
             { 
@@ -161,34 +175,43 @@
                 chapter: "02",
                 image: "images/第二章插图.jpg",
                 description: [
-                    "The pandemic's end triggered a <span class='text-highlight'>retaliatory rebound</span> in cross-border consumption.",
-                    "Amidst surging flows, checkpoints have evolved into smart hubs. Each efficient crossing meets the challenge of massive volume, folding <span class='text-highlight'>physical distance</span> into daily routine."
+                    "The end of the pandemic has triggered a rebound in consumption and travel frequency among residents of Shenzhen and Hong Kong. As the flow of people and vehicles gradually increases after the lifting of restrictions, the control points also need to be equipped with sufficient intelligence to handle the challenges posed by the huge volume of customs clearance traffic. ",
+                    "From the perspectives of the development history of the border control station, the evolution of commuting patterns and the effectiveness of construction, we observe the iterative progress of this border in recent years with a historical monthly system perspective."
                 ],
                 subchapters: [
-                    { title: "2.1 Flows", url: "2-0.html" },
-                    { title: "2.2 Analysis", url: "2-0.html" },
-                    { title: "2.3 Dual City", url: "2-0.html" }
+                    { title: "2.1 Flows", url: "Chapter2.HTML" },
+                    { title: "2.2 Analysis", url: "Chapter2.HTML" },
+                    { title: "2.3 Dual City", url: "Chapter2.HTML" }
                 ]
             },
             { 
                 id: 3, 
-                title: "THE HUMAN SCALE", 
+                title: "CONCRETE LIVES", 
                 subtitle: "Chapter 3\nCONCRETE LIVES", 
                 type: "chapter_intro", 
                 chapter: "03",
                 image: "images/第三章插图.jpg",
                 description: [
-                    "<span class='text-xl font-bold block mb-2'>Faces of the Border</span>",
-                    "In this migration of hundreds of millions, faces are no longer blurred.",
-                    "They are migratory birds, ferrymen, stitches suturing two cities. 8 archetypes reflecting 8 survival philosophies."
+                    "The development of border control points has improved clearance efficiency and made dual-city routines possible for more people. Yet faster crossing does not automatically lead to deeper integration.",
+                    "They are migratory birds, ferrymen, stitches suturing two cities. All of them plan their days between speed and uncertainty. By stepping briefly into these everyday routines, we shift our focus from movement itself to the lived experience of their boundary-crossing life—how time, rhythm, and small frictions continue to shape what cross-border life actually feels like."
                 ],
                 subchapters: [
-                    { title: "3.1 Persona", url: "3-2.html" },
-                    { title: "3.2 Timeline", url: "3-3.html" },
-                    { title: "3.3 Phenomenon", url: "3-3fix.html" }
+                    { title: "3.1 Persona", url: "Chapter3_Persona.HTML" },
+                    { title: "3.2 Timeline", url: "Chapter3_Timeline.HTML" },
+                    { title: "3.3 Phenomenon", url: "Chapter3_Phenomenon.HTML" }
                 ]
             },
-            { id: 4, title: "Epilogue", subtitle: "Epilogue", type: "credits" }
+            { 
+                id: 4, 
+                title: "Epilogue", 
+                subtitle: "Epilogue", 
+                type: "credits",
+                subchapters: [
+                    { title: "Review", stepIndex: 5 },
+                    { title: "Archive", stepIndex: 6 }
+                ]
+            },
+            { id: 5, title: "Archive", subtitle: "Archive", type: "archive", hiddenInNav: true }
         ];
 
         // 1.5 V2 Intro Page
@@ -204,7 +227,7 @@
                         <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-2 text-gray-900 font-serif">
                             Dissolving Borders
                         </h1>
-                        <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-10 text-gray-300 font-serif">
+                        <h2 className="text-3xl md:text-5xl font-light tracking-tight mb-10 text-gray-300 font-serif">
                             Symbiotic Living
                         </h2>
                         
@@ -248,9 +271,9 @@
                 </div>
                 <div className="relative z-10">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.5 }}>
-                        <div className="font-mono text-accentCyan tracking-[0.4em] text-xs mb-6 uppercase">2023 - 2025 BORDER CHRONICLE</div>
-                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-4 text-black">From Crossing<br/>to Commuting</h1>
-                        <h2 className="text-xl md:text-3xl font-serif text-black/60 tracking-[0.3em] mb-12 uppercase">How SZ-HK Border Becomes Everyday Life</h2>
+                        <div className="font-mono text-accentCyan tracking-[0.6em] text-xs mb-6 uppercase">2023 - 2025 BORDER CHRONICLE</div>
+                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-4 text-black">Twin City Tides</h1>
+                        <h2 className="text-xl md:text-3xl font-light font-serif text-black/60 tracking-[0.3em] mb-12">Lives across the Shenzhen<br />‑Hong Kong Border</h2>
                         <button 
                             onClick={onNext}
                             className="px-8 py-3 border border-black/10 hover:border-accentCyan hover:text-accentCyan text-black/80 transition-all duration-500 font-mono tracking-widest text-[10px] group"
@@ -263,8 +286,14 @@
         );
 
         // 2. Chapter Intro (Modified for White Mode)
-        const FloatingCard = ({ title, titleEn, quote, x, y, delay }) => {
+        const FloatingCard = ({ title, titleEn, quote, x, y, delay, type }) => {
             const [isActive, setIsActive] = useState(false);
+            
+            // Define colors based on type (SZ=Blue, HK=Green)
+            const isSZ = type === 'SZ';
+            const bgColor = isSZ ? 'bg-blue-500/10' : 'bg-emerald-500/10';
+            const iconColor = isSZ ? 'text-blue-600' : 'text-emerald-600';
+            const borderColor = isSZ ? 'border-blue-500/20' : 'border-emerald-500/20';
 
             return (
                 <motion.div 
@@ -286,13 +315,12 @@
                         zIndex: { duration: 0 }
                     }}
                     style={{ left: x, top: y }}
-                    className="absolute hidden md:flex flex-col p-4 bg-white/40 backdrop-blur-sm border border-white/60 rounded-xl shadow-sm w-48 cursor-grab active:cursor-grabbing group hover:bg-white/60 transition-colors duration-300"
+                    className={`absolute hidden md:flex flex-col p-4 bg-white/90 backdrop-blur-sm border ${borderColor} rounded-xl shadow-sm w-48 cursor-grab active:cursor-grabbing group hover:bg-white/95 transition-colors duration-300`}
                 >
-                    <div className="w-8 h-8 rounded-full bg-accentCyan/10 mb-2 flex items-center justify-center pointer-events-none">
-                        <i className="fas fa-user text-accentCyan text-xs"></i>
+                    <div className={`w-8 h-8 rounded-full ${bgColor} mb-2 flex items-center justify-center pointer-events-none`}>
+                        <i className={`fas fa-user ${iconColor} text-xs`}></i>
                     </div>
-                    <div className="font-bold text-slate-800 text-xs pointer-events-none">{title}</div>
-                    <div className="text-[10px] text-slate-500 font-mono uppercase pointer-events-none mb-1">{titleEn}</div>
+                    <div className="font-medium text-slate-800 text-sm pointer-events-none mb-1 uppercase tracking-wide">{titleEn}</div>
                     
                     {/* Opinion Tooltip */}
                     <AnimatePresence>
@@ -301,9 +329,9 @@
                                 initial={{ opacity: 0, scale: 0.9, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: 5 }}
-                                className="absolute top-full left-0 mt-2 w-56 p-3 bg-white/90 backdrop-blur-md rounded-lg shadow-xl border border-accentCyan/20 z-50 pointer-events-none"
+                                className={`absolute top-full left-0 mt-2 w-56 p-3 bg-white/90 backdrop-blur-md rounded-lg shadow-xl border ${borderColor} z-50 pointer-events-none`}
                             >
-                                <div className="absolute -top-1 left-6 w-2 h-2 bg-white/90 transform rotate-45 border-t border-l border-accentCyan/20"></div>
+                                <div className="absolute -top-1 left-6 w-2 h-2 bg-white/90 transform rotate-45 border-t border-l border-slate-200"></div>
                                 <p className="text-[10px] leading-relaxed text-slate-600 font-serif italic">
                                     "{quote}"
                                 </p>
@@ -324,56 +352,64 @@
                     titleEn: "Cross-border Student", 
                     x: "10%", 
                     y: "20%",
-                    quote: "The Shenzhen-Hong Kong border is like a magic door to me. One side holds the delicious warmth of home cooking; the other, the strict discipline of school."
+                    quote: "The Shenzhen-Hong Kong border is like a magic door to me. One side holds the delicious warmth of home cooking; the other, the strict discipline of school.",
+                    type: "SZ"
                 },
                 { 
                     title: "深港通勤族", 
                     titleEn: "SZ-HK Commuters", 
                     x: "75%", 
                     y: "15%",
-                    quote: "The border defines my existence. It's a calculated trade-off between high income and living costs. Sometimes I feel like a pendulum."
+                    quote: "The border defines my existence. It's a calculated trade-off between high income and living costs. Sometimes I feel like a pendulum.",
+                    type: "SZ"
                 },
                 { 
                     title: "周末特种兵", 
                     titleEn: "Weekend Raiders", 
                     x: "80%", 
                     y: "60%",
-                    quote: "As a consumer, the border is the line of 'cost-performance ratio'. I hope payment and logistics will be fully integrated soon."
+                    quote: "As a consumer, the border is the line of 'cost-performance ratio'. I hope payment and logistics will be fully integrated soon.",
+                    type: "HK"
                 },
                 { 
                     title: "北上安老长者", 
                     titleEn: "Elderly Moving North", 
                     x: "15%", 
                     y: "70%",
-                    quote: "Retirement in the Greater Bay Area means dignity. My pension stretches further here—spacious gardens and attentive care that were impossible dreams in Hong Kong."
+                    quote: "Retirement in the Greater Bay Area means dignity. My pension stretches further here—spacious gardens and attentive care that were impossible dreams in Hong Kong.",
+                    type: "HK"
                 },
                 { 
                     title: "留学硕博通勤者", 
                     titleEn: "Postgrad Commuters", 
                     x: "60%", 
                     y: "80%",
-                    quote: "The border is like a filter. It filters out Shenzhen's noise so I can study, and HK's stress so I can rest. But it also blurs my sense of belonging."
+                    quote: "The border is like a filter. It filters out Shenzhen's noise so I can study, and HK's stress so I can rest. But it also blurs my sense of belonging.",
+                    type: "SZ"
                 },
                 { 
                     title: "远程协作人", 
                     titleEn: "Remote Collaborators", 
-                    x: "20%", 
-                    y: "40%",
-                    quote: "My office is in the cloud, my home is in Shenzhen. The border is just a checkpoint for client meetings, not a barrier to my daily life."
+                    x: "45%", 
+                    y: "55%",
+                    quote: "My office is in the cloud, my home is in Shenzhen. The border is just a checkpoint for client meetings, not a barrier to my daily life.",
+                    type: "SZ"
                 },
                 { 
                     title: "商务精英", 
                     titleEn: "Business Elite", 
                     x: "50%", 
                     y: "10%",
-                    quote: "Time is the only currency that matters. The high-speed rail and E-channel make the border invisible, turning two cities into one giant business district."
+                    quote: "Time is the only currency that matters. The high-speed rail and E-channel make the border invisible, turning two cities into one giant business district.",
+                    type: "HK"
                 },
                 { 
                     title: "生活探索者", 
                     titleEn: "Life Explorer", 
                     x: "85%", 
                     y: "35%",
-                    quote: "I don't belong to one city. I belong to the flow. Shenzhen's tech vibrancy and Hong Kong's cultural depth—why choose when I can have both?"
+                    quote: "I don't belong to one city. I belong to the flow. Shenzhen's tech vibrancy and Hong Kong's cultural depth—why choose when I can have both?",
+                    type: "HK"
                 }
             ];
 
@@ -434,9 +470,9 @@
                             </div>
                             
                             <NextButton onClick={() => {
-                        if (data.id === 1) window.location.href = '1-1.html';
-                        else if (data.id === 2) window.location.href = '2-0.html';
-                        else if (data.id === 3) window.location.href = '3-2.html';
+                        if (data.id === 1) window.location.href = 'Chapter1.HTML';
+                        else if (data.id === 2) window.location.href = 'Chapter2.HTML';
+                        else if (data.id === 3) window.location.href = 'Chapter3_Persona.HTML';
                         else onNext();
                     }} text="ENTER CHAPTER" />
                         </motion.div>
@@ -445,11 +481,15 @@
             );
         };
 
-        // 3. Data Viz (Integrated 1-1.html)
+        const onNext = () => {
+             // Logic to handle next step if needed
+        };
+
+        // 3. Data Viz (Integrated Chapter1.HTML)
         const DataVizPage = ({ onNext }) => (
             <div className="viewport-container w-full h-full relative">
                 <iframe 
-                    src="1-1.html" 
+                    src="Chapter1.HTML" 
                     className="w-full h-full border-0" 
                     title="The Resurgence"
                 />
@@ -459,11 +499,11 @@
             </div>
         );
 
-        // 4. Split View (Integrated 2-0.html)
+        // 4. Split View (Integrated Chapter2.HTML)
         const SplitViewPage = ({ onNext }) => (
             <div className="viewport-container w-full h-full relative">
                 <iframe 
-                    src="2-0.html" 
+                    src="Chapter2.HTML" 
                     className="w-full h-full border-0" 
                     title="Folding Time Analysis"
                 />
@@ -479,8 +519,8 @@
 
             const pages = [
                 { id: '3-1', title: 'Cross-Temporal', subtitle: 'Analysis', url: '3-1.html', desc: 'Space-time evolution of border crossings.' },
-                { id: '3-2', title: 'Persona', subtitle: 'Profiles', url: '3-2.html', desc: 'Individual stories from the commuter tide.' },
-                { id: '3-3', title: 'Timeline', subtitle: 'Cross-Border', url: '3-3.html', desc: 'A day in the life of the twin cities.' },
+                { id: '3-2', title: 'Persona', subtitle: 'Profiles', url: 'Chapter3_Persona.HTML', desc: 'Individual stories from the commuter tide.' },
+                { id: '3-3', title: 'Timeline', subtitle: 'Cross-Border', url: 'Chapter3_Timeline.HTML', desc: 'A day in the life of the twin cities.' },
                 { id: '4-1', title: 'Future', subtitle: 'Questions', url: '4-1future_question.html', desc: 'Emerging issues and future outlooks.' },
             ];
 
@@ -522,7 +562,7 @@
                                             
                                             <div>
                                                 <div className="font-mono text-[10px] text-black/40 tracking-widest uppercase mb-3">{page.subtitle}</div>
-                                                <h3 className="font-serif text-3xl text-black/80 group-hover:text-accentCyan transition-colors duration-300">{page.title}</h3>
+                                                <h3 className="font-medium font-serif text-3xl text-black/80 group-hover:text-accentCyan transition-colors duration-300">{page.title}</h3>
                                             </div>
                                             
                                             <div className="flex justify-between items-end">
@@ -546,7 +586,7 @@
             <div className="viewport-container bg-white flex items-center justify-center">
                 <div className="max-w-3xl px-8 text-center">
                     <div className="text-accentCyan font-mono text-[10px] tracking-[0.5em] mb-8 uppercase">Epilogue</div>
-                    <h2 className="text-4xl md:text-5xl font-serif mb-12 tracking-widest uppercase text-black">
+                    <h2 className="text-4xl md:text-5xl font-bold font-serif mb-12 tracking-widest uppercase text-black">
                         <span data-zh="边界消融，生活共生" data-en="Border Dissolution, Life Symbiosis">Border Dissolution, Life Symbiosis</span>
                     </h2>
                     
@@ -567,6 +607,283 @@
                 </div>
             </div>
         );
+
+        // --- PARTICLE BACKGROUND (Ported from Reference.html) ---
+        const ParticleBackground = () => {
+            const mountRef = useRef(null);
+            useEffect(() => {
+                if(!mountRef.current) return;
+                
+                // Setup Canvas
+                const canvas = document.createElement('canvas');
+                canvas.style.position = 'fixed';
+                canvas.style.top = '0';
+                canvas.style.left = '0';
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+                canvas.style.zIndex = '0'; 
+                canvas.style.pointerEvents = 'none';
+                mountRef.current.appendChild(canvas);
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+
+                // Particles
+                const particlesGeometry = new THREE.BufferGeometry();
+                const particlesCount = 800; 
+                const posArray = new Float32Array(particlesCount * 3);
+                for(let i = 0; i < particlesCount * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 45; 
+                }
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                
+                // Material - using accentCyan color #00997A
+                const material = new THREE.PointsMaterial({ size: 0.04, color: 0x00997A, transparent: true, opacity: 0.4 });
+                const particlesMesh = new THREE.Points(particlesGeometry, material);
+                scene.add(particlesMesh);
+                camera.position.z = 12;
+
+                // Animation
+                let animationId;
+                const animate = () => {
+                    animationId = requestAnimationFrame(animate);
+                    particlesMesh.rotation.y += 0.0002; 
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                // Resize
+                const handleResize = () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                };
+                window.addEventListener('resize', handleResize);
+
+                // Cleanup
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    cancelAnimationFrame(animationId);
+                    mountRef.current && mountRef.current.removeChild(canvas);
+                    particlesGeometry.dispose();
+                    material.dispose();
+                    renderer.dispose();
+                };
+            }, []);
+            return <div ref={mountRef} className="fixed inset-0 pointer-events-none z-0" />;
+        };
+
+        // --- DATA for Archive ---
+        const referenceData = [
+            {
+                title: "Daily Passenger Traffic Statistics",
+                source: "data.gov.hk",
+                url: "https://data.gov.hk/en-data/dataset/hk-immd-set5-statistics-daily-passenger-traffic",
+                category: "Raw Dataset"
+            },
+            {
+                title: "Passenger, Visitor and Vehicular Traffic",
+                source: "data.gov.hk",
+                url: "https://data.gov.hk/en-data/dataset/hk-immd-set5-statistics-passenger-visitor-vehicular-traffic",
+                category: "Raw Dataset"
+            },
+            {
+                title: "Immigration Clearance Statistics",
+                source: "Immigration Department",
+                url: "https://www.immd.gov.hk/hks/facts/passenger-statistics-menu.html",
+                category: "Official Report"
+            },
+            {
+                title: "List of Immigration Control Points",
+                source: "Wikipedia",
+                url: "https://zh.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF%E5%87%BA%E5%85%A5%E5%A2%83%E7%AE%A1%E5%88%B6%E7%AB%99%E5%88%97%E8%A1%A8",
+                category: "Reference"
+            },
+            {
+                title: "Immigration Control Points Info",
+                source: "GovHK",
+                url: "https://www.gov.hk/en/residents/immigration/control/index.htm",
+                category: "Official Guide"
+            },
+            {
+                title: "Cross-boundary Travel Survey 2017",
+                source: "Planning Department",
+                url: "https://data.gov.hk/en-data/dataset/hk-pland-pland1-cross-boundary-travel-survey-2017",
+                category: "Research Paper"
+            },
+            {
+                title: "Cross-boundary Travel Survey 2021",
+                source: "Planning Department",
+                url: "https://data.gov.hk/en-data/dataset/hk-pland-pland1-cross-boundary-travel-survey-2017",
+                category: "Research Paper"
+            }
+        ];
+
+        // 7. Archive Page Component
+        const ArchivePage = () => {
+            return (
+                <div className="viewport-container bg-[#f8fafc]">
+                    <ParticleBackground />
+                    
+                    {/* Inner Scroller */}
+                    <div className="content-scroller relative z-10">
+                        <div className="max-w-4xl mx-auto px-6">
+                            
+                            {/* MAIN SHEET CONTAINER */}
+                            <motion.div 
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                                className="archive-sheet rounded-3xl p-8 md:p-12 flex flex-col gap-12 mb-12"
+                            >
+                                
+                                {/* 1. Header & Abstract */}
+                                <section>
+                                    <div className="flex justify-between items-start border-b border-slate-200 pb-6 mb-8">
+                                        <div>
+                                            <div className="font-mono text-xs font-bold text-accentCyan tracking-widest mb-2 uppercase flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-accentCyan animate-pulse"></div>
+                                                Final Report
+                                            </div>
+                                            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter font-serif">Twin City Tides</h1>
+                                        </div>
+                                        <div className="hidden md:block text-right">
+                                            <div className="font-mono text-[10px] text-slate-400">ARCHIVE ID: 2025-HK-SZ</div>
+                                            <div className="font-mono text-[10px] text-slate-400">STATUS: COMPLETE</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col md:flex-row gap-8">
+                                        <div className="md:w-1/4">
+                                            <div className="font-mono text-[10px] text-slate-400 uppercase tracking-widest font-bold">Abstract</div>
+                                        </div>
+                                        <div className="md:w-3/4">
+                                            <p className="font-serif text-lg md:text-xl text-slate-700 leading-relaxed italic">
+                                                "This project visualizes the flow and interaction between Shenzhen and Hong Kong. From physical barriers to intelligent nodes, we trace the evolution of the <span className="text-accentCyan font-bold not-italic">One-Hour Living Circle</span>."
+                                            </p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* 2. Team List & Institution */}
+                                <section className="border-t border-slate-200 pt-8">
+                                    <div className="flex flex-col md:flex-row gap-8">
+                                        <div className="md:w-1/4">
+                                            <div className="font-mono text-[10px] text-slate-400 uppercase tracking-widest font-bold">Credits</div>
+                                        </div>
+                                        <div className="md:w-3/4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
+                                                {/* Team */}
+                                                <div>
+                                                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-3">Project Team</div>
+                                                    <ul className="space-y-2 font-sans text-sm font-semibold text-slate-800">
+                                                        <li className="flex items-center gap-2">
+                                                            <div className="w-1 h-1 bg-slate-300 rounded-full"></div> LI Mingxi (Leonardo)
+                                                        </li>
+                                                        <li className="flex items-center gap-2">
+                                                            <div className="w-1 h-1 bg-slate-300 rounded-full"></div> LU Junchi
+                                                        </li>
+                                                        <li className="flex items-center gap-2">
+                                                            <div className="w-1 h-1 bg-slate-300 rounded-full"></div> ZHOU Yiwei
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
+                                                {/* Institution with Logo */}
+                                                <div>
+                                                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-3">Institution</div>
+                                                    <div className="flex flex-col items-start gap-3">
+                                                        {/* Logo Container */}
+                                                        <div className="h-14 w-auto flex items-center justify-start shrink-0 overflow-hidden">
+                                                            <img 
+                                                                src="CityU_Horizontal_Logo_CMYK.svg" 
+                                                                alt="CityU Logo" 
+                                                                className="h-full w-auto object-contain"
+                                                            />
+                                                        </div>
+                                                        <div className="font-sans text-sm text-slate-800 leading-snug">
+                                                            <strong>City University of Hong Kong</strong><br/>
+                                                            <span className="text-slate-500 text-xs">School of Creative Media</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Tech Stack */}
+                                                <div className="col-span-1 md:col-span-2 border-t border-slate-100 pt-6 mt-2">
+                                                    <div className="text-[10px] font-bold text-slate-400 uppercase mb-3">Tools & Tech</div>
+                                                    <div className="flex flex-wrap gap-4 text-xs text-slate-600">
+                                                        <a href="https://github.com/Leonardolee351-LMX/Genuary_Twincitytale" target="_blank" className="bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:border-accentCyan hover:text-accentCyan flex items-center gap-2 transition-all">
+                                                            <i className="fab fa-github"></i> GitHub Repository
+                                                        </a>
+                                                        <a href="https://openrouteservice.org/" target="_blank" className="bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:border-accentCyan hover:text-accentCyan flex items-center gap-2 transition-all">
+                                                            <i className="fas fa-map-signs"></i> OpenRouteService
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* 3. Data Sources */}
+                                <section className="border-t border-slate-200 pt-8 flex-1">
+                                    <div className="flex flex-col md:flex-row gap-8 h-full">
+                                        <div className="md:w-1/4">
+                                            <div className="font-mono text-[10px] text-slate-400 uppercase tracking-widest font-bold sticky top-8">
+                                                Data Index
+                                            </div>
+                                        </div>
+                                        <div className="md:w-3/4">
+                                            <div className="flex flex-col">
+                                                {/* List Header */}
+                                                <div className="flex pb-2 border-b border-slate-200 text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2 pl-2">
+                                                    <div className="flex-1">Source Title</div>
+                                                    <div className="hidden sm:block w-24 text-right pr-4">Category</div>
+                                                </div>
+
+                                                {/* List Items */}
+                                                {referenceData.map((item, idx) => (
+                                                    <a 
+                                                        key={idx}
+                                                        href={item.url}
+                                                        target="_blank"
+                                                        className="list-row py-3 flex items-center justify-between group cursor-pointer text-slate-700 hover:text-accentCyan"
+                                                    >
+                                                        <div className="flex-1 pr-4">
+                                                            <div className="font-bold text-sm group-hover:translate-x-1 transition-transform">
+                                                                {item.title}
+                                                            </div>
+                                                            <div className="font-mono text-[9px] text-slate-400 mt-0.5 uppercase group-hover:text-accentCyan/60">
+                                                                {item.source}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="meta-tag hidden sm:inline-flex bg-white border border-slate-200 text-slate-400 group-hover:border-accentCyan/30 group-hover:text-accentCyan/70">
+                                                                {item.category}
+                                                            </span>
+                                                            <i className="fas fa-external-link-alt text-[10px] text-slate-300 group-hover:text-accentCyan transition-colors"></i>
+                                                        </div>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Footer */}
+                                <div className="text-center pt-8 text-[10px] font-mono text-slate-300 uppercase tracking-widest">
+                                    Twin City Chronicles Archive © 2025
+                                </div>
+
+                            </motion.div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
         // --- Global Navigation Component ---
         const GlobalNav = ({ chapters, currentStep, onNavigate }) => {
@@ -609,15 +926,18 @@
                                         <div className={`w-2 h-2 rounded-full mt-3 transition-all duration-300 ${active ? 'bg-accentCyan scale-125' : 'bg-black/20 group-hover:bg-black/40'}`}></div>
                                     </div>
 
-                                    {/* Hover Line & Sub-chapters (Upward Y-axis) */}
+                                    {/* Sub-menu Container */}
                                     {chapter.subchapters && (
-                                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
+                                        <div 
+                                            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center transition-all duration-300 pointer-events-none group-hover:pointer-events-auto"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
                                             {/* The Line */}
-                                            <div className="w-px h-32 bg-accentCyan/30 origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-out delay-75"></div>
+                                            <div className="w-px h-[16rem] bg-gradient-to-t from-accentCyan/50 to-transparent origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-out"></div>
                                             
                                             {/* Sub-items Container - positioned absolutely along the line */}
                                             <div 
-                                                className="absolute bottom-0 w-48 h-32 flex flex-col-reverse justify-around items-center py-2"
+                                                className="absolute bottom-0 w-64 h-[16rem] flex flex-col-reverse justify-around items-center pt-6 pb-12"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 {chapter.subchapters.map((sub, subIndex) => (
@@ -635,7 +955,7 @@
                                                         }}
                                                     >
                                                         {/* Label */}
-                                                        <div className={`bg-white/95 backdrop-blur px-3 py-1 border rounded shadow-sm text-[10px] font-medium transition-colors hover:scale-105 whitespace-nowrap ${currentStep === sub.stepIndex ? 'text-accentCyan border-accentCyan/30' : 'text-black/60 border-black/5 hover:text-accentCyan hover:border-accentCyan/30'}`}>
+                                                        <div className={`bg-white/80 backdrop-blur-sm px-6 py-2 rounded-xl text-xs font-mono tracking-widest uppercase border border-slate-200 transition-all duration-300 cursor-pointer hover:scale-110 whitespace-nowrap ${currentStep === sub.stepIndex ? 'text-accentCyan font-bold' : 'text-slate-400 font-medium hover:text-accentCyan hover:font-bold'}`}>
                                                             {sub.title}
                                                         </div>
                                                     </div>
@@ -718,6 +1038,7 @@
                                 {chapters[step].type === "split_view" && <SplitViewPage />}
                                 {chapters[step].type === "persona_grid" && <PersonaGrid />}
                                 {chapters[step].type === "credits" && <CreditsPage />}
+                                {chapters[step].type === "archive" && <ArchivePage />}
                             </motion.div>
                         </AnimatePresence>
                     </main>

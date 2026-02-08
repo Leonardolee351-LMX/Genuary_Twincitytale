@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twin City Tides | 2025 Data Narrative (Enhanced)</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        serif: ['"Noto Serif"', 'serif'],
+                    },
+                    colors: {
+                        primary: '#0E7490', // Cyan 700
+                        secondary: '#06B6D4', // Cyan 500
+                        accent: '#ECFEFF', // Cyan 50
+                        slate: { 50: '#f8fafc', 850: '#1e293b' },
+                        hk: { red: '#E11D48' } // Rose 600
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #f1f5f9 1px, transparent 1px), linear-gradient(to bottom, #f1f5f9 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f8fafc; color: #1e293b; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        
+        /* Observable Chart Variables & Styles */
+        :root {
+            --accent-color: #0E7490; /* Matched to primary */
+            --color-arrival: #0071e3;
+            --color-departure: #34c759;
+            --color-hk: #30b0c7;
+            --color-mainland: #5856d6;
+            --color-other: #5ac8fa;
+            
+            /* Net Flow Colors */
+            --color-pos: #34c759;       /* Net Outflow (Departure > Arrival) */
+            --color-neg: #0071e3;       /* Net Inflow (Arrival > Departure) */
+            --color-2017: #ff9500;      /* Orange for 2017 comparison */
+        }
+
+        /* Segmented Control */
+        .segmented-control { display: flex; background: rgba(0,0,0,0.05); padding: 3px; border-radius: 8px; }
+        .segment-opt { padding: 4px 10px; font-size: 11px; border-radius: 6px; cursor: pointer; color: #64748b; transition: all 0.2s; user-select: none; }
+        .segment-opt:hover { color: #0f172a; }
+        .segment-opt.active { background: white; color: #0E7490; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 600; }
+
+        /* Toggles */
+        .toggle-group { display: flex; gap: 12px; flex-wrap: wrap; }
+        .custom-toggle { display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer; user-select: none; color: #475569; }
+        .custom-toggle input { accent-color: var(--accent-color); width: 14px; height: 14px; margin: 0; }
+
+        /* Chips */
+        .chip-scroll-container { width: 100%; position: relative; max-height: 100px; overflow-y: auto; }
+        .chip-scroll { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px; }
+        .chip { padding: 4px 10px; border-radius: 20px; background: rgba(241, 245, 249, 0.8); border: 1px solid rgba(203, 213, 225, 0.5); font-size: 10px; cursor: pointer; transition: all 0.2s; color: #64748b; }
+        .chip:hover { background: rgba(226, 232, 240, 0.8); }
+        .chip.active { background: var(--accent-color); color: white; border-color: transparent; box-shadow: 0 2px 6px rgba(14, 116, 144, 0.3); }
+
+        /* Chart Components */
+        .chart-wrapper { width: 100%; position: relative; }
+        #detail-card {
+            position: absolute; top: 10px; right: 10px; width: 260px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
+            border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 16px; display: none; z-index: 50;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            animation: fadeIn 0.2s ease-out;
+        }
+        .stats-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+        .stats-table td { padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
+        .donut-container { height: 140px; display: flex; justify-content: center; margin: 10px 0; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        
+        /* Tooltip */
+        .tooltip {
+            position: absolute; padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.95); color: #1e293b;
+            border-radius: 8px; pointer-events: none; font-size: 11px;
+            display: none; z-index: 100; backdrop-filter: blur(4px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;
+        }
+        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #94a3b8; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+        /* Glassmorphism */
+        .bento-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .bento-card:hover {
+            transform: translateY(-4px);
+            border-color: #06B6D4;
+            box-shadow: 0 20px 40px -10px rgba(14, 116, 144, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Typography */
+        .manuscript-text { font-family: 'Noto Serif', serif; font-size: 1.125rem; line-height: 1.8; color: #334155; }
+        .manuscript-text strong { color: #0E7490; font-weight: 700; background: linear-gradient(120deg, #ECFEFF 0%, #ECFEFF 100%); background-repeat: no-repeat; background-size: 100% 40%; background-position: 0 90%; }
+        
+        /* Utils */
+        .section-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #94a3b8; display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
+        .section-tag::before { content: ''; width: 8px; height: 8px; background: currentColor; border-radius: 50%; }
+        .chart-placeholder { border: 2px dashed #cbd5e1; background: rgba(241, 245, 249, 0.5); border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .chart-placeholder::after { content: "[ Interactive Component Area ]"; font-family: 'JetBrains Mono', monospace; color: #94a3b8; font-size: 0.875rem; letter-spacing: 1px; }
+        
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; opacity: 0.6; }
+        .nav-capsule { background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(203,213,225,0.5); border-radius: 100px; padding: 6px; display: inline-flex; gap: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .nav-link { padding: 8px 24px; border-radius: 100px; font-size: 0.9rem; font-weight: 600; color: #64748b; transition: all 0.2s; white-space: nowrap; }
+        .nav-link:hover, .nav-link.active { background: #0E7490; color: white; }
+
+        /* Net Flow Chart Styles */
+        .rhythm-chart { width: 100%; height: 180px; }
+        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #94a3b8; font-size: 12px; }
+        
+        /* TOC Active States */
+        .toc-link.active .toc-line { width: 24px; background-color: #0E7490; }
+        .toc-link[data-target="section-4"].active .toc-line,
+        .toc-link[data-target="section-5"].active .toc-line,
+        .toc-link[data-target="section-6"].active .toc-line { background-color: #E11D48; }
+        .toc-link.active span { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Global Navigation (Top) -->
+    <div class="fixed top-2 w-full flex justify-center z-[70] pointer-events-none">
+        <nav class="nav-capsule pointer-events-auto shadow-lg border-white/50">
+            <a href="index.html" class="nav-link font-serif italic pr-4 border-r border-slate-200">Twin City Tides</a>
+            <a href="Chapter1.HTML" class="nav-link active">Ch.1</a>
+            <a href="Chapter2.HTML" class="nav-link">Ch.2</a>
+        </nav>
+    </div>
+
+    <!-- Chapter Navigation (Sub-nav) -->
+    <div class="fixed top-20 w-full flex justify-center z-[60] pointer-events-none">
+        <nav class="nav-capsule pointer-events-auto scale-90 opacity-90 hover:opacity-100 transition-opacity">
+            <a href="#section-1" class="nav-link" data-target="section-1">1.Overview</a>
+            <a href="#section-2" class="nav-link" data-target="section-2">2.Recovery Data</a>
+            <a href="#section-5" class="nav-link" data-target="section-5">3.Inversion Data</a>
+        </nav>
+    </div>
+
+    <!-- Right Side Navigation (Notion-style) -->
+    <div class="fixed right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-[60] hidden md:flex">
+        <!-- Group 1 -->
+        <a href="#section-1" class="toc-link group relative flex items-center justify-end h-4 w-12" data-target="section-1">
+            <span class="absolute right-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono text-slate-400 whitespace-nowrap bg-white/80 px-2 py-1 rounded backdrop-blur-sm border border-slate-100 shadow-sm">01 Resurgence</span>
+            <div class="toc-line w-4 h-[2px] bg-slate-300 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-primary"></div>
+        </a>
+        <a href="#section-2" class="toc-link group relative flex items-center justify-end h-4 w-12" data-target="section-2">
+            <span class="absolute right-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono text-slate-400 whitespace-nowrap bg-white/80 px-2 py-1 rounded backdrop-blur-sm border border-slate-100 shadow-sm">Chart I</span>
+            <div class="toc-line w-4 h-[2px] bg-slate-300 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-primary"></div>
+        </a>
+        <a href="#section-3" class="toc-link group relative flex items-center justify-end h-4 w-12" data-target="section-3">
+            <span class="absolute right-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono text-slate-400 whitespace-nowrap bg-white/80 px-2 py-1 rounded backdrop-blur-sm border border-slate-100 shadow-sm">Insights I</span>
+            <div class="toc-line w-4 h-[2px] bg-slate-300 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-primary"></div>
+        </a>
+        
+        <div class="h-4"></div> <!-- Spacer -->
+
+        <!-- Group 2 -->
+        <a href="#section-4" class="toc-link group relative flex items-center justify-end h-4 w-12" data-target="section-4">
+            <span class="absolute right-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono text-slate-400 whitespace-nowrap bg-white/80 px-2 py-1 rounded backdrop-blur-sm border border-slate-100 shadow-sm">02 Inversion</span>
+            <div class="toc-line w-4 h-[2px] bg-slate-300 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-hk-red"></div>
+        </a>
+        <a href="#section-5" class="toc-link group relative flex items-center justify-end h-4 w-12" data-target="section-5">
+            <span class="absolute right-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono text-slate-400 whitespace-nowrap bg-white/80 px-2 py-1 rounded backdrop-blur-sm border border-slate-100 shadow-sm">Chart II</span>
+            <div class="toc-line w-4 h-[2px] bg-slate-300 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-hk-red"></div>
+        </a>
+        <a href="#section-6" class="toc-link group relative flex items-center justify-end h-4 w-12" data-target="section-6">
+            <span class="absolute right-6 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono text-slate-400 whitespace-nowrap bg-white/80 px-2 py-1 rounded backdrop-blur-sm border border-slate-100 shadow-sm">Insights II</span>
+            <div class="toc-line w-4 h-[2px] bg-slate-300 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-hk-red"></div>
+        </a>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-6 pb-32 pt-32 space-y-24">
+
+        <!-- 1. The Resurgence (Narrative) -->
+        <section id="section-1" class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center min-h-[60vh]">
+            <div class="space-y-6">
+                <div class="section-tag text-primary">Part 01 / The Resurgence</div>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 leading-tight">
+                    Twin City Tides:<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Three Years of Vanishing Borders</span>
+                </h1>
+                <div class="manuscript-text">
+                    <p>
+                        The border reopening in early 2023 was not merely the lifting of physical gates, but a <strong>retaliatory release</strong> of pent-up demand. What began as simple family visits rapidly evolved into a comprehensive infiltration covering work, consumption, and healthcare.
+                    </p>
+                    <p class="mt-4">
+                        The data curve did not rise gradually but exhibited a <strong>vertical explosion</strong>, marking the physical reconnection of the Greater Bay Area's lifeblood.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bento-card p-2 aspect-square md:aspect-auto md:h-full flex items-center justify-center relative overflow-hidden group">
+                <div class="absolute inset-0 bg-grid-pattern bg-[length:20px_20px] opacity-50"></div>
+                <div class="relative z-10 text-center">
+                    <div class="w-32 h-32 mx-auto bg-gradient-to-tr from-primary to-accent rounded-full blur-2xl opacity-60 animate-pulse"></div>
+                    <i class="fas fa-arrow-trend-up text-7xl text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform group-hover:scale-110 transition-transform duration-500"></i>
+                    <div class="mt-12 font-mono text-xs text-slate-400">DATA SURGE VISUALIZATION</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Chart I (Interactive) -->
+        <section id="section-2" class="scroll-mt-24">
+            <div class="bento-card p-0 overflow-hidden relative transition-all duration-300">
+                 <iframe src="observable/observable.html" scrolling="no" style="width: 100%; height: 1000px; border: none; overflow: hidden;"></iframe>
+            </div>
+        </section>
+
+        <!-- 3. INSIGHTS I (ENHANCED) -->
+        <section id="section-3" class="scroll-mt-24">
+            <h3 class="section-tag text-slate-400 mb-6 pl-2">Key Findings: The Resurgence Phase</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Insight 1: Rapid Recovery (Gauge Chart) -->
+                <div class="bento-card p-6 hover:border-primary/50 group flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recovery Speed</span>
+                            <i class="fas fa-stopwatch text-slate-300 group-hover:text-primary transition-colors"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-slate-800 font-mono tracking-tight">85%</div>
+                        <p class="text-xs text-slate-500 mt-1">Recovery of 2019 levels in just 3 months</p>
+                    </div>
+                    
+                    <!-- Viz: Gauge -->
+                    <div class="relative h-24 w-full flex items-center justify-center mt-4">
+                        <svg class="w-24 h-24 transform -rotate-90">
+                            <circle cx="48" cy="48" r="40" stroke="#f1f5f9" stroke-width="8" fill="none"/>
+                            <!-- Animated Stroke -->
+                            <circle cx="48" cy="48" r="40" stroke="#0E7490" stroke-width="8" fill="none" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" class="transition-all duration-1000 group-hover:stroke-dashoffset-[37.6]"/> <!-- 85% filled -->
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center flex-col">
+                            <span class="text-[10px] text-primary font-bold">Q1 '23</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 leading-relaxed">
+                        <strong>Context:</strong> Unlike other global borders which took ~12 months to normalize, the SZ-HK border saw a V-shaped rebound immediately after reopening.
+                    </div>
+                </div>
+
+                <!-- Insight 2: Historical Peak (Area Chart) -->
+                <div class="bento-card p-6 border-primary/30 bg-gradient-to-br from-white to-primary/5 group flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Peak Volume</span>
+                            <span class="px-2 py-0.5 bg-primary/10 text-primary rounded text-[9px] font-bold">NEW RECORD</span>
+                        </div>
+                        <div class="text-3xl font-bold text-primary font-mono tracking-tight">1.24M</div>
+                        <p class="text-xs text-primary/70 mt-1">Single Day Crossings (Easter 2025)</p>
+                    </div>
+
+                    <!-- Viz: Area Chart -->
+                    <div class="h-24 w-full mt-4 relative">
+                        <svg class="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="peakGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#0E7490" stop-opacity="0.3"/>
+                                    <stop offset="100%" stop-color="#0E7490" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M0,35 Q20,35 40,20 T80,5 L90,2 L100,35 Z" fill="url(#peakGradient)" />
+                            <path d="M0,35 Q20,35 40,20 T80,5 L90,2" fill="none" stroke="#0E7490" stroke-width="2" class="group-hover:stroke-[3px] transition-all"/>
+                            <circle cx="90" cy="2" r="3" fill="#06B6D4" class="animate-pulse"/>
+                        </svg>
+                        <!-- Comparison Line -->
+                        <div class="absolute top-[40%] left-0 w-full border-t border-dashed border-slate-400/50 text-[9px] text-slate-400">
+                            <span class="bg-white/50 px-1">2017 Avg</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-white/60 rounded-lg border border-primary/10 text-[11px] text-slate-600 leading-relaxed">
+                        <strong>Impact:</strong> Surpassing pre-pandemic highs indicates total integration. The "One-Hour Living Circle" is physically realized.
+                    </div>
+                </div>
+
+                <!-- Insight 3: Growth Momentum (Quarterly Bars) -->
+                <div class="bento-card p-6 hover:border-green-500/50 group flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Momentum</span>
+                            <i class="fas fa-chart-line text-green-500"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-green-600 font-mono tracking-tight">+190%</div>
+                        <p class="text-xs text-slate-500 mt-1">YoY Growth Rate (2023-2024)</p>
+                    </div>
+
+                    <!-- Viz: Quarterly Bars -->
+                    <div class="h-24 w-full mt-4 flex items-end justify-between gap-2 px-2">
+                        <div class="w-1/4 h-[30%] bg-slate-200 rounded-t group-hover:bg-slate-300 transition-colors flex flex-col justify-end items-center"><span class="text-[8px] mb-1 opacity-0 group-hover:opacity-100">Q1</span></div>
+                        <div class="w-1/4 h-[50%] bg-slate-200 rounded-t group-hover:bg-slate-300 transition-colors flex flex-col justify-end items-center"><span class="text-[8px] mb-1 opacity-0 group-hover:opacity-100">Q2</span></div>
+                        <div class="w-1/4 h-[75%] bg-green-200 rounded-t group-hover:bg-green-300 transition-colors flex flex-col justify-end items-center"><span class="text-[8px] mb-1 opacity-0 group-hover:opacity-100">Q3</span></div>
+                        <div class="w-1/4 h-[100%] bg-green-500 rounded-t shadow-lg shadow-green-500/20 flex flex-col justify-end items-center"><span class="text-[8px] mb-1 text-white font-bold">Q4</span></div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 leading-relaxed">
+                        <strong>Trend:</strong> Growth was not seasonal but structural. Each quarter set a new baseline, driven by policy relaxation.
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. The Inversion (Narrative) -->
+        <section id="section-4" class="scroll-mt-24 flex flex-col gap-12 py-12">
+            <div class="space-y-6 max-w-4xl mx-auto text-center">
+                <div class="section-tag text-hk-red">Part 02 / The Inversion</div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">
+                    From "Southbound Shopping"<br>
+                    to <span class="text-transparent bg-clip-text bg-gradient-to-r from-hk-red to-orange-500">"Northbound Living"</span>
+                </h2>
+                <div class="manuscript-text text-left md:text-center mx-auto max-w-2xl">
+                    <p>
+                        Resurgence is not just a return of numbers, but a <strong>structural inversion</strong>. Historically, footsteps on the Lo Wu Bridge mostly headed south. However, in 2024, value for money and digital convenience are reconstructing the living radius.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Chart II (Interactive) -->
+        <section id="section-5" class="scroll-mt-24">
+            <!-- Embed Observable Visualization directly via Iframe -->
+            <div class="w-full h-[800px] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+                <iframe 
+                    src="observable/observable_distance.html" 
+                    class="w-full h-full border-none" 
+                    scrolling="no"
+                    style="overflow: hidden;"
+                    title="Net Flow Dynamics Visualization">
+                </iframe>
+            </div>
+        </section>
+
+
+
+        <!-- 6. INSIGHTS II (ENHANCED) -->
+        <section id="section-6" class="scroll-mt-24 pb-12">
+            <h3 class="section-tag text-slate-400 mb-6 pl-2">Key Findings: The Inversion Phase</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Insight 1: Ratio (Diverging Bars) -->
+                <div class="bento-card p-6 border-hk-red/20 bg-hk-red/5 group flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-bold text-hk-red uppercase tracking-widest">Flow Ratio</span>
+                            <i class="fas fa-exchange-alt text-hk-red"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-hk-red font-mono tracking-tight">2 : 1</div>
+                        <p class="text-xs text-hk-red/70 mt-1">Northbound vs Southbound (2024)</p>
+                    </div>
+
+                    <!-- Viz: Diverging Bars -->
+                    <div class="mt-4 flex flex-col gap-3 relative">
+                        <!-- Center Line -->
+                        <div class="absolute left-[33%] top-0 bottom-0 w-px border-l border-dashed border-slate-300"></div>
+                        
+                        <div class="flex items-center text-[10px] font-mono group-hover:translate-x-1 transition-transform">
+                            <span class="w-8 text-right pr-2 text-slate-500">HK</span>
+                            <div class="h-6 rounded-r bg-hk-red w-[66%] relative flex items-center">
+                                <span class="absolute right-2 text-white font-bold">77M</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-[10px] font-mono group-hover:translate-x-1 transition-transform delay-75">
+                            <span class="w-8 text-right pr-2 text-slate-500">ML</span>
+                            <div class="h-6 rounded-r bg-primary/60 w-[33%] relative flex items-center">
+                                <span class="absolute right-2 text-white font-bold">38M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-white/60 rounded-lg border border-hk-red/10 text-[11px] text-slate-600 leading-relaxed">
+                        <strong>Shift:</strong> For the first time in history, Hong Kong resident outflow is double that of mainland visitor inflow.
+                    </div>
+                </div>
+
+                <!-- Insight 2: Weekend Pulse (Heatmap Strip) -->
+                <div class="bento-card p-6 hover:border-slate-300 group flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Temporal Pulse</span>
+                            <i class="fas fa-calendar-week text-slate-400"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-slate-800 font-mono tracking-tight">+40%</div>
+                        <p class="text-xs text-slate-500 mt-1">Weekend Traffic Surge</p>
+                    </div>
+
+                    <!-- Viz: Heatmap Dots -->
+                    <div class="mt-4 flex justify-between items-center bg-slate-100 rounded-full p-2">
+                        <!-- Mon-Fri -->
+                        <div class="w-6 h-6 rounded-full bg-slate-300"></div>
+                        <div class="w-6 h-6 rounded-full bg-slate-300"></div>
+                        <div class="w-6 h-6 rounded-full bg-slate-300"></div>
+                        <div class="w-6 h-6 rounded-full bg-slate-300"></div>
+                        <div class="w-6 h-6 rounded-full bg-slate-400"></div>
+                        <!-- Sat-Sun -->
+                        <div class="w-8 h-8 rounded-full bg-hk-red shadow-lg shadow-hk-red/40 animate-pulse"></div>
+                        <div class="w-8 h-8 rounded-full bg-hk-red shadow-lg shadow-hk-red/40 animate-pulse delay-100"></div>
+                    </div>
+                    <div class="flex justify-between px-2 mt-1 text-[8px] font-mono text-slate-400 uppercase">
+                        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span class="text-hk-red font-bold">S</span><span class="text-hk-red font-bold">S</span>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 leading-relaxed">
+                        <strong>Pattern:</strong> The "5+2" lifestyle has emerged. Working in HK, living in Shenzhen on weekends is the new norm.
+                    </div>
+                </div>
+
+                <!-- Insight 3: Efficiency (Progress Donut) -->
+                <div class="bento-card p-6 hover:border-slate-300 group flex flex-col justify-between h-full">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Friction</span>
+                            <i class="fas fa-bolt text-yellow-500"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-slate-800 font-mono tracking-tight">75%</div>
+                        <p class="text-xs text-slate-500 mt-1">E-Channel Penetration</p>
+                    </div>
+
+                    <!-- Viz: Segmented Bar -->
+                    <div class="mt-6">
+                        <div class="flex justify-between text-[9px] font-bold text-slate-500 mb-1 uppercase">
+                            <span>E-Channel</span>
+                            <span>Manual</span>
+                        </div>
+                        <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex">
+                            <div class="h-full bg-slate-800 w-[75%] group-hover:bg-primary transition-colors duration-500"></div>
+                            <div class="h-full bg-slate-300 w-[25%]"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-slate-400 mt-1 font-mono">
+                            <span>&lt; 10 sec</span>
+                            <span>~ 15 min</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 leading-relaxed">
+                        <strong>Tech:</strong> Bio-authentication has removed the psychological cost of crossing. The border is now "invisible."
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Epilogue & Next Chapter -->
+        <section id="section-epilogue" class="py-24 flex flex-col items-center justify-center text-center space-y-12">
+            <div class="max-w-2xl px-6">
+                <div class="w-16 h-1 bg-gradient-to-r from-primary to-hk-red mx-auto mb-8 rounded-full"></div>
+                <h3 class="text-2xl md:text-3xl font-serif text-slate-800 italic mb-6">
+                    "The border is no longer a line of separation,<br>but a seam of fusion."
+                </h3>
+                <p class="text-slate-500 leading-relaxed">
+                    As digital payments unify and transport networks densify, the physical and psychological distances between the two cities are collapsing. What we are witnessing is not just recovery, but the birth of a singular metropolitan organism.
+                </p>
+            </div>
+
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-emerald-300 to-teal-400 rounded-full blur opacity-40 group-hover:opacity-80 transition duration-1000 group-hover:duration-200"></div>
+                <a href="index.html?step=3" class="relative px-8 py-4 bg-white rounded-full leading-none flex items-center gap-4 transition-transform duration-200 group-hover:-translate-y-1 border border-slate-100">
+                    <div class="flex flex-col items-start">
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Next Chapter</span>
+                        <span class="text-lg font-bold text-slate-800">02. The Counterflow</span>
+                    </div>
+                    <i class="fas fa-arrow-right text-slate-400 group-hover:text-teal-500 transition-colors"></i>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- THREE.JS Background Logic ---
+        const initThreeBackground = () => {
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 600;
+            const posArray = new Float32Array(particlesCount * 3);
+            const colorArray = new Float32Array(particlesCount * 3);
+            
+            const color1 = new THREE.Color(0x0E7490); 
+            const color2 = new THREE.Color(0x94a3b8); 
+
+            for(let i = 0; i < particlesCount * 3; i+=3) {
+                posArray[i] = (Math.random() - 0.5) * 15;
+                posArray[i+1] = (Math.random() - 0.5) * 20;
+                posArray[i+2] = (Math.random() - 0.5) * 5;
+                
+                const mixedColor = Math.random() > 0.5 ? color1 : color2;
+                colorArray[i] = mixedColor.r;
+                colorArray[i+1] = mixedColor.g;
+                colorArray[i+2] = mixedColor.b;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.03,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, material);
+            scene.add(particlesMesh);
+            camera.position.z = 4;
+
+            let targetY = 0;
+            window.addEventListener('scroll', () => { targetY = window.scrollY * 0.0005; });
+
+            const animate = () => {
+                requestAnimationFrame(animate);
+                particlesMesh.rotation.y += 0.0005;
+                particlesMesh.position.y = -targetY;
+                renderer.render(scene, camera);
+            };
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+
+        // --- GSAP Animations ---
+        const initGSAP = () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            const cards = document.querySelectorAll('.bento-card');
+            cards.forEach((card, index) => {
+                gsap.from(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 90%",
+                        toggleActions: "play none none reverse"
+                    },
+                    y: 30,
+                    opacity: 0,
+                    duration: 0.6,
+                    delay: 0.1,
+                    ease: "power2.out"
+                });
+            });
+
+
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const tocLinks = document.querySelectorAll('.toc-link');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (scrollY >= (sectionTop - sectionHeight / 3)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initThreeBackground();
+            initGSAP();
+        });
+    </script>
+
+    <script src="global-nav.js"></script>
+</body>
+
+

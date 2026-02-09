@@ -27,9 +27,9 @@
             title: "THE FOLDED CITY", 
             subtitle: "Chapter 2\nFOLDED CITY", 
             subchapters: [
-                { title: "2.1 Flows", url: "Chapter2.HTML" },
-                { title: "2.2 Analysis", url: "Chapter2.HTML" },
-                { title: "2.3 Dual City", url: "Chapter2.HTML" }
+                { title: "2.1 Flows", url: "chapter2-1.html" },
+                { title: "2.2 Analysis", url: "chapter2-1.html" },
+                { title: "2.3 Dual City", url: "chapter2-1.html" }
             ]
         },
         { 
@@ -55,7 +55,7 @@
         currentStep = parseFloat(stepParam);
     } else if (path.includes("Chapter1.HTML") || path.includes("1-1")) {
         currentStep = 2; // Chapter 1
-    } else if (path.includes("Chapter2.HTML")) {
+    } else if (path.includes("Chapter2.HTML") || path.toLowerCase().includes("chapter2-1.html")) {
         currentStep = 3; // Chapter 2
     } else if (path.includes("Chapter3_Persona.HTML") || path.includes("Chapter3_Timeline.HTML") || path.includes("Chapter3_Phenomenon.HTML")) {
         currentStep = 4; // Chapter 3
@@ -138,7 +138,7 @@
                 if (sub.stepIndex !== undefined) {
                      isSubActive = (currentStep === sub.stepIndex);
                 } else if (sub.url) {
-                     isSubActive = path.includes(sub.url);
+                     isSubActive = path.toLowerCase().includes(sub.url.toLowerCase());
                 }
 
                 const subLabel = document.createElement('div');

@@ -179,9 +179,9 @@
                     "From the perspectives of the development history of the border control station, the evolution of commuting patterns and the effectiveness of construction, we observe the iterative progress of this border in recent years with a historical monthly system perspective."
                 ],
                 subchapters: [
-                    { title: "2.1 Flows", url: "Chapter2.HTML" },
-                    { title: "2.2 Analysis", url: "Chapter2.HTML" },
-                    { title: "2.3 Dual City", url: "Chapter2.HTML" }
+                    { title: "2.1 Flows", url: "chapter2-1.html" },
+                    { title: "2.2 Analysis", url: "chapter2-1.html" },
+                    { title: "2.3 Dual City", url: "chapter2-1.html" }
                 ]
             },
             { 
@@ -471,7 +471,7 @@
                             
                             <NextButton onClick={() => {
                         if (data.id === 1) window.location.href = 'Chapter1.HTML';
-                        else if (data.id === 2) window.location.href = 'Chapter2.HTML';
+                        else if (data.id === 2) window.location.href = 'chapter2-1.html';
                         else if (data.id === 3) window.location.href = 'Chapter3_Persona.HTML';
                         else onNext();
                     }} text="ENTER CHAPTER" />
@@ -503,7 +503,7 @@
         const SplitViewPage = ({ onNext }) => (
             <div className="viewport-container w-full h-full relative">
                 <iframe 
-                    src="Chapter2.HTML" 
+                    src="chapter2-1.html" 
                     className="w-full h-full border-0" 
                     title="Folding Time Analysis"
                 />

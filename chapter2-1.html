@@ -4,20 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Folded Metropolis: Complete Edition</title>
-    <script>
-        (function() {
-            const target = "chapter2-1.html";
-            const next = target + window.location.search + window.location.hash;
-            if (!window.location.pathname.toLowerCase().includes(target)) {
-                window.location.replace(next);
-            }
-        })();
-    </script>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,14 +25,14 @@
                     colors: {
                         primary: '#0E7490', // Cyan 700
                         secondary: '#06B6D4', // Cyan 500
-                        accent: '#ECFEFF', // Cyan 50 (Added from Part 3)
+                        accent: '#ECFEFF', // Cyan 50
                         slate: { 850: '#1e293b' }
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
+                        serif: ['"Noto Serif"', 'serif'],
                     },
-                    // Animations from Part 3
                     animation: {
                         'fade-in': 'fadeIn 0.6s ease-out forwards',
                         'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -49,13 +40,17 @@
                         'float': 'float 6s ease-in-out infinite',
                         'swap-out': 'swapOut 3s infinite', 
                         'swap-in': 'swapIn 3s infinite',   
+                        'shimmer': 'shimmer 2.5s infinite linear',
+                        'progress-bar': 'progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite',
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
                         slideUp: { '0%': { transform: 'translateY(40px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
                         swapOut: { '0%, 45%': { opacity: 1, transform: 'scale(1)' }, '50%, 95%': { opacity: 0, transform: 'scale(0.5)' }, '100%': { opacity: 1, transform: 'scale(1)' } },
-                        swapIn: { '0%, 45%': { opacity: 0, transform: 'scale(0.5)' }, '50%, 95%': { opacity: 1, transform: 'scale(1)' }, '100%': { opacity: 0, transform: 'scale(0.5)' } }
+                        swapIn: { '0%, 45%': { opacity: 0, transform: 'scale(0.5)' }, '50%, 95%': { opacity: 1, transform: 'scale(1)' }, '100%': { opacity: 0, transform: 'scale(0.5)' } },
+                        shimmer: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(100%)' } },
+                        progress: { '0%': { width: '0%', opacity: '1' }, '80%': { width: '100%', opacity: '1' }, '100%': { width: '100%', opacity: '0' } }
                     }
                 }
             }
@@ -74,6 +69,9 @@
     
     <!-- D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
         :root {
@@ -94,7 +92,7 @@
             --glass-blur: blur(16px);
 
             /* Dimensions */
-            --panel-width: 400px;
+            --panel-width: 420px;
             --radius-lg: 20px;
             --radius-md: 12px;
             --radius-sm: 8px;
@@ -126,7 +124,6 @@
         ::-webkit-scrollbar-thumb { background-color: rgba(148, 163, 184, 0.5); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background-color: rgba(100, 116, 139, 0.8); }
 
-        /* Part 3 Specific Utilities */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -135,8 +132,10 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #0E7490; }
 
+        /* --- Part 3 Components --- */
         .bento-card {
             transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            backdrop-filter: blur(12px);
         }
         .bento-card:hover {
             transform: translateY(-5px);
@@ -144,8 +143,30 @@
             box-shadow: 0 20px 40px -10px rgba(14, 116, 144, 0.15);
             border-color: #22D3EE;
         }
+        
+        .section-tag { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            letter-spacing: 0.1em; 
+            text-transform: uppercase; 
+            color: #94a3b8; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            margin-bottom: 1rem; 
+        }
+        .section-tag::before { content: ''; width: 8px; height: 8px; background: currentColor; border-radius: 50%; }
 
-        /* --- CHAPTER NAVIGATOR (CAPSULE) --- */
+        .viz-contrast-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+
+        /* --- CHAPTER NAVIGATOR --- */
         .chapter-nav-container {
             position: absolute;
             top: 24px;
@@ -203,21 +224,18 @@
             opacity: 1; pointer-events: auto; z-index: 1; visibility: visible;
         }
         
-        /* Map Container Specifics */
         .full-screen-map {
             width: 100%; height: 100%; background: #eef2f6;
         }
         
-        /* Part 2 Specific Layout Fixes */
         #map-part2-inner {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 0; /* Map stays behind UI */
+            z-index: 0; 
         }
         #root {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; pointer-events: none; /* Let clicks pass through empty areas to map */
+            z-index: 10; pointer-events: none;
         }
-        /* Re-enable pointer events for the UI panel inside #root */
         #root .glass-panel, #root .legend-unified {
             pointer-events: auto;
         }
@@ -245,23 +263,16 @@
         .panel-scroll-area {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 24px 28px;
+            padding: 28px 32px;
         }
 
         /* --- TYPOGRAPHY SYSTEM --- */
         .main-title-large {
-            font-size: 20px; font-weight: 800; 
+            font-size: 22px; font-weight: 800;
             color: var(--text-primary);
-            letter-spacing: -0.5px; margin-bottom: 4px;
+            letter-spacing: -0.5px; margin-bottom: 6px;
             line-height: 1.2;
         }
-        .main-title-small {
-            font-size: 11px; font-weight: 600; color: var(--text-secondary); 
-            text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8;
-            margin-bottom: 24px;
-        }
-        .header-section { margin-bottom: 24px; }
-        
         .current-year {
             font-size: 56px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
             color: var(--primary-color); line-height: 1; letter-spacing: -3px;
@@ -269,26 +280,27 @@
         }
         .subtitle { 
             font-size: 13px; color: var(--text-secondary); font-weight: 500; 
-            line-height: 1.5; min-height: 2.8em;
+            line-height: 1.6; min-height: 2.8em; margin-bottom: 10px;
         }
+        .header-section { margin-bottom: 32px; }
 
         /* --- COMPONENT: SELECT --- */
         select.compact-select {
-            padding: 10px 12px; border-radius: var(--radius-sm); 
+            padding: 12px 14px; border-radius: var(--radius-sm); 
             border: 1px solid rgba(0,0,0,0.08);
             font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
             color: var(--text-primary); background-color: rgba(255,255,255,0.8);
             width: 100%; outline: none; transition: all 0.2s; 
-            margin-bottom: 16px;
+            margin-bottom: 10px; /* Adjusted: Reduced from 24px */
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         select.compact-select:hover { border-color: rgba(0,0,0,0.2); }
-        select.compact-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px var(--primary-light); }
+        select.compact-select:focus { border-color: var(--primary-color); ring: 2px solid var(--primary-light); }
 
         /* --- COMPONENT: SLIDER (Unified) --- */
-        .slider-container { width: 100%; padding: 0 2px; margin-top: 20px; margin-bottom: 20px; }
+        .slider-container { width: 100%; padding: 0 2px; margin-top: 24px; margin-bottom: 24px; }
         input[type=range] { 
-            width: 100%;  background: transparent; cursor: pointer; 
+            width: 100%; -webkit-appearance: none; background: transparent; cursor: pointer; 
         }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-runnable-track { 
@@ -303,38 +315,50 @@
         }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
         .slider-labels { 
-            display: flex; justify-content: space-between; margin-top: 8px; 
+            display: flex; justify-content: space-between; margin-top: 10px; 
             font-family: 'JetBrains Mono', monospace; font-size: 10px; 
             color: var(--text-muted); font-weight: 500; 
         }
 
         /* --- COMPONENT: STATS & EVENTS --- */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-        .stats-grid.three-cols { grid-template-columns: 1fr 1fr 1fr; }
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 8px; /* Modified: Reduced gap to fit content */
+            margin-bottom: 24px; /* Modified: Reduced margin */
+        }
+        .stats-grid.three-cols { grid-template-columns: repeat(3, 1fr); }
         
         .stat-item {
-            background: rgba(255, 255, 255, 0.6); padding: 16px; border-radius: var(--radius-md);
-            border: 1px solid rgba(255,255,255,0.8); display: flex; flex-direction: column; justify-content: center;
+            background: #ffffff; padding: 12px; /* Modified: Reduced padding */
+            border-radius: var(--radius-md);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            display: flex; flex-direction: column; justify-content: center;
+            transition: all 0.2s ease;
+            min-width: 0; /* Ensures content does not overflow */
         }
+        .stat-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
         .stat-item.highlight { 
-            background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(224, 242, 254, 0.5)); 
-            border-color: #BAE6FD; 
+            background: linear-gradient(135deg, #ffffff, #f0f9ff);
+            border-color: #7dd3fc; box-shadow: 0 4px 12px rgba(14, 116, 144, 0.1);
         }
         .stat-item label { 
             display: block; font-size: 10px; text-transform: uppercase; 
-            color: var(--text-muted); margin-bottom: 4px; font-weight: 700; letter-spacing: 0.5px;
+            color: var(--text-muted); margin-bottom: 4px; font-weight: 700; letter-spacing: 0.8px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Handle long labels */
         }
         .stat-item .value { 
-            font-family: 'JetBrains Mono', monospace; font-size: 24px; 
+            font-family: 'JetBrains Mono', monospace; font-size: 20px; /* Slight adjust if needed, but 24px usually ok */
             font-weight: 700; color: var(--text-primary); line-height: 1.1; 
         }
-        .stat-item .unit { font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-left: 2px; }
-        .stat-item .sub-value { font-size: 11px; margin-top: 4px; display: block; font-weight: 600; }
+        .stat-item .unit { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-left: 2px; }
+        .stat-item .sub-value { font-size: 10px; margin-top: 4px; display: block; font-weight: 600; color: #64748b; white-space: nowrap; }
 
         .event-section-title { 
             font-size: 11px; font-weight: 700; color: var(--text-secondary); 
-            margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; 
-            display: flex; align-items: center; gap: 8px; margin-top: 12px;
+            margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; 
+            display: flex; align-items: center; gap: 8px; margin-top: 20px;
         }
         .event-section-title::before { 
             content: ''; width: 4px; height: 4px; background: var(--secondary-color); border-radius: 50%; 
@@ -342,16 +366,11 @@
         
         .event-card { 
             background: white; border: 1px solid rgba(0,0,0,0.05); 
-            border-radius: var(--radius-md); padding: 16px; margin-bottom: 10px; 
+            border-radius: var(--radius-md); padding: 18px; margin-bottom: 12px; 
             transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
-        .event-card:hover { 
-            transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); 
-        }
-        .event-card.active {
-            border-color: var(--primary-color);
-            background-color: var(--accent-bg);
-        }
+        .event-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+        .event-card.active { border-color: var(--primary-color); background-color: var(--accent-bg); }
         
         .event-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .event-tag { 
@@ -363,12 +382,23 @@
         .event-title { font-weight: 600; font-size: 13px; color: var(--text-primary); margin-bottom: 4px; }
         .event-image { width: 100%; height: 140px; object-fit: cover; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.05); }
         .event-impact-box { background: #F8FAFC; border-radius: 6px; padding: 10px 12px; margin-top: 10px; font-size: 12px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px; border: 1px solid rgba(0,0,0,0.04); }
-        .narrative-box { font-size: 13px; line-height: 1.6; color: var(--text-secondary); background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.6); }
+        .narrative-box { font-size: 13px; line-height: 1.6; color: var(--text-secondary); background: rgba(255,255,255,0.5); padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; }
+
+        /* New class for specific port details */
+        .port-detail-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            margin-bottom: 24px; /* Increased spacing */
+            border: 1px solid rgba(0,0,0,0.05);
+            display: block; 
+        }
 
         .back-btn { 
             font-size: 12px; color: var(--primary-color); cursor: pointer; 
-            background: white; padding: 6px 14px; border-radius: 100px; 
-            font-weight: 600; display: none; margin-bottom: 16px; 
+            background: white; padding: 8px 16px; border-radius: 100px; 
+            font-weight: 600; display: none; margin-bottom: 20px; 
             align-self: flex-start; box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
             border: 1px solid rgba(0,0,0,0.05); transition: all 0.2s;
         }
@@ -387,8 +417,7 @@
         .legend-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 11px; color: var(--text-secondary); font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
         .legend-item:hover { opacity: 0.7; }
         .legend-color { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .legend-line { width: 12px; height: 3px; margin-right: 8px; border-radius: 2px; }
-
+        
         .tooltip {
             position: absolute; background: rgba(255, 255, 255, 0.95); padding: 0;
             border-radius: var(--radius-sm); 
@@ -414,12 +443,9 @@
             cursor: pointer; transition: all 0.2s; background: transparent; border: none; 
         }
         .map-label:hover { color: var(--primary-color); transform: scale(1.1); z-index: 1000; }
+        .station-node { transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        .station-node { 
-            transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        /* --- TAB SWITCHER (For Part 2) --- */
+        /* --- TAB SWITCHER --- */
         .tab-group { 
             background: rgba(0,0,0,0.04); padding: 4px; border-radius: 100px; 
             display: flex; margin-bottom: 24px;
@@ -442,10 +468,8 @@
     </style>
 </head>
 <body>
-    <!-- Global Nav Integration -->
-    <script src="global-nav.js"></script>
 
-    <!-- CHAPTER NAVIGATION (Internal) -->
+    <!-- CHAPTER NAVIGATION -->
     <div class="chapter-nav-container">
         <button id="nav-c1" class="nav-btn active" onclick="switchChapter(1)">
             1. Flows
@@ -464,9 +488,12 @@
         
         <div class="glass-panel">
             <div class="panel-scroll-area">
-                <div class="main-title-group">
-                    <div class="main-title-large">The Folded Metropolis</div>
-                    <div class="main-title-small">Part 1: Cross-Border Evolution</div>
+                <div class="mb-6">
+                    <div class="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">The Folded Metropolis</div>
+                    <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Part 1: Cross-Border Evolution</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 8px; margin-bottom: 28px; line-height: 1.6; font-style: italic; border-left: 2px solid #cbd5e1; padding-left: 12px;">
+                        Tracing the evolution of checkpoints: from rigid barriers to seamless digital gateways that progressively expanded the urban boundary.
+                    </div>
                 </div>
 
                 <div class="header-section">
@@ -517,6 +544,12 @@
                 </div>
 
                 <div id="info-panel"></div>
+
+                <div class="flex justify-end mt-8 border-t border-slate-200 pt-6">
+                    <button onclick="switchChapter(2)" class="bg-cyan-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-cyan-700 transition-all shadow-lg flex items-center gap-2">
+                        Next Chapter <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -540,7 +573,7 @@
 
     <!-- PART 3 CONTAINER (React) -->
     <div id="view-part3" class="view-container view-hidden">
-        <div id="root-part3" class="w-full h-full"></div>
+        <div id="root-part3" class="w-full h-full overflow-y-auto custom-scrollbar"></div>
     </div>
 
     <!-- SWITCHING LOGIC -->
@@ -573,7 +606,6 @@
                 part2.classList.add('view-active');
                 part2.classList.remove('view-hidden');
                 btn2.classList.add('active');
-                if (window.initPart2) window.initPart2(); // Initialize React app
                 // Trigger resize for React map (Part 2)
                 setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
             } else if (chapterId === 3) {
@@ -587,23 +619,16 @@
     <!-- PART 1 LOGIC (Vanilla JS + D3) -->
     <script>
         (function() {
-            /* --- ANIMATION HELPERS (NEW) --- */
             function animateValue(obj, start, end, duration, decimals = 0) {
                 let startTimestamp = null;
                 const step = (timestamp) => {
                     if (!startTimestamp) startTimestamp = timestamp;
                     const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                    // EaseOutQuad
                     const easeProgress = 1 - (1 - progress) * (1 - progress);
-                    
                     const current = start + (end - start) * easeProgress;
                     obj.innerHTML = current.toFixed(decimals);
-                    
-                    if (progress < 1) {
-                        window.requestAnimationFrame(step);
-                    } else {
-                        obj.innerHTML = end.toFixed(decimals);
-                    }
+                    if (progress < 1) { window.requestAnimationFrame(step); } 
+                    else { obj.innerHTML = end.toFixed(decimals); }
                 };
                 window.requestAnimationFrame(step);
             }
@@ -613,11 +638,9 @@
                 counters.forEach(counter => {
                     const target = parseFloat(counter.getAttribute('data-target'));
                     const decimals = parseInt(counter.getAttribute('data-decimals') || 0);
-                    // Start from 0, animate to target over 800ms
                     animateValue(counter, 0, target, 800, decimals);
                 });
             }
-            /* -------------------------------- */
 
             const timeLabels = ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"];
             const yearSubtitles = {
@@ -639,7 +662,7 @@
                 "2021": { total: 1000000, luohu: 0, futian: 0, airport: 800000, huanggang: 0, shenzhen_bay: 800000, hzmb: 150000, west_kowloon: 0, liantang: 0, mankamto: 0, shatoujiao: 0, macau_ferry: 0, china_ferry: 0, kai_tak: 0, harbour: 0, hung_hom: 0, tuen_mun: 0 },
                 "2022": { total: 5300000, luohu: 0, futian: 0, airport: 1500000, huanggang: 0, shenzhen_bay: 930000, hzmb: 300000, west_kowloon: 0, liantang: 0, mankamto: 0, shatoujiao: 0, macau_ferry: 0, china_ferry: 0, kai_tak: 0, harbour: 0, hung_hom: 0, tuen_mun: 0 },
                 "2023": { total: 212000000, luohu: 50000000, futian: 40000000, airport: 35000000, huanggang: 20000000, shenzhen_bay: 35000000, hzmb: 20000000, west_kowloon: 25000000, liantang: 12000000, mankamto: 3000000, shatoujiao: 1500000, macau_ferry: 8000000, china_ferry: 3000000, kai_tak: 1000000, harbour: 30000, hung_hom: 0, tuen_mun: 400000 },
-                "2024": { total: 298500000, luohu: 65000000, futian: 45000000, airport: 45000000, huanggang: 25000000, shenzhen_bay: 40000000, hzmb: 30000000, west_kowloon: 30000000, liantang: 25000000, mankamto: 3500000, shatoujiao: 2000000, macau_ferry: 10000000, china_ferry: 4000000, kai_tak: 1200000, harbour: 40000, hung_hom: 0, tuen_mun: 500000 },
+                "2024": { total: 298500000, luohu: 65000000, futian: 45000000, airport: 45000000, huanggang: 25000000, shenzhen_bay: 40000000, hzmb: 30000000, west_kowloon: 30000000, liantang: 25000000, mankamto: 3500000, shatoujiao: 2000000, macau_ferry: 10000000, china_ferry: 4000000, kai_tak: 1200000, harbour: 40000, hung_hom: 0, tuen_mun: 550000 },
                 "2025": { total: 315000000, luohu: 68000000, futian: 48000000, airport: 61000000, huanggang: 26000000, shenzhen_bay: 42000000, hzmb: 35000000, west_kowloon: 35000000, liantang: 30000000, mankamto: 4000000, shatoujiao: 2500000, macau_ferry: 11000000, china_ferry: 4500000, kai_tak: 1300000, harbour: 45000, hung_hom: 0, tuen_mun: 550000 }
             };
             const ports = {
@@ -733,8 +756,8 @@
                     events.push({ tag: "Service", date: "2023-08-14", title: "HSR 'Flexi-trip' (Futian)", desc: "Free ticket changes up to 3 times for West Kowloon-Futian, even 1 hour after departure.", impact: "Operationalized HSR like a metro system, boosting short-haul traffic and changing rigid ticketing habits.", img: "images/2023高铁“灵活行” (福田段).jpg" });
                 }
                 if (year === "2024") {
-                    events.push({ tag: "Policy", date: "2024-03-18", title: "'Flexi-trip' to Shenzhen North", desc: "Flexible ticket changes extended to Shenzhen North Station, connecting deeper into residential zones.", impact: " fueled 'Cross-border Commuting', supporting the 'Living in Shenzhen, Working in HK' lifestyle.", img: "images/2024“灵活行”延伸至深圳北站.jpg" });
-                    events.push({ tag: "Service", date: "2024 Holidays", title: "Extended Clearance Hours", desc: "Shenzhen Bay 24h clearance; Lo Wu extended to 2am during major holidays.", impact: "Facilitated 'Northbound Nightlife'. 2024 saw a structural reversal: HK northbound traffic exceeded southbound.", img: "images/2024延长通关服务时间.jpg" });
+                    events.push({ tag: "Policy", date: "2024-03-18", title: "'Flexi-trip' to Shenzhen North", desc: "Flexible ticket changes extended to Shenzhen North Station, connecting deeper into residential zones.", impact: " fueled 'Cross-border Commuting', supporting the 'Living in Shenzhen, Working in HK' lifestyle.", img: "images/2024延长通关服务时间.jpg" });
+                    events.push({ tag: "Service", date: "2024 Holidays", title: "Extended Clearance Hours", desc: "Shenzhen Bay 24h clearance; Lo Wu extended to 2am during major holidays.", impact: "Facilitated 'Northbound Nightlife'. 2024 saw a structural reversal: HK northbound traffic exceeded southbound.", img: "images/2024“灵活行”延伸至深圳北站.jpg" });
                 }
                 if (year === "2025") {
                     events.push({ tag: "Integration", date: "2025-10-13", title: "Closed Road Permit (CRP) Waived", desc: "Approved 'Northbound' vehicles no longer need CRP or fees, cutting red tape.", impact: "Cross-border driving became as simple as local driving, balancing bi-directional flows.", img: "images/2025免除封闭道路通行许可证 (CRP).jpg" });
@@ -747,8 +770,8 @@
             let selectedPort = null;
             let map; 
             let g; 
-            const initialCenter = [22.36, 114.05]; // Optimized view to include HZMB and Liantang
-            const initialZoom = 10.5; // Optimized zoom
+            const initialCenter = [22.36, 114.05]; 
+            const initialZoom = 10.5; 
             const colorScale = d3.scaleOrdinal().domain(["railway", "hsr", "road", "water", "new", "air"]).range(["#2563EB", "#E11D48", "#059669", "#0284C7", "#D97706", "#7C3AED"]);
             const typeIcons = { "railway": "fa-subway", "hsr": "fa-train", "road": "fa-bus", "water": "fa-ship", "new": "fa-car", "air": "fa-plane" };
             const radiusScale = d3.scaleSqrt().domain([0, 30]).range([3, 40]);
@@ -756,7 +779,7 @@
             function initMap1() {
                 if (document.getElementById('map1').innerHTML !== "") return;
                 map = L.map('map1', { zoomControl: false, attributionControl: false, zoomSnap: 0.1 }).setView(initialCenter, initialZoom);
-                window.map1Instance = map; // Store globally for resize
+                window.map1Instance = map; 
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(map);
                 L.control.zoom({ position: 'topright' }).addTo(map);
                 L.svg({clickable: true}).addTo(map);
@@ -828,10 +851,7 @@
                 const stats = data.stats;
                 const eventsHtml = (data.events || []).map(e => `<div class="event-card"><div class="event-header"><span class="event-tag">${e.tag}</span><span class="event-date">${e.date}</span></div>${e.img ? `<img src="${e.img}" class="event-image" alt="${e.title}" onerror="this.src='https://placehold.co/600x400?text=No+Local+Image'">` : ''}<div class="event-title">${e.title}</div><div style="font-size:13px; color:#555; line-height:1.5;">${e.desc}</div>${e.impact ? `<div class="event-impact-box"><i class="fas fa-chart-line"></i> <strong>Impact:</strong> ${e.impact}</div>` : ''}</div>`).join('');
                 
-                // MODIFIED: Added .counter classes and data-target attributes
-                panel.innerHTML = `<div class="stats-grid" style="margin-top:10px;"><div class="stat-item highlight"><label>Annual Total</label><div class="value"><span class="counter" data-target="${stats.total}" data-decimals="2">0.00</span> <span class="unit">Bn</span></div><span class="sub-value neutral">Total HK Cross-Border</span></div><div class="stat-item"><label>Daily Average</label><div class="value"><span class="counter" data-target="${stats.daily}" data-decimals="1">0.0</span> <span class="unit">k</span></div><span class="sub-value" style="color:#666">Sea/Land/Air</span></div></div><div class="event-section-title">Key Annual Events</div><div>${eventsHtml}</div><div style="margin-top:20px; font-size:11px; color:#94A3B8; text-align:center; padding:10px; border-top:1px dashed rgba(0,0,0,0.1);">Drag slider to change year • Click map pins for details</div>`;
-                
-                // TRIGGER ANIMATION
+                panel.innerHTML = `<div class="stats-grid" style="margin-top:4px;"><div class="stat-item highlight"><label>Annual Total</label><div class="value"><span class="counter" data-target="${stats.total}" data-decimals="2">0.00</span> <span class="unit">Bn</span></div><span class="sub-value neutral">Total HK Cross-Border</span></div><div class="stat-item"><label>Daily Average</label><div class="value"><span class="counter" data-target="${stats.daily}" data-decimals="1">0.0</span> <span class="unit">k</span></div><span class="sub-value" style="color:#666">Sea/Land/Air</span></div></div><div class="event-section-title">Key Annual Events</div><div>${eventsHtml}</div><div style="margin-top:20px; font-size:11px; color:#94A3B8; text-align:center; padding:10px; border-top:1px dashed rgba(0,0,0,0.1);">Drag slider to change year • Click map pins for details</div>`;
                 triggerAnimations();
             }
 
@@ -853,13 +873,10 @@
                 else if (pData.growth !== "N/A" && pData.growth !== "0") { const isPos = parseFloat(pData.growth) >= 0; const color = isPos ? '#059669' : '#DC2626'; const icon = isPos ? '↑' : '↓'; growthHtml = `<span style="color:${color}; font-weight:700;">${icon} ${Math.abs(pData.growth)}%</span> (YoY)`; } 
                 else growthHtml = `<span style="color:#94A3B8;">-</span>`;
                 
-                // MODIFIED: Added .counter classes and data-target attributes
                 const annualVal = (pData.annual/1000000).toFixed(2);
                 const dailyVal = (pData.daily/1000).toFixed(1);
                 
                 panel.innerHTML = `<div class="card-header"><span class="card-title" style="color:${colorScale(pStatic.type)}">${pStatic.name}</span></div><img src="${pStatic.img}" class="port-detail-image" alt="${pStatic.name}" onerror="this.src='https://placehold.co/600x400?text=No+Image'"><div class="stats-grid three-cols"><div class="stat-item highlight"><label>Annual Total</label><div class="value" style="font-size:24px;"><span class="counter" data-target="${annualVal}" data-decimals="2">0.00</span><span style="font-size:12px">M</span></div><span class="sub-value" style="font-size:10px;">${growthHtml}</span></div><div class="stat-item"><label>Daily Avg</label><div class="value" style="font-size:24px;"><span class="counter" data-target="${dailyVal}" data-decimals="1">0.0</span><span style="font-size:12px">k</span></div><span class="sub-value" style="font-size:10px; color:#64748B;">pax/day</span></div><div class="stat-item"><label>HK Share</label><div class="value" style="font-size:24px;"><span class="counter" data-target="${pData.share}" data-decimals="1">0.0</span>%</div><div style="width:100%; height:4px; background:rgba(0,0,0,0.1); margin-top:4px; border-radius:2px;"><div style="width:${pData.share}%; height:100%; background:${colorScale(pStatic.type)}; border-radius:2px;"></div></div></div></div><div class="event-section-title">Annual Status Analysis</div><div class="narrative-box" style="border-left:4px solid ${colorScale(pStatic.type)};">${pData.desc}</div><div style="margin-top:16px; padding:12px; background:rgba(255,255,255,0.6); border-radius:6px; font-size:13px; color:#64748B; border:1px solid rgba(255,255,255,0.8);"><i class="fas fa-info-circle"></i> Status: <strong>${pData.status}</strong></div>`;
-                
-                // TRIGGER ANIMATION
                 triggerAnimations();
             }
 
@@ -879,7 +896,6 @@
             window.selectPort1 = function(pid) { selectedPort = pid; updateYear(currentIndex); const p = ports[pid]; if(p) map.flyTo([p.lat, p.lon], 16, { duration: 1.5 }); }
             window.resetView = function() { selectedPort = null; updateYear(currentIndex); map.flyTo(initialCenter, initialZoom, { duration: 1.5 }); }
 
-            // Init listeners
             document.addEventListener("DOMContentLoaded", function() { 
                 initMap1(); 
                 document.getElementById('year-slider').addEventListener('input', (e) => updateYear(parseInt(e.target.value)));
@@ -888,11 +904,11 @@
         })();
     </script>
 
-    <!-- PART 2 LOGIC (React) -->
+    <!-- PART 2 & PART 3 LOGIC (React) -->
     <script type="text/babel">
-        // const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // --- ICONS DEFINITION ---
+        // --- PART 2: COMPONENTS ---
         const Icons = {
             Activity: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width={props.size} height={props.size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
             History: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width={props.size} height={props.size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>,
@@ -1047,7 +1063,6 @@
             const [showSearch, setShowSearch] = useState(false);
             const [searchQuery, setSearchQuery] = useState("");
             const [replayCount, setReplayCount] = useState(0);
-            const [copySuccess, setCopySuccess] = useState('');
 
             const mapRef = useRef(null);
             const mainLayerRef = useRef(null);
@@ -1066,25 +1081,22 @@
                         return parsed.org || inputKey;
                     } catch (e) { return inputKey; }
                 };
-                setApiKey(processKey('eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjI0NmY0YzlhNjI5NzQyMjlhZGYzNmQyMDEyYzM2YmZiIiwiaCI6Im11cm11cjY0In0='));
+                setApiKey(processKey(DEFAULT_KEY_INPUT));
             }, []);
 
             useEffect(() => {
                 if (mapRef.current) return;
                 
-                // Initialize map container for Part 2
-                // Ensure the container exists before appending
                 const parent = document.getElementById('view-part2');
                 if(!parent) return;
 
-                // Cleanup existing if any
                 if(document.getElementById('map-part2-inner')) {
                     document.getElementById('map-part2-inner').remove();
                 }
 
                 const container = L.DomUtil.create('div', 'full-screen-map');
                 container.id = 'map-part2-inner';
-                parent.appendChild(container); // Append to Part 2 view
+                parent.appendChild(container);
 
                 const map = L.map(container, { zoomControl: false, zoomSnap: 0.1, attributionControl: false }).setView(position, 10);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(map);
@@ -1098,13 +1110,11 @@
                 });
                 renderConnectivity();
                 
-                // Handle resize
                 const resizeObserver = new ResizeObserver(() => {
                     map.invalidateSize();
                 });
                 resizeObserver.observe(container);
 
-                // Add window listener to resize map when tab changes
                 window.addEventListener('resize', () => {
                    map.invalidateSize(); 
                 });
@@ -1228,7 +1238,6 @@
                 const L = window.L;
                 if (!mapRef.current || !mainLayerRef.current) return [];
                 const routePaths = REAL_PATHS[routeId];
-                // FIX: Added strict Array check
                 if (!routePaths || !Array.isArray(routePaths) || routePaths.length === 0) return [];
                 const isMultiSegment = !Array.isArray(routePaths[0]);
                 const allPolylines = [];
@@ -1453,16 +1462,6 @@
                     .map(([id, config]) => ({ id, ...config }));
                 return historyFilter === 'all' ? valid : valid.filter(r => r.type === historyFilter);
             };
-
-            const copyToClipboard = (text) => {
-                navigator.clipboard.writeText(text).then(() => {
-                    setCopySuccess('Copied to clipboard!');
-                    setTimeout(() => setCopySuccess(''), 2000);
-                }, (err) => {
-                    setCopySuccess('Failed to copy!');
-                    setTimeout(() => setCopySuccess(''), 2000);
-                });
-            };
             
             useEffect(() => {
                 if (!mainLayerRef.current) return;
@@ -1487,9 +1486,12 @@
                 <div>
                     <div className="glass-panel">
                         <div className="panel-scroll-area">
-                            <div className="main-title-group">
-                                <div className="main-title-large">Greater Bay Area</div>
-                                <div className="main-title-small">Part 2: Connectivity</div>
+                            <div className="mb-6">
+                                <div className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">Greater Bay Area</div>
+                                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Part 2: Connectivity</div>
+                                <div className="text-xs text-slate-500 mt-3 mb-6 italic leading-relaxed pl-3 border-l-2 border-slate-300">
+                                    Quantifying the daily commute: Visualizing real-world accessibility through transport modes, time isochrones, and travel costs.
+                                </div>
                             </div>
 
                             <div className="tab-group">
@@ -1623,35 +1625,71 @@
                                     </div>
                                     <div className="mb-4">
                                         <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">API Key (OpenRouteService)</label>
-                                        <div className="flex items-center gap-2 bg-white/50 border border-slate-200 p-2 rounded-lg mb-2">
+                                        <div className="flex items-center gap-2 bg-white/50 border border-slate-200 p-2 rounded-lg">
                                             <Icon name="Key" size={14} className="text-[#0E7490]"/>
                                             <input type="text" value={apiKey} onChange={e => setApiKey(e.target.value)} className="flex-1 bg-transparent text-[10px] font-mono text-slate-600 outline-none truncate" placeholder="Enter ORS API Key" />
                                         </div>
-                                        
-                                        <div 
-                                            onClick={() => {
-                                                const key = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjI0NmY0YzlhNjI5NzQyMjlhZGYzNmQyMDEyYzM2YmZiIiwiaCI6Im11cm11cjY0In0=";
-                                                navigator.clipboard.writeText(key).then(() => {
-                                                    setCopySuccess('Copied!');
-                                                    setTimeout(() => setCopySuccess(''), 2000);
-                                                });
-                                            }}
-                                            className="group relative cursor-pointer bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 p-3 rounded-xl shadow-sm hover:shadow-md hover:border-[#0E7490] transition-all duration-300"
-                                        >
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Demo Key (Click to Copy)</span>
-                                                <Icon name={copySuccess ? "Check" : "Key"} size={12} className={copySuccess ? "text-green-500" : "text-slate-400 group-hover:text-[#0E7490]"} />
-                                            </div>
-                                            <code className="block w-full text-[10px] font-mono text-slate-600 truncate opacity-70 group-hover:opacity-100 transition-opacity">
-                                                eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjI0NmY0YzlhNjI5NzQyMjlhZGYzNmQyMDEyYzM2YmZiIiwiaCI6Im11cm11cjY0In0=
-                                            </code>
-                                            {copySuccess && (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-white/90 rounded-xl backdrop-blur-sm animate-fade-in">
-                                                    <span className="text-xs font-bold text-[#0E7490] flex items-center gap-1">
-                                                        <Icon name="Check" size={14}/> Copied!
-                                                    </span>
+                                        <div className="mt-2 p-2 rounded-lg border border-slate-200 bg-white/60">
+                                            <div className="flex items-start gap-2">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-[9px] text-slate-500 leading-snug">
+                                                        Use the API KEY in the "supplyment" file and paste it here, or use the default key below.
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={async () => {
+                                                            const text = DEFAULT_KEY_INPUT;
+                                                            try {
+                                                                await navigator.clipboard.writeText(text);
+                                                            } catch (e) {
+                                                                const ta = document.createElement('textarea');
+                                                                ta.value = text;
+                                                                ta.setAttribute('readonly', '');
+                                                                ta.style.position = 'fixed';
+                                                                ta.style.left = '-9999px';
+                                                                document.body.appendChild(ta);
+                                                                ta.select();
+                                                                try { document.execCommand('copy'); } finally { document.body.removeChild(ta); }
+                                                            }
+                                                        }}
+                                                        className="mt-2 w-full text-left font-mono text-[9px] text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-md px-2 py-1 break-all transition-colors"
+                                                        title="Click to copy"
+                                                    >
+                                                        {DEFAULT_KEY_INPUT}
+                                                    </button>
                                                 </div>
-                                            )}
+
+                                                <div className="flex flex-col gap-2 shrink-0">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setApiKey(processKey(DEFAULT_KEY_INPUT))}
+                                                        className="px-2 py-1 rounded-md bg-[#0E7490] text-white text-[9px] font-bold hover:brightness-110 transition"
+                                                    >
+                                                        Use
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={async () => {
+                                                            const text = DEFAULT_KEY_INPUT;
+                                                            try {
+                                                                await navigator.clipboard.writeText(text);
+                                                            } catch (e) {
+                                                                const ta = document.createElement('textarea');
+                                                                ta.value = text;
+                                                                ta.setAttribute('readonly', '');
+                                                                ta.style.position = 'fixed';
+                                                                ta.style.left = '-9999px';
+                                                                document.body.appendChild(ta);
+                                                                ta.select();
+                                                                try { document.execCommand('copy'); } finally { document.body.removeChild(ta); }
+                                                            }
+                                                        }}
+                                                        className="px-2 py-1 rounded-md bg-white border border-slate-200 text-slate-600 text-[9px] font-bold hover:bg-slate-50 transition"
+                                                    >
+                                                        Copy
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <button onClick={fetchIsochrones} disabled={isLoading} className={`w-full py-3 rounded-xl font-bold text-sm text-white shadow-lg flex items-center justify-center gap-2 transition-all ${isLoading ? 'bg-slate-400' : 'bg-gradient-to-r from-[#0E7490] to-[#06B6D4] hover:shadow-xl'}`}>
@@ -1660,6 +1698,15 @@
                                     {errorMsg && <div className="mt-2 text-[10px] text-red-500 bg-red-50 p-2 rounded">{errorMsg}</div>}
                                 </div>
                             )}
+
+                            <div className="flex justify-between mt-8 border-t border-slate-200 pt-6">
+                                <button onClick={() => switchChapter(1)} className="bg-slate-200 text-slate-700 font-bold py-1.5 px-4 rounded-md hover:bg-slate-300 transition-all flex items-center gap-2 text-sm">
+                                    <i className="fas fa-arrow-left"></i> Previous Chapter
+                                </button>
+                                <button onClick={() => switchChapter(3)} className="bg-cyan-600 text-white font-bold py-1.5 px-4 rounded-md hover:bg-cyan-700 transition-all shadow-lg flex items-center gap-2 text-sm">
+                                    Next Chapter <i className="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     {viewMode === 'isochrone' && (
@@ -1706,261 +1753,361 @@
             );
         }
 
-        window.initPart2 = function() {
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+        // --- PART 2: Isochrone Analysis (React) ---
+        function initPart2() {
+            const { useState, useEffect, useRef, createElement: e } = React;
+            const AppPart2 = () => {
+                const [apiKey, setApiKey] = useState("5b3ce3597851110001cf6248f9531b0631324241959542596f955352");
+                const [copySuccess, setCopySuccess] = useState('');
+                const mapRef = useRef(null);
+
+                const handleCopyKey = () => {
+                    navigator.clipboard.writeText(apiKey)
+                        .then(() => {
+                            setCopySuccess('Copied!');
+                            setTimeout(() => setCopySuccess(''), 2000);
+                        })
+                        .catch(err => {
+                            setCopySuccess('Failed!');
+                            setTimeout(() => setCopySuccess(''), 2000);
+                        });
+                };
+
+                const APIKeyInput = () => {
+                    return e('div', { className: 'mb-4' },
+                        e('label', { className: 'block text-xs font-bold text-slate-500 mb-1' }, 'API KEY (OPENROUTESERVICE)'),
+                        e('div', { className: 'flex items-center p-2 border border-slate-300 rounded-md bg-white' },
+                            e('i', { className: 'fa-solid fa-key text-slate-400 text-xs mr-2' }),
+                            e('input', {
+                                type: 'text',
+                                className: 'flex-grow text-sm font-mono outline-none bg-transparent',
+                                value: apiKey,
+                                onChange: (e) => setApiKey(e.target.value),
+                                placeholder: 'Enter your API key...'
+                            })
+                        )
+                    );
+                };
+
+                const DemoKey = () => {
+                    const demoKey = "eyJvcmciOi...LCJpZCI6...fQ=="; // Obfuscated for display
+                    const handleCopy = () => {
+                        navigator.clipboard.writeText(apiKey).then(() => {
+                            setCopySuccess('Copied!');
+                            setTimeout(() => setCopySuccess(''), 2000);
+                        }, () => {
+                            setCopySuccess('Failed to copy.');
+                        });
+                    };
+
+                    return e('div', { 
+                        className: 'mb-6 p-3 border border-slate-200 rounded-md bg-slate-50/50 cursor-pointer hover:bg-slate-100 transition-colors',
+                        onClick: handleCopy
+                    },
+                        e('div', { className: 'flex justify-between items-center' },
+                            e('div', null,
+                                e('div', { className: 'text-xs font-bold text-slate-500' }, 'DEMO KEY (CLICK TO COPY)'),
+                                e('p', { className: 'text-sm font-mono text-slate-700 truncate' }, demoKey)
+                            ),
+                            copySuccess 
+                                ? e('span', { className: 'text-xs font-semibold text-green-600 animate-fade-in' }, copySuccess)
+                                : e('i', { className: 'fa-regular fa-copy text-slate-400' })
+                        )
+                    );
+                };
+                
+                useEffect(() => {
+                    if (!mapRef.current) {
+                        const map = L.map('map-part2-inner', {
+                            center: [22.45, 114.1],
+                            zoom: 9,
+                            maxZoom: 18,
+                            minZoom: 8,
+                            zoomControl: false,
+                            attributionControl: false
+                        });
+                        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+                        }).addTo(map);
+                        mapRef.current = map;
+                    }
+                }, []);
+
+                return e('div', { className: 'glass-panel animate-fade-in' },
+                    e('div', { className: 'panel-scroll-area custom-scrollbar' },
+                        e('div', { className: 'header-section' },
+                            e('div', { className: 'main-title-large' }, 'Isochrone Analysis'),
+                            e('div', { className: 'subtitle' }, 'Explore reachability from any point in the Greater Bay Area.')
+                        ),
+                        e(APIKeyInput),
+                        e(DemoKey),
+                        e('button', {
+                            onClick: handleCopyKey,
+                            className: 'w-full bg-cyan-600 text-white font-semibold py-2 rounded-lg hover:bg-cyan-700 transition-all mb-2'
+                        }, copySuccess || 'Copy Demo Key'),
+                        e('button', {
+                            className: 'w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20'
+                        }, 'Generate Isochrone')
+                    )
+                );
+            };
+
             const container = document.getElementById('root');
-            if (container && !window.part2Initialized) {
-                const root = ReactDOM.createRoot(container);
-                root.render(<App />);
-                window.part2Initialized = true;
-            }
+            const root = ReactDOM.createRoot(container);
+            root.render(e(AppPart2));
         }
-    </script>
 
-    <!-- PART 3 LOGIC (React) -->
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-
-        // --- 1. ENHANCED VISUALIZATION COMPONENTS ---
-
-        // 1. RAIL VIZ (Speed Focus)
+        // --- PART 3: DUAL CITY COMPONENTS ---
+        
+        // 1. MICRO-VISUALIZATION COMPONENTS (Contrast Series)
+        // 1.1 Rail: Time Compression (60m vs 14m)
         const RailViz = () => (
-            <div className="flex flex-col h-full justify-between py-2">
-                <div className="flex items-center gap-2 opacity-40">
-                    <div className="w-16 text-[10px] font-mono uppercase tracking-wider text-right">East Rail</div>
-                    <div className="flex-1 h-1 bg-slate-300 rounded-full overflow-hidden">
-                        <div className="h-full w-full bg-slate-400 opacity-50 repeating-linear-gradient-45"></div>
+            <div className="flex flex-col h-full justify-center gap-3">
+                {/* Past */}
+                <div className="opacity-40">
+                    <div className="flex justify-between mb-1">
+                        <span className="viz-contrast-label">Old Era (East Rail)</span>
+                        <span className="text-[10px] font-mono">60m+</span>
                     </div>
-                    <div className="text-xs font-bold text-slate-500">45m</div>
+                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full w-2/3 bg-slate-400"></div>
+                    </div>
                 </div>
-                
-                <div className="flex flex-col gap-1">
-                    <div className="flex justify-between items-end">
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider">HSR / XRL</span>
-                        <i className="fas fa-bolt text-secondary animate-pulse"></i>
+                {/* Present */}
+                <div>
+                    <div className="flex justify-between mb-1 items-center">
+                        <span className="viz-contrast-label text-primary">XRL Era</span>
+                        <i className="fas fa-bolt text-secondary text-xs animate-pulse"></i>
                     </div>
-                    <div className="h-12 w-full bg-gradient-to-r from-slate-100 to-accent rounded-lg relative overflow-hidden border border-secondary/20 group">
-                        <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center pl-3">
-                            <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary italic tracking-tighter">
-                                14<span className="text-sm font-normal text-primary ml-1 not-italic">min</span>
-                            </span>
+                    <div className="h-8 w-full bg-slate-100 rounded-md relative overflow-hidden border border-secondary/20 group">
+                        {/* New Animation: Width grows from 0% to 100% */}
+                        <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-secondary animate-progress-bar"></div>
+                        <div className="absolute inset-0 flex items-center pl-2">
+                             <span className="text-lg font-black text-slate-800 italic z-10 mix-blend-multiply">14m</span>
                         </div>
-                        {/* Moving Train Effect */}
-                        <div className="absolute top-0 bottom-0 w-1/2 bg-gradient-to-r from-transparent via-secondary/20 to-transparent -skew-x-12 animate-[slideUp_1s_infinite_linear] translate-x-[-100%] group-hover:translate-x-[200%] transition-all duration-700"></div>
                     </div>
                 </div>
             </div>
         );
 
-        // 2. FLOW VIZ (South vs North)
-        const FlowViz = () => (
-            <div className="flex h-full items-center justify-around">
-                <div className="flex flex-col items-center opacity-40 scale-90">
-                    <i className="fas fa-arrow-down text-2xl text-slate-400 mb-1"></i>
-                    <span className="text-[10px] font-mono text-slate-500">Southbound</span>
-                </div>
-                <div className="h-12 w-[1px] bg-slate-200"></div>
-                <div className="flex flex-col items-center relative">
-                    <div className="absolute -inset-4 bg-accent rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <i className="fas fa-arrow-up text-4xl text-primary mb-1 animate-bounce"></i>
-                    <span className="text-xs font-bold text-primary uppercase tracking-wide">Northbound</span>
-                </div>
-            </div>
-        );
-
-        // 3. CLEARANCE VIZ (Time Collapse)
+        // 1.2 Clearance: Stamp vs Bio-Scan
         const ClearanceViz = () => (
-            <div className="h-full flex flex-col justify-center gap-4">
-                <div className="flex items-center gap-3 opacity-50">
-                    <div className="w-8 h-8 rounded-full border border-slate-300 flex items-center justify-center">
-                        <i className="fas fa-passport text-slate-400 text-xs"></i>
+            <div className="flex items-center justify-between h-full px-2">
+                {/* Past */}
+                <div className="flex flex-col items-center gap-1 opacity-40 grayscale">
+                    <div className="w-10 h-10 border-2 border-slate-300 rounded flex items-center justify-center">
+                        <i className="fas fa-stamp text-slate-400 text-lg transform -rotate-12"></i>
                     </div>
-                    <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div className="w-3/4 h-full bg-slate-300"></div>
-                    </div>
-                    <span className="text-xs font-mono">30m</span>
+                    <span className="viz-contrast-label">Manual</span>
                 </div>
                 
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg text-white">
-                        <i className="fas fa-fingerprint text-sm"></i>
+                <div className="h-[1px] w-8 bg-slate-300 relative">
+                    <i className="fas fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-[10px] text-slate-400"></i>
+                </div>
+
+                {/* Present */}
+                <div className="flex flex-col items-center gap-1">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl shadow-lg flex items-center justify-center relative overflow-hidden text-white">
+                        <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                        <i className="fas fa-fingerprint text-2xl relative z-10"></i>
                     </div>
-                    <div className="flex-1">
-                        <div className="text-[10px] text-primary font-bold uppercase mb-1">Bio-Auth Passage</div>
-                        <div className="flex items-baseline gap-2">
-                             <span className="text-3xl font-black text-slate-800 leading-none">7</span>
-                             <span className="text-xs text-slate-500 font-medium">seconds</span>
+                    <span className="text-xs font-bold text-primary font-mono">7s Scan</span>
+                </div>
+            </div>
+        );
+
+        // 1.3 Consumption: Flow Reversal (Luxury vs Daily)
+        const ConsumptionViz = () => (
+            <div className="flex h-full items-center justify-around">
+                {/* Southbound (Fading) */}
+                <div className="flex flex-col items-center opacity-30 scale-75">
+                    <span className="viz-contrast-label mb-1">Luxury</span>
+                    <i className="fas fa-long-arrow-alt-down text-3xl text-slate-500"></i>
+                    <span className="text-[9px] text-slate-400 mt-1">Southbound</span>
+                </div>
+
+                <div className="h-16 w-[1px] bg-slate-200"></div>
+
+                {/* Northbound (Booming) */}
+                <div className="flex flex-col items-center">
+                    <span className="viz-contrast-label text-primary mb-1">Daily</span>
+                    <div className="relative">
+                        <i className="fas fa-long-arrow-alt-up text-5xl text-transparent bg-clip-text bg-gradient-to-t from-primary to-secondary drop-shadow-sm animate-bounce"></i>
+                        <div className="absolute -bottom-1 -right-4 bg-yellow-400 text-yellow-900 text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm animate-pulse">HOT</div>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-600 mt-1">Northbound</span>
+                </div>
+            </div>
+        );
+
+        // 1.4 Driving: Plate Color Change
+        const DrivingViz = () => (
+            <div className="h-full flex flex-col justify-center gap-3">
+                {/* Old: Black Plate */}
+                <div className="flex items-center gap-2 opacity-40">
+                    <div className="bg-slate-800 text-white px-2 py-1 rounded text-[9px] font-mono border border-slate-600 w-20 text-center">
+                        粤Z•0000港
+                    </div>
+                    <span className="text-[9px] text-slate-500">Privileged</span>
+                </div>
+                
+                {/* New: White Plate (Single) */}
+                <div className="flex items-center gap-2">
+                    <div className="bg-white text-slate-800 px-2 py-1 rounded text-[10px] font-mono border-2 border-primary shadow-sm w-24 text-center relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-2 h-2 bg-red-500"></div>
+                        FV 8888
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-primary uppercase">Middle Class</span>
+                        <span className="text-[8px] text-slate-400">Direct Access</span>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // 1.5 Payment: Consolidation (Cash/Cards -> QR)
+        const PaymentViz = () => (
+            <div className="h-full flex items-center justify-center relative">
+                {/* Background chaos (fading) */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+                    <i className="fas fa-money-bill text-2xl absolute top-2 left-4 rotate-12"></i>
+                    <i className="fas fa-credit-card text-2xl absolute bottom-2 right-4 -rotate-12"></i>
+                    <i className="fas fa-coins text-xl absolute top-8 right-2"></i>
+                </div>
+                
+                {/* Center Singularity */}
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-14 h-14 bg-white border-2 border-primary rounded-lg p-1 shadow-lg shadow-cyan-500/20">
+                        <div className="w-full h-full bg-slate-900 flex items-center justify-center overflow-hidden">
+                            <i className="fas fa-qrcode text-3xl text-white"></i>
+                            <div className="absolute w-full h-0.5 bg-green-400 top-0 animate-[slideUp_2s_infinite_linear]"></div>
                         </div>
                     </div>
+                    <span className="text-[10px] font-bold text-primary mt-2 uppercase tracking-wide">One Code</span>
                 </div>
             </div>
         );
 
-        // 4. CAR RIGHTS (Plate Viz)
-        const PlateViz = () => (
-            <div className="h-full flex flex-col justify-between">
-                <div className="bg-slate-800 text-white/50 p-2 rounded text-[10px] font-mono text-center opacity-60">
-                    FV-2018 [Restricted]
-                </div>
-                <div className="text-center my-1 text-slate-300 text-[10px]"><i className="fas fa-arrow-down"></i></div>
-                <div className="bg-gradient-to-r from-primary to-secondary p-[1px] rounded shadow-sm">
-                    <div className="bg-white p-2 rounded-[3px] flex items-center justify-between">
-                         <span className="text-primary font-bold text-xs uppercase">HK•Public</span>
-                         <i className="fas fa-check-circle text-secondary text-xs"></i>
-                    </div>
-                </div>
-            </div>
-        );
-
-         // 5. CARGO VIZ (Port Function)
-         const CargoViz = () => (
-            <div className="h-full flex items-center justify-center gap-4">
-                 <div className="text-center opacity-40">
-                    <div className="w-10 h-10 border border-dashed border-slate-400 rounded flex items-center justify-center mb-1 mx-auto">
-                        <i className="fas fa-box text-slate-400"></i>
-                    </div>
-                    <div className="text-[9px] uppercase">Freight</div>
+        // 1.6 Identity: Tourist -> Resident
+        const IdentityViz = () => (
+            <div className="h-full flex flex-col justify-between py-1">
+                 <div className="flex justify-between items-center px-2 opacity-40">
+                    <i className="fas fa-camera text-slate-400"></i>
+                    <span className="text-[9px] uppercase line-through">Tourist</span>
                  </div>
-                 <i className="fas fa-chevron-right text-secondary text-xs"></i>
-                 <div className="text-center">
-                    <div className="w-12 h-12 bg-accent border border-secondary rounded-full flex items-center justify-center mb-1 mx-auto shadow-sm">
-                        <i className="fas fa-user-friends text-primary"></i>
+                 
+                 <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg p-2 shadow-md text-white relative overflow-hidden transform transition-transform hover:scale-105">
+                    <div className="flex justify-between items-start">
+                        <i className="fas fa-id-card text-lg"></i>
+                        <div className="w-4 h-4 bg-yellow-400 rounded-full opacity-50"></div>
                     </div>
-                    <div className="text-[9px] font-bold text-primary uppercase">People</div>
+                    <div className="mt-2 text-[10px] font-mono opacity-90">GBA RESIDENT</div>
+                    <div className="text-[8px] opacity-75">Medical & Tax Rights</div>
                  </div>
             </div>
         );
 
-        // 6. FINANCE VIZ (Cash vs E-Wallet)
-        const FinanceViz = () => (
-            <div className="h-full flex flex-col items-center justify-center relative overflow-hidden">
-                <div className="relative w-16 h-16 flex items-center justify-center mb-2">
-                    <div className="absolute animate-swap-out flex items-center justify-center bg-amber-400 rounded-full w-12 h-12 border-2 border-amber-600 shadow-sm text-amber-700">
-                         <span className="font-bold text-lg">$</span>
-                    </div>
-                    <i className="fas fa-qrcode text-5xl text-primary absolute animate-swap-in"></i>
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono flex items-center gap-2">
-                    <span className="opacity-50 line-through">CASH</span>
-                    <i className="fas fa-long-arrow-alt-right text-secondary"></i>
-                    <span className="text-primary font-bold">DIGITAL</span>
-                </div>
-            </div>
-        );
-
-        // --- 2. DATASETS ---
+        // --- 2. DATASETS (Asymmetrical 4-Column Grid for 2 Rows) ---
 
         const bentoData = [
+            // Row 1: 2-1-1 (Total 4)
             { 
                 id: 1, 
-                title: "Time-Space Compression", 
-                subtitle: "Metro vs HSR", 
+                title: "Time Collapsed", 
+                subtitle: "Intercity to Metro", 
                 viz: <RailViz/>, 
-                stat: "-68%", 
-                statLabel: "Travel Time",
-                colSpan: "col-span-1 md:col-span-2", 
-                rowSpan: "row-span-1",
-                bg: "bg-white",
-                driver: {
-                    year: "2018 & 2022",
-                    tag: "Infrastructure",
-                    image: "images/Rail Network Integration.jpg",
-                    title: "Rail Network Integration",
-                    desc: "The commissioning of the High Speed Rail (XRL) compressed travel to Guangzhou to 48 mins, while the East Rail Line Cross-Harbour Extension connected HK Island directly to the Shenzhen border."
-                }
-            },
-            { 
-                id: 4, 
-                title: "The Frictionless Border", 
-                subtitle: "Clearance Time", 
-                viz: <ClearanceViz/>, 
-                stat: "7s", 
-                statLabel: "Avg. Pass Time",
-                colSpan: "col-span-1", 
-                rowSpan: "row-span-1 md:row-span-2",
-                bg: "bg-gradient-to-b from-white to-accent",
-                driver: {
-                    year: "2018 - 2024",
-                    tag: "Technology",
-                    image: "images/Smart Clearance Evolution.jpg",
-                    title: "Smart Clearance Evolution",
-                    desc: "From 'Co-location' arrangements to the removal of health declarations and the pilot of biometric 'Senseless Clearance', physical and digital barriers have been systematically dismantled."
+                stat: "14m", 
+                statLabel: "Kowloon to Futian",
+                colSpan: "col-span-1 md:col-span-2", // Large
+                bg: "bg-white/90",
+                copy: {
+                    title: "Time Collapsed: Intercity to Metro",
+                    stat: "14m",
+                    desc: "Historically, traveling to Shenzhen was a planned 'trip' taking over an hour. Today, the High Speed Rail (XRL) operates like a metro system. The 'One-stop' connection from West Kowloon to Futian takes just 14 minutes, making a cross-border lunch break as casual as crossing the street."
                 }
             },
             { 
                 id: 2, 
-                title: "Flow Reversal", 
-                subtitle: "Shopping Trend", 
-                viz: <FlowViz/>, 
-                stat: "3x", 
-                statLabel: "Northbound Growth",
-                colSpan: "col-span-1", 
-                rowSpan: "row-span-1",
-                bg: "bg-white",
-                driver: {
-                    year: "2023",
-                    tag: "Consumption",
-                    image: "images/The Costco Effect.jpg",
-                    title: "The Costco Effect",
-                    desc: "Post-pandemic reopening combined with currency advantages led to a surge in northbound consumption, driven by warehouse supermarkets like Sam's Club filling a gap in HK's retail market."
+                title: "Senseless Passage", 
+                subtitle: "Manual vs Biometric", 
+                viz: <ClearanceViz/>, 
+                stat: "7s", 
+                statLabel: "Walk-through Time",
+                colSpan: "col-span-1", // Small
+                bg: "bg-gradient-to-b from-white/90 to-accent/90",
+                copy: {
+                    title: "Manual Stamp vs. Biometric Scan",
+                    stat: "7s",
+                    desc: "Gone are the days of manual ID checks, stamps, and long queues. With the integration of 'Senseless Clearance' (biometric recognition) at Shenzhen ports and 'e-Channel' on the HK side, the physical border has dissolved into a walk-through digital checkpoint."
                 }
             },
             { 
                 id: 3, 
-                title: "Democratized Driving", 
-                subtitle: "Vehicle Rights", 
-                viz: <PlateViz/>, 
+                title: "The Reverse Tide", 
+                subtitle: "Luxury vs Daily", 
+                viz: <ConsumptionViz/>, 
+                stat: "3x", 
+                statLabel: "Northbound Surge",
+                colSpan: "col-span-1", // Small
+                bg: "bg-white/90",
+                copy: {
+                    title: "Luxury vs. Daily Living",
+                    stat: "3x",
+                    desc: "In the past, the flow was Southbound for luxury goods and medicine. Now, the tide has reversed. Hong Kong residents flock Northbound for services (spas, dental) and warehouse supermarkets (Sam's Club/Costco). It represents a shift from 'tourism' to 'daily necessity'."
+                }
+            },
+            // Row 2: 1-1-2 (Total 4)
+            { 
+                id: 4, 
+                title: "Automotive Liberty", 
+                subtitle: "Privilege vs Middle Class", 
+                viz: <DrivingViz/>, 
                 stat: "500k+", 
-                statLabel: "Applications",
-                colSpan: "col-span-1", 
-                rowSpan: "row-span-1",
-                bg: "bg-white",
-                driver: {
-                    year: "2023",
-                    tag: "Policy",
-                    image: "images/Northbound Travel Scheme.jpg",
-                    title: "Northbound Travel Scheme",
-                    desc: "The 'Northbound Travel for HK Vehicles' policy allowed single-plate private cars to enter Guangdong via the HZMB, removing the expensive barrier of dual license plates."
+                statLabel: "Single-Plate Cars",
+                colSpan: "col-span-1", // Small
+                bg: "bg-white/90",
+                copy: {
+                    title: "Privilege vs. Middle Class",
+                    stat: "500k+",
+                    desc: "Driving across the border used to be the exclusive privilege of the wealthy with dual plates (FV/ZU). The 'Northbound Travel for HK Vehicles' policy liberated the road, allowing middle-class single-plate private cars to drive directly into Guangdong for weekends."
                 }
             },
             { 
                 id: 5, 
-                title: "Port Evolution", 
-                subtitle: "Huanggang Function", 
-                viz: <CargoViz/>, 
-                stat: "100%", 
-                statLabel: "Passenger Focus",
-                colSpan: "col-span-1 md:col-span-1 lg:col-span-1", 
-                rowSpan: "row-span-1",
-                bg: "bg-white",
-                driver: {
-                    year: "2020",
-                    tag: "Urban Planning",
-                    image: "images/Port Function Split.jpg",
-                    title: "Port Function Split",
-                    desc: "The opening of Liantang/Heung Yuen Wai port implemented the 'East-in East-out' cargo strategy, allowing older ports like Huanggang to be redeveloped exclusively for passenger use."
+                title: "Payment Singularity", 
+                subtitle: "Exchange vs Seamless", 
+                viz: <PaymentViz/>, 
+                stat: "95%", 
+                statLabel: "Coverage",
+                colSpan: "col-span-1", // Small
+                bg: "bg-white/90",
+                copy: {
+                    title: "Exchange vs. Seamless Scan",
+                    stat: "95%",
+                    desc: "The hassle of exchanging cash or topping up separate cards (Octopus) is history. Today, a single QR code (AlipayHK or WeChat Pay HK) works seamlessly across both cities, erasing the financial friction of the border."
                 }
             },
             { 
                 id: 6, 
-                title: "Financial Fusion", 
-                subtitle: "Cash vs. E-Wallet", 
-                viz: <FinanceViz/>, 
-                stat: "95%", 
-                statLabel: "Cashless Coverage",
-                colSpan: "col-span-1 md:col-span-1", 
-                rowSpan: "row-span-1",
-                bg: "bg-white",
-                driver: {
-                    year: "2023 - 2024",
-                    tag: "FinTech",
-                    image: "images/E-Wallet Interoperability.jpg",
-                    title: "E-Wallet Interoperability",
-                    desc: "AlipayHK and WeChat Pay HK achieved full coverage of mainland merchants and public transport, eliminating the need for cash exchange and effectively unifying the payment ecosystem."
+                title: "Institutional Landing", 
+                subtitle: "Tourist vs Resident", 
+                viz: <IdentityViz/>, 
+                stat: "100%", 
+                statLabel: "GBA Resident",
+                colSpan: "col-span-1 md:col-span-2", // Large
+                bg: "bg-white/90",
+                copy: {
+                    title: "Tourist vs. GBA Resident",
+                    stat: "100%",
+                    desc: "HK people are no longer just 'tourists'. New policies have granted 'National Treatment' in many areas, allowing Hong Kongers to access medical vouchers, tax benefits, and social services, effectively becoming residents of the Greater Bay Area."
                 }
             }
         ];
 
-        // FULL PDF DATA MAPPING
+        // --- 3. TIMELINE DATA ---
         const timelineData = [
             { 
                 year: "Pre-2017", 
@@ -2094,15 +2241,96 @@
             }
         ];
 
-        // --- 3. SUB-COMPONENTS ---
+        // --- 4. PARTICLE BACKGROUND ---
+        const ParticleBackground = () => {
+            const mountRef = useRef(null);
+            useEffect(() => {
+                if(!mountRef.current) return;
+                const canvas = document.createElement('canvas');
+                canvas.style.position = 'fixed';
+                canvas.style.top = '0';
+                canvas.style.left = '0';
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+                canvas.style.zIndex = '-1';
+                canvas.style.pointerEvents = 'none';
+                mountRef.current.appendChild(canvas);
 
-        // Modal for Timeline
-        const Modal = ({ item, onClose }) => (
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+
+                const particlesGeometry = new THREE.BufferGeometry();
+                const particlesCount = 800;
+                const posArray = new Float32Array(particlesCount * 3);
+                
+                for(let i = 0; i < particlesCount * 3; i++) {
+                    posArray[i] = (Math.random() - 0.5) * 20;
+                }
+
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+                const material = new THREE.PointsMaterial({ size: 0.02, color: 0x0E7490, transparent: true, opacity: 0.4 });
+                const particlesMesh = new THREE.Points(particlesGeometry, material);
+                scene.add(particlesMesh);
+                camera.position.z = 5;
+
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    particlesMesh.rotation.y += 0.0003;
+                    particlesMesh.rotation.x += 0.0001;
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                const handleResize = () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                };
+                window.addEventListener('resize', handleResize);
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    if (mountRef.current && mountRef.current.contains(canvas)) {
+                        mountRef.current.removeChild(canvas);
+                    }
+                    particlesGeometry.dispose();
+                    material.dispose();
+                    renderer.dispose();
+                };
+            }, []);
+            return <div ref={mountRef} />;
+        };
+
+        // --- 5. MODALS & SUB-COMPONENTS ---
+        
+        const InfoModal = ({ data, onClose }) => (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+                <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 relative animate-slide-up border border-slate-100" onClick={e => e.stopPropagation()}>
+                    <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition"><i className="fas fa-times"></i></button>
+                    
+                    <div className="mb-6">
+                        <div className="text-xs font-bold text-primary uppercase tracking-widest mb-2 border border-primary/20 inline-block px-2 py-0.5 rounded bg-accent">Status Quo 2025</div>
+                        <h2 className="text-2xl font-bold text-slate-800 mb-1 leading-tight">{data.title}</h2>
+                        <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary mt-2">{data.stat}</div>
+                    </div>
+                    
+                    <div className="h-[1px] w-full bg-slate-100 mb-6"></div>
+                    
+                    <p className="text-slate-600 leading-relaxed font-serif text-base">
+                        {data.desc}
+                    </p>
+                </div>
+            </div>
+        );
+
+        const TimelineModal = ({ item, onClose }) => (
             <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in" onClick={onClose}>
                 <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
                     {/* Header Image */}
                     <div className="h-48 md:h-64 relative shrink-0">
-                        <img src={item.img} className="w-full h-full object-cover" />
+                        <img src={item.img} className="w-full h-full object-cover" onError={(e) => {e.target.src = `https://placehold.co/600x400?text=${item.title}`}} />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent opacity-90"></div>
                         <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 bg-black/30 rounded-full text-white backdrop-blur hover:bg-black/50 transition flex items-center justify-center"><i className="fas fa-times"></i></button>
                         <div className="absolute bottom-6 left-6 text-white">
@@ -2135,296 +2363,208 @@
             </div>
         );
 
-        // New Modal for Drivers (Single Event)
-        const DriverModal = ({ driver, onClose }) => (
-            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in" onClick={onClose}>
-                <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-slide-up flex flex-col" onClick={e => e.stopPropagation()}>
-                    <div className="h-56 relative shrink-0">
-                        <img src={driver.image} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent"></div>
-                        <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 bg-black/30 rounded-full text-white backdrop-blur hover:bg-black/50 transition flex items-center justify-center"><i className="fas fa-times"></i></button>
-                        <div className="absolute bottom-6 left-6 text-white pr-6">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="bg-secondary text-white px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase">{driver.year}</span>
-                                <span className="text-xs font-bold uppercase tracking-wider opacity-80 border border-white/30 px-2 py-0.5 rounded">{driver.tag}</span>
-                            </div>
-                            <h2 className="text-2xl font-bold leading-tight">{driver.title}</h2>
-                        </div>
-                    </div>
-                    <div className="p-6 md:p-8 bg-white">
-                        <div className="flex gap-4">
-                            <div className="shrink-0 mt-1">
-                                <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-primary shadow-sm">
-                                    <i className="fas fa-layer-group"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">The Driver Event</h4>
-                                <p className="text-slate-700 leading-relaxed font-medium text-base">
-                                    {driver.desc}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-slate-50 px-6 py-3 border-t border-slate-100 text-right">
-                         <button onClick={onClose} className="text-xs font-bold text-slate-500 hover:text-primary uppercase tracking-wider transition-colors">Close</button>
-                    </div>
-                </div>
-            </div>
-        );
+        // --- 6. MAIN SECTIONS ---
 
-        // --- 4. MAIN SCREENS ---
-
-        const DashboardScreen = ({ onNavigate }) => {
-            const [selectedDriver, setSelectedDriver] = useState(null);
+        const DashboardSection = () => {
+            const [selectedCard, setSelectedCard] = useState(null);
 
             return (
-                <div className="h-full flex flex-col p-6 md:p-8 max-w-7xl mx-auto w-full relative">
+                <div className="max-w-7xl mx-auto px-6 py-20 min-h-[90vh] flex flex-col justify-center relative z-10">
                     {/* Header */}
-                    <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-slide-up">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-primary text-[10px] font-bold tracking-wider mb-3 border border-secondary/30">
-                                <i className="fas fa-database"></i> PART 3: DATA NARRATIVE
-                            </div>
-                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                                <span className="text-[#00997A] font-sans">THE FOLDED CITY</span>
-                            </h1>
-                            <p className="text-slate-500 mt-2 max-w-lg leading-relaxed">
-                                From administrative boundary to metropolitan interface.
-                                <br/>Tracking the structural dissolution of distance (2017-2025).
-                            </p>
+                    <div className="mb-12 animate-slide-up">
+                        <div className="section-tag">
+                            <i className="fas fa-database"></i> PART 3: DATA NARRATIVE
                         </div>
-                        <div className="flex gap-3">
-                            <button onClick={() => window.location.href='index.html?step=4'} className="group flex items-center gap-3 px-6 py-3 bg-white text-slate-900 border border-slate-200 rounded-full font-bold text-sm hover:bg-slate-50 transition-colors shadow-lg hover:shadow-xl">
-                                <span>Go to Chapter 3</span>
-                                <i className="fas fa-external-link-alt group-hover:scale-110 transition-transform text-xs"></i>
-                            </button>
-                            <button onClick={onNavigate} className="group flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-full font-bold text-sm hover:bg-primary transition-colors shadow-lg hover:shadow-primary/30">
-                                <span>Explore Timeline</span>
-                                <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-                        </div>
+                        <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6">
+                            Borderless <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Dual City</span>
+                        </h1>
+                        <p className="text-slate-600 font-serif text-lg leading-relaxed max-w-3xl bg-white/40 backdrop-blur-sm p-4 rounded-xl border border-white/50">
+                            As checkpoints evolve from "barriers" into "hubs," every wave of policy optimization acts to fold space and time. These efficient clearance strategies have not only made the <span className="font-bold text-slate-800">Hong Kong-Shenzhen commute</span> effortless but have birthed tens of thousands of <span className="font-bold text-slate-800">"Dual-City Citizens"</span>—for whom crossing the border is no longer an obstacle, but a seamless transition of daily life.
+                        </p>
                     </div>
 
-                    {/* Bento Grid */}
-                    <div className="flex-1 min-h-0 relative"> {/* min-h-0 allows scroll within flex */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-fr gap-4 h-full pb-2 md:pb-0 overflow-y-auto custom-scrollbar pr-2">
-                            {bentoData.map((item, idx) => (
-                                <div key={item.id} 
-                                    onClick={() => setSelectedDriver(item.driver)}
-                                    className={`bento-card relative rounded-2xl p-5 border border-slate-200/60 shadow-sm flex flex-col justify-between overflow-hidden group cursor-pointer hover:border-primary/50 ${item.colSpan} ${item.rowSpan} ${item.bg}`}
-                                    style={{animationDelay: `${idx * 100}ms`}}
-                                >
-                                    <div className="flex justify-between items-start z-10 pointer-events-none">
-                                        <div>
-                                            <h3 className="font-bold text-slate-700 text-sm md:text-base">{item.title}</h3>
-                                            <p className="text-xs text-slate-400">{item.subtitle}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-xl md:text-2xl font-black text-slate-800">{item.stat}</div>
-                                            <div className="text-[9px] font-bold text-primary uppercase tracking-wide">{item.statLabel}</div>
-                                        </div>
+                    {/* Asymmetrical Bento Grid (4 Columns = 2 Rows with 3 items each) */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 auto-rows-fr gap-4">
+                        {bentoData.map((item, idx) => (
+                            <div key={item.id} 
+                                onClick={() => setSelectedCard(item.copy)}
+                                className={`bento-card relative rounded-2xl p-5 border border-white/60 shadow-lg flex flex-col justify-between overflow-hidden group cursor-pointer ${item.colSpan} ${item.bg}`}
+                                style={{animationDelay: `${idx * 100}ms`, minHeight: '220px'}}
+                            >
+                                <div className="flex justify-between items-start z-10 pointer-events-none">
+                                    <div>
+                                        <h3 className="font-bold text-slate-700 text-sm md:text-base">{item.title}</h3>
+                                        <p className="text-[10px] text-slate-400 uppercase tracking-wide font-bold mt-1">{item.subtitle}</p>
                                     </div>
-                                    
-                                    <div className="flex-1 mt-4 mb-2 relative z-10 pointer-events-none">
-                                        {item.viz}
+                                    <div className="text-right">
+                                        <div className="text-xl md:text-2xl font-black text-slate-800">{item.stat}</div>
+                                        <div className="text-[8px] font-bold text-primary uppercase tracking-wide">{item.statLabel}</div>
                                     </div>
-                                    
-                                    {/* Background Decoration */}
-                                    <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-secondary/10 to-transparent rounded-full blur-2xl group-hover:bg-secondary/20 transition-colors pointer-events-none"></div>
+                                </div>
+                                
+                                <div className="flex-1 mt-4 relative z-10 pointer-events-none">
+                                    {item.viz}
+                                </div>
+                                
+                                <div className="absolute bottom-3 right-3 text-slate-300 group-hover:text-primary transition-colors text-xs">
+                                    <i className="fas fa-plus-circle"></i>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
 
-                                    {/* Interaction Hint */}
-                                    <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-slate-100/50 backdrop-blur text-slate-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform scale-90 group-hover:scale-100">
-                                        <i className="fas fa-search-plus text-xs"></i>
+                    {selectedCard && <InfoModal data={selectedCard} onClose={() => setSelectedCard(null)} />}
+                </div>
+            );
+        };
+
+        const TimelineSection = () => {
+            const scrollRef = useRef(null);
+            const [selectedItem, setSelectedItem] = useState(null);
+
+            const scroll = (direction) => {
+                if(scrollRef.current) {
+                    const scrollAmount = window.innerWidth * 0.4;
+                    scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+                }
+            };
+
+            return (
+                <div className="max-w-7xl mx-auto px-6 py-20 min-h-[90vh] flex flex-col justify-center relative z-10">
+                    <div className="mb-12">
+                         <div className="section-tag mb-4 pl-1">Evolution Timeline</div>
+                         <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+                             From Hard Barriers to <span className="text-primary">Soft Integration</span>
+                         </h2>
+                         <p className="text-slate-600 font-serif text-lg leading-relaxed text-left w-full bg-white/40 backdrop-blur-sm p-4 rounded-xl border border-white/50">
+                            The past decade has witnessed a complete metamorphosis of the border. What began as a rigid line of separation has dissolved into a digital membrane, permeable and intelligent. We have moved from the era of physical infrastructure to the era of psychological fusion.
+                         </p>
+                    </div>
+
+                    <div className="relative">
+                        {/* Scroll Buttons */}
+                        <button onClick={() => scroll('left')} className="absolute top-1/2 -translate-y-1/2 -left-4 z-20 w-12 h-12 rounded-full bg-white/80 backdrop-blur border border-slate-200 shadow-lg text-slate-600 hover:text-primary hover:scale-110 transition-all flex items-center justify-center">
+                            <i className="fas fa-chevron-left"></i>
+                        </button>
+                        <button onClick={() => scroll('right')} className="absolute top-1/2 -translate-y-1/2 -right-4 z-20 w-12 h-12 rounded-full bg-white/80 backdrop-blur border border-slate-200 shadow-lg text-slate-600 hover:text-primary hover:scale-110 transition-all flex items-center justify-center">
+                            <i className="fas fa-chevron-right"></i>
+                        </button>
+
+                        <div ref={scrollRef} className="flex gap-8 overflow-x-auto snap-x snap-mandatory hide-scrollbar py-4 px-2" style={{scrollPaddingLeft: '1rem'}}>
+                            {timelineData.map((e, i) => (
+                                <div key={i} onClick={() => setSelectedItem(e)} 
+                                    className="snap-center shrink-0 w-[85vw] md:w-[450px] h-[65vh] bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden relative cursor-pointer group hover:-translate-y-4 transition-all duration-500 ease-out"
+                                >
+                                    <div className="absolute inset-0">
+                                        <img src={e.img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-90 group-hover:opacity-100" onError={(err) => {err.target.src = `https://placehold.co/600x900?text=${e.title}`}} />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                                    </div>
+                                    
+                                    <div className="absolute bottom-0 left-0 w-full p-8 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-5xl font-mono font-black text-white/20 group-hover:text-white/40 transition-colors">{e.year}</span>
+                                            <span className="px-3 py-1 bg-primary/80 backdrop-blur rounded-full text-[10px] font-bold uppercase tracking-widest">{e.tag}</span>
+                                        </div>
+                                        <h3 className="text-3xl font-bold mb-3 leading-tight">{e.title}</h3>
+                                        <p className="text-sm text-slate-300 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 leading-relaxed">
+                                            {e.desc}
+                                        </p>
+                                        <div className="mt-6 flex items-center gap-2 text-secondary text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all delay-200">
+                                            View {e.events.length} Events <i className="fas fa-arrow-right"></i>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Driver Modal */}
-                    {selectedDriver && <DriverModal driver={selectedDriver} onClose={() => setSelectedDriver(null)} />}
+                    {selectedItem && <TimelineModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
                 </div>
             );
         };
 
-        const TimelineScreen = ({ onNavigateBack, onNavigateForward, setSelectedItem }) => {
-            const scrollRef = useRef(null);
-
-            useEffect(() => {
-                const el = scrollRef.current;
-                if(el) {
-                    const handleWheel = (e) => {
-                        if (e.deltaY !== 0) {
-                            e.preventDefault();
-                            el.scrollLeft += e.deltaY;
-                        }
-                    };
-                    el.addEventListener("wheel", handleWheel);
-                    return () => el.removeEventListener("wheel", handleWheel);
-                }
-            }, []);
-
-            // Scroll Handlers for Buttons
-            const scroll = (direction) => {
-                if(scrollRef.current) {
-                    const scrollAmount = window.innerWidth * 0.6; // Scroll roughly 60% of viewport width
-                    scrollRef.current.scrollBy({
-                        left: direction === 'left' ? -scrollAmount : scrollAmount,
-                        behavior: 'smooth'
-                    });
-                }
-            };
-
-            return (
-                <div className="h-full flex flex-col relative bg-slate-50">
-                    <div className="absolute top-8 left-8 z-10">
-                         <h2 className="text-2xl font-bold text-slate-900">Evolution Timeline</h2>
-                         <p className="text-xs text-slate-500">Scroll or use buttons to explore</p>
-                    </div>
-
-                    {/* Navigation Buttons */}
-                    <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 hidden md:block">
-                        <button onClick={() => scroll('left')} className="w-12 h-12 rounded-full bg-white/80 backdrop-blur border border-slate-200 shadow-lg text-slate-600 hover:text-primary hover:scale-110 transition-all flex items-center justify-center">
-                            <i className="fas fa-chevron-left"></i>
-                        </button>
-                    </div>
-                    <div className="absolute top-1/2 -translate-y-1/2 right-4 z-20 hidden md:block">
-                        <button onClick={() => scroll('right')} className="w-12 h-12 rounded-full bg-white/80 backdrop-blur border border-slate-200 shadow-lg text-slate-600 hover:text-primary hover:scale-110 transition-all flex items-center justify-center">
-                            <i className="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-
-                    <div ref={scrollRef} className="flex-1 flex items-center overflow-x-auto gap-8 px-8 md:px-20 snap-x snap-mandatory hide-scrollbar">
-                        {timelineData.map((e, i) => (
-                            <div key={i} onClick={() => setSelectedItem(e)}
-                                className="snap-center shrink-0 w-[85vw] md:w-[450px] h-[65vh] bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden relative cursor-pointer group hover:-translate-y-4 transition-all duration-500 ease-out"
-                            >
-                                <div className="absolute inset-0">
-                                    <img src={e.img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-90 group-hover:opacity-100" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-                                </div>
-                                
-                                <div className="absolute bottom-0 left-0 w-full p-8 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-5xl font-mono font-black text-white/20 group-hover:text-white/40 transition-colors">{e.year}</span>
-                                        <span className="px-3 py-1 bg-primary/80 backdrop-blur rounded-full text-[10px] font-bold uppercase tracking-widest">{e.tag}</span>
-                                    </div>
-                                    <h3 className="text-3xl font-bold mb-3 leading-tight">{e.title}</h3>
-                                    <p className="text-sm text-slate-300 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 leading-relaxed">
-                                        {e.desc}
-                                    </p>
-                                    <div className="mt-6 flex items-center gap-2 text-secondary text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all delay-200">
-                                        View {e.events.length} Events <i className="fas fa-arrow-right"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                        {/* Final Spacer with Next Button */}
-                        <div className="snap-center shrink-0 w-[300px] h-[65vh] flex items-center justify-center">
-                             <button onClick={onNavigateForward} className="w-20 h-20 rounded-full bg-slate-900 text-white flex items-center justify-center hover:scale-110 transition-transform shadow-2xl group">
-                                <span className="group-hover:hidden"><i className="fas fa-chevron-right text-xl"></i></span>
-                                <span className="hidden group-hover:inline text-xs font-bold uppercase tracking-wider">Start</span>
-                             </button>
-                        </div>
-                    </div>
-
-                    <button onClick={onNavigateBack} className="absolute bottom-8 left-8 text-slate-400 hover:text-slate-800 text-sm font-bold flex items-center gap-2 z-30">
-                        <i className="fas fa-arrow-left"></i> Back to Dashboard
-                    </button>
-                </div>
-            );
-        };
-
-        const ConclusionScreen = ({ onRestart }) => (
-            <div className="h-full flex flex-col justify-center items-center text-center px-6 relative overflow-hidden bg-white">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-accent via-white to-white opacity-60"></div>
-                
-                <div className="relative z-10 animate-slide-up">
-                    <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl rotate-3 flex items-center justify-center text-white mb-8 mx-auto shadow-2xl shadow-primary/30">
-                        <i className="fas fa-check text-3xl"></i>
+        const ConclusionSection = () => (
+            <div className="max-w-5xl mx-auto px-6 py-24 min-h-[70vh] flex flex-col justify-center text-center relative z-10">
+                <div className="animate-slide-up">
+                    <div className="inline-flex items-center gap-2 mb-6 text-primary/80 font-mono text-sm font-bold tracking-widest uppercase border-b border-primary/20 pb-2">
+                        <i className="fas fa-layer-group"></i> Conclusion
                     </div>
                     
-                    <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
-                        The End of Policy<br/>is the <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Start of Living</span>
+                    <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tight">
+                        The Trilogy of <span className="text-primary">Integration</span>
                     </h2>
                     
-                    <p className="text-slate-500 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-                        Migration trends and checkpoint optimizations have birthed a new demographic: 
-                        <span className="font-bold text-slate-800"> The Cross-Border Citizen</span>.
+                    <p className="text-xl md:text-3xl text-slate-600 font-serif italic mb-16 max-w-4xl mx-auto leading-relaxed">
+                        "Our narrative spans three chapters: The <strong className="text-slate-800 not-italic">Hardware Link</strong> built the bridges; The <strong className="text-slate-800 not-italic">Digital Link</strong> forged resilience; and now, The <strong className="text-slate-800 not-italic">Soft Link</strong> dissolves the invisible walls of policy and life."
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-3xl mx-auto mb-12">
-                        {[
-                            {icon:'fa-briefcase', t:'Commuter', d:'14min High Speed Commute'}, 
-                            {icon:'fa-shopping-bag', t:'Consumer', d:'Weekend Sam\'s Club Run'}, 
-                            {icon:'fa-home', t:'Resident', d:'Retiring in Zhongshan'}
-                        ].map((x,i)=>(
-                            <div key={i} className="bg-white/80 backdrop-blur p-4 rounded-xl border border-slate-100 shadow-lg hover:-translate-y-1 transition-transform">
-                                <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center text-primary mx-auto mb-3"><i className={`fas ${x.icon}`}></i></div>
-                                <div className="font-bold text-slate-800 mb-1">{x.t}</div>
-                                <div className="text-xs text-slate-500">{x.d}</div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                        {/* Characteristic 1 */}
+                        <div className="group bg-white p-6 rounded-2xl border border-slate-100 shadow-md hover:shadow-xl hover:border-primary/30 transition-all duration-500 flex flex-col items-center hover:-translate-y-2">
+                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
+                                <i className="fas fa-tachometer-alt text-2xl text-slate-400 group-hover:text-primary transition-colors"></i>
                             </div>
-                        ))}
-                    </div>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hardware Connectivity</h3>
+                            <p className="text-sm text-slate-500 text-center leading-relaxed">
+                                Physical infrastructure has compressed the 1-hour circle into a 14-minute metro-style commute.
+                            </p>
+                        </div>
 
-                    <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
-                        <button onClick={onRestart} className="px-8 py-3 rounded-full border border-slate-200 text-slate-500 hover:text-primary hover:border-primary hover:bg-accent/50 transition-all text-sm font-bold uppercase tracking-widest">
-                            <i className="fas fa-undo mr-2"></i> Replay Narrative
-                        </button>
+                        {/* Characteristic 2 */}
+                        <div className="group bg-white p-6 rounded-2xl border border-slate-100 shadow-md hover:shadow-xl hover:border-primary/30 transition-all duration-500 flex flex-col items-center hover:-translate-y-2">
+                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
+                                <i className="fas fa-link text-2xl text-slate-400 group-hover:text-primary transition-colors"></i>
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Digital Resilience</h3>
+                            <p className="text-sm text-slate-500 text-center leading-relaxed">
+                                A unified digital backbone (Health Codes, e-Payments) ensures flow continues despite physical disruptions.
+                            </p>
+                        </div>
 
-                        <button 
-                            onClick={() => window.location.href = 'index.html?step=4'}
-                            className="px-8 py-3 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-all text-sm font-bold uppercase tracking-widest shadow-lg hover:shadow-xl hover:-translate-y-0.5 group"
-                        >
-                            Next Chapter <i className="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                        </button>
+                        {/* Characteristic 3 */}
+                        <div className="group bg-gradient-to-br from-primary/5 to-secondary/5 p-6 rounded-2xl border border-primary/20 shadow-lg hover:shadow-2xl hover:border-primary/50 transition-all duration-500 flex flex-col items-center hover:-translate-y-2 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                                <i className="fas fa-infinity text-2xl text-primary animate-pulse-slow"></i>
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Institutional Integration</h3>
+                            <p className="text-sm text-slate-600 text-center leading-relaxed font-medium">
+                                Policy breakthroughs have granted HK residents 'National Treatment', turning the border into a bridge.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         );
 
-        // --- 5. ROOT CONTAINER ---
+        // --- 7. ROOT COMPONENT ---
 
-        const AppPart3 = () => {
-            const [screen, setScreen] = useState(0);
-            const [selectedItem, setSelectedItem] = useState(null);
-
-            // Screen Mapping
-            const renderScreen = () => {
-                switch(screen) {
-                    case 0: return <DashboardScreen onNavigate={() => setScreen(1)} />;
-                    case 1: return <TimelineScreen onNavigateBack={() => setScreen(0)} onNavigateForward={() => setScreen(2)} setSelectedItem={setSelectedItem} />;
-                    case 2: return <ConclusionScreen onRestart={() => setScreen(0)} />;
-                    default: return <DashboardScreen />;
-                }
-            };
+        const DualCityApp = () => {
+            const ChapterNavSection = () => (
+                <div className="max-w-7xl mx-auto px-6 py-12 flex justify-start relative z-10">
+                    <button onClick={() => switchChapter(2)} className="bg-white text-slate-700 font-bold py-3 px-8 rounded-lg hover:bg-slate-100 transition-all shadow-md border border-slate-200 flex items-center gap-2">
+                        <i className="fas fa-arrow-left"></i> Previous Chapter
+                    </button>
+                </div>
+            );
 
             return (
-                <div className="w-full h-full bg-[#f8fafc] relative">
-                    {/* Main Content Transition Wrapper */}
-                    <div className="w-full h-full transition-opacity duration-500">
-                        {renderScreen()}
-                    </div>
-
-                    {/* Modal Overlay */}
-                    {selectedItem && <Modal item={selectedItem} onClose={() => setSelectedItem(null)} />}
-
-                    {/* Navigation Dots (Visual Indicator) */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-50">
-                        {[0,1,2].map(i => (
-                            <button key={i} onClick={()=>setScreen(i)} 
-                                className={`h-1 rounded-full transition-all duration-500 ${screen===i ? 'w-8 bg-slate-800' : 'w-2 bg-slate-300 hover:bg-primary'}`} 
-                            />
-                        ))}
+                <div className="w-full min-h-screen relative overflow-hidden">
+                    <ParticleBackground />
+                    <div className="relative z-10 pb-20">
+                        <DashboardSection />
+                        <TimelineSection />
+                        <ConclusionSection />
+                        <ChapterNavSection />
                     </div>
                 </div>
             );
         };
 
         const root3 = ReactDOM.createRoot(document.getElementById('root-part3'));
-        root3.render(<AppPart3 />);
+        root3.render(<DualCityApp />);
     </script>
+
     <script src="global-nav.js"></script>
 </body>
 </html>

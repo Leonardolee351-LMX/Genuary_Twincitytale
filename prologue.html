@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Twin City Tides | Prologue</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['"Noto Serif"', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            primary: '#0E7490',
+            secondary: '#06B6D4',
+            slate: { 850: '#1e293b' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      /* Local hero asset path. Place the file inside ./images/ */
+      --hero-photo: url('images/prologue-hero.jpg');
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: #f8fafc;
+      color: #334155;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    .narrative-layer { position: relative; z-index: 10; }
+    .gsap-reveal { opacity: 0; transform: translateY(30px); }
+
+    .hero-photo {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(to bottom, rgba(248, 250, 252, 0.78), rgba(248, 250, 252, 0.86)),
+        radial-gradient(circle at 20% 20%, rgba(14, 116, 144, 0.12), transparent 45%),
+        linear-gradient(135deg, rgba(14, 116, 144, 0.07), rgba(6, 182, 212, 0.03)),
+        var(--hero-photo);
+      background-size: cover;
+      background-position: center center;
+      filter: grayscale(1) contrast(0.9) saturate(0.75);
+      opacity: 0.72;
+    }
+
+    .hero-fade {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(to bottom, rgba(248,250,252,0.48) 0%, rgba(248,250,252,0.18) 28%, rgba(248,250,252,0.40) 100%),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.14), rgba(248,250,252,0.70) 75%);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      opacity: 0.03;
+      background-image:
+        linear-gradient(#0E7490 1px, transparent 1px),
+        linear-gradient(90deg, #0E7490 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 88%);
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 50%; top: 0; bottom: 0; width: 1px;
+      background: linear-gradient(to bottom, transparent, #cbd5e1 5%, #cbd5e1 95%, transparent);
+      transform: translateX(-50%);
+    }
+
+    .timeline-node {
+      position: relative;
+    }
+
+    .timeline-detail-shell {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+      opacity: 0;
+    }
+
+    .timeline-node.is-active .timeline-detail-shell,
+    .timeline-node.is-pinned .timeline-detail-shell {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+
+    .timeline-detail-inner {
+      overflow: hidden;
+    }
+
+    .timeline-detail-panel {
+      margin-top: 1rem;
+      border: 1px solid rgba(203, 213, 225, 0.9);
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      box-shadow: 0 20px 45px -22px rgba(15, 23, 42, 0.18);
+      overflow: hidden;
+      transform: translateY(12px);
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .timeline-node.is-active .timeline-detail-panel,
+    .timeline-node.is-pinned .timeline-detail-panel {
+      transform: translateY(0);
+    }
+
+    .timeline-summary {
+      transition: color 0.25s ease, opacity 0.25s ease;
+    }
+
+    .timeline-node.is-active .timeline-summary h4,
+    .timeline-node.is-pinned .timeline-summary h4 { color: #0f172a; }
+
+    .timeline-node.is-active .timeline-dot,
+    .timeline-node.is-pinned .timeline-dot {
+      background: #0E7490;
+      box-shadow: 0 0 0 6px rgba(255,255,255,0.88), 0 0 0 10px rgba(14,116,144,0.08);
+    }
+
+    .timeline-node.is-active .timeline-teaser,
+    .timeline-node.is-pinned .timeline-teaser {
+      color: #475569;
+    }
+
+    .timeline-detail-image {
+      min-height: 220px;
+      background-size: cover;
+      background-position: center center;
+      position: relative;
+      isolation: isolate;
+      filter: grayscale(0.4) saturate(0.7) contrast(0.92) brightness(0.96);
+    }
+
+    .timeline-detail-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(15,23,42,0.08), rgba(15,23,42,0.28)),
+        radial-gradient(circle at 20% 20%, rgba(14,116,144,0.18), transparent 38%);
+      z-index: 1;
+    }
+
+    .timeline-detail-image-label {
+      position: absolute;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 2;
+      color: rgba(255,255,255,0.9);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .timeline-progress {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, rgba(6,182,212,0.65), rgba(14,116,144,0.65));
+      transform: translateX(-50%);
+      transform-origin: top;
+      border-radius: 999px;
+      height: 0;
+      opacity: 0.45;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .chart-tooltip {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.18s ease;
+      box-shadow: 0 14px 30px -18px rgba(15, 23, 42, 0.22);
+      font-size: 0.75rem;
+      z-index: 100;
+      max-width: 240px;
+    }
+
+    .chart-separator-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      fill: #94a3b8;
+    }
+
+    @media (max-width: 1023px) {
+      .timeline-line, .timeline-progress { left: 24px; }
+      .timeline-mobile-wrap { padding-left: 4rem; }
+      .timeline-detail-panel { margin-left: 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="bg-canvas" class="fixed inset-0 flex items-center justify-center">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="opacity-[0.03]">
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#0E7490" stroke-width="0.5" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)" />
+      <path d="M -100,500 Q 400,300 800,600 T 2000,400" fill="none" stroke="#0E7490" stroke-width="2" />
+      <path d="M -100,480 Q 420,280 820,580 T 2000,380" fill="none" stroke="#06B6D4" stroke-width="1" stroke-dasharray="4 4" />
+    </svg>
+  </div>
+
+  <!-- Global Nav -->
+  <script src="global-nav.js"></script>
+
+  <main class="narrative-layer">
+    <section id="prologue-hook" class="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
+      <div class="hero-photo" aria-hidden="true"></div>
+      <div class="hero-fade" aria-hidden="true"></div>
+      <div class="hero-grid" aria-hidden="true"></div>
+
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+        <p class="gsap-reveal font-mono text-primary text-xs tracking-[0.2em] uppercase mb-8">Prologue</p>
+        <h1 class="gsap-reveal font-serif text-4xl md:text-5xl lg:text-6xl text-slate-800 leading-tight md:leading-[1.15] font-medium">
+          The border is not where the journey ends.<br />
+          <span class="text-slate-500">It is where the day gets divided.</span>
+        </h1>
+        <p class="gsap-reveal mt-10 text-slate-600 font-sans text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
+          Between Shenzhen and Hong Kong, commuting is never just movement. It is a daily negotiation with gates, train platforms, payment systems, opening hours, and the quiet arithmetic of time.
+        </p>
+      </div>
+
+      <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-50 animate-bounce z-10">
+        <div class="w-[1px] h-12 bg-slate-400 mb-2"></div>
+        <span class="font-mono text-xs text-slate-400 uppercase tracking-[0.2em]">Scroll</span>
+      </div>
+    </section>
+
+    <section id="prologue-history" class="py-32 px-6">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-24">
+          <h2 class="gsap-reveal font-serif text-3xl md:text-4xl text-slate-800 mb-4">A Shifting Boundary</h2>
+          <p class="gsap-reveal text-slate-500 font-sans max-w-2xl mx-auto">
+            For over two decades, the institutional border has continually reorganized cross-city life. Each infrastructure upgrade and policy shift rewrote the rules of movement.
+          </p>
+        </div>
+
+        <div id="timeline-frame" class="relative w-full max-w-4xl mx-auto">
+          <div class="timeline-line"></div>
+          <div id="timeline-progress" class="timeline-progress"></div>
+          <div id="timeline-container" class="relative z-10 space-y-16 lg:space-y-24"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="prologue-overview" class="min-h-screen pt-32 pb-48 px-6 flex flex-col justify-center bg-white border-t border-slate-100 relative">
+      <div class="max-w-6xl mx-auto w-full">
+        <div class="gsap-reveal text-center mb-16">
+          <h2 class="font-serif text-3xl text-slate-800 mb-4">The Rhythm of Mobility</h2>
+          <p class="text-slate-500 font-sans text-sm max-w-2xl mx-auto">
+            Selected official mobility milestones, 1997–2025
+          </p>
+        </div>
+
+        <div class="gsap-reveal w-full relative">
+          <div id="d3-chart-container" class="w-full h-[60vh] min-h-[400px]"></div>
+          <div id="chart-tooltip" class="chart-tooltip font-sans text-slate-700"></div>
+        </div>
+
+        <div class="gsap-reveal mt-8 max-w-3xl mx-auto text-center">
+          <p class="text-xs text-slate-400 font-sans leading-relaxed">
+            This overview combines selected official milestones reported in different but related measures — pre-2020 average daily cross-boundary passenger traffic and post-2020 annual control-point passenger movements. It is meant to show the changing rhythm of mobility, not a perfectly uniform statistical series.
+          </p>
+        </div>
+
+        <div class="gsap-reveal mt-40 text-center relative z-20 pb-48">
+          <div class="w-[1px] h-24 bg-primary/30 mx-auto mb-10"></div>
+          <h2 class="font-serif text-3xl md:text-4xl text-primary leading-tight font-medium max-w-3xl mx-auto">
+            So what, exactly, came back after reopening<br class="hidden md:block" />
+            <span class="text-slate-400">— and what returned in another form?</span>
+          </h2>
+          <a href="index.html?step=2" class="mt-16 flex flex-col items-center">
+            <span class="font-mono text-xs text-primary uppercase tracking-[0.2em] mb-4">Enter Chapter 1</span>
+            <div class="w-10 h-10 rounded-full border border-primary text-primary flex items-center justify-center opacity-80">
+              <i class="fas fa-arrow-down"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const timelineData = [
+      {
+        year: '1997',
+        title: 'Handover / Persistent Border',
+        teaser: 'The transfer of sovereignty did not erase the checkpoint logic of the boundary.',
+        desc: 'The sovereignty transfer did not dissolve the border. The boundary remained institutionally meaningful even as the relationship between the two cities intensified.',
+        fact: 'Lo Wu handled 154,000 passengers a day; major crossings together formed an estimated baseline of about 173,500 passengers a day.',
+        visualLabel: 'Checkpoint Baseline',
+        image: "url('images/1997.jpg')"
+      },
+      {
+        year: '2003',
+        title: 'Individual Visit Scheme',
+        teaser: 'Post-SARS policy change turned crossing into a denser and more routine practice.',
+        desc: 'After SARS, the Individual Visit Scheme reshaped tourism, retail, and everyday movement, turning border crossing into a much more intensive and normalized practice.',
+        fact: 'Official yearbook figures put total cross-boundary passenger traffic at about 332,000 passengers per day.',
+        visualLabel: 'Policy Shift',
+        image: "url('images/2003.jpg')"
+      },
+      {
+        year: '2005–06',
+        title: 'Accelerated Expansion',
+        teaser: 'Cross-border movement became a mass pattern rather than an occasional exception.',
+        desc: 'Cross-border travel became increasingly normalized as a mass daily pattern rather than an exceptional trip.',
+        fact: 'Traffic rose from about 453,100 passengers a day in 2005 to roughly 477,000 in 2006.',
+        visualLabel: 'Mass Routine',
+        image: "url('images/2005-2006.jpg')"
+      },
+      {
+        year: '2007',
+        title: 'Shenzhen Bay & Spur Line',
+        teaser: 'New ports and rail links redistributed how the boundary was crossed.',
+        desc: 'A new western corridor and direct rail connection reconfigured the geography of movement, pulling cross-border routines deeper into urban transport systems.',
+        fact: 'Shenzhen Bay Port opened on 1 July 2007; the Lok Ma Chau Spur Line / Futian connection followed on 15 August 2007.',
+        visualLabel: 'New Corridors',
+        image: "url('images/2007.jpg')"
+      },
+      {
+        year: '2010s',
+        title: 'Infrastructure Boom',
+        teaser: 'Travel time compressed; the one-hour living circle became plausible at scale.',
+        desc: 'Major transport infrastructure compressed travel time and made the idea of a one-hour living circle more plausible for large numbers of people.',
+        fact: 'By 2014, cross-boundary passenger traffic had reached about 678,000 passengers per day; the same level held in 2016.',
+        visualLabel: 'Compressed Time',
+        image: "url('images/2010.jpg')"
+      },
+      {
+        year: '2018',
+        title: 'Express Rail & HZMB',
+        teaser: 'Regional mega-infrastructure folded distance and rearranged route logic.',
+        desc: 'Large-scale transport infrastructures further folded the region and reorganized routes, speed, and territorial imagination.',
+        fact: 'The Express Rail Link opened on 23 September 2018, the Hong Kong–Zhuhai–Macao Bridge on 24 October 2018; mobility reached about 715,900 passengers per day.',
+        visualLabel: 'Regional Integration',
+        image: "url('images/2018.jpg')"
+      },
+      {
+        year: '2019',
+        title: 'Pre-pandemic High Point',
+        teaser: 'A mature level of mobility became the benchmark that later defined “recovery.”',
+        desc: 'Mobility reached a mature pre-pandemic scale that later became the key benchmark for recovery.',
+        fact: 'Official figures recorded about 691,200 cross-boundary passenger movements per day across rail, road, and sea.',
+        visualLabel: 'Benchmark',
+        image: "url('images/2019.png')"
+      },
+      {
+        year: '2020–22',
+        title: 'Pandemic Suspension',
+        teaser: 'Routine movement collapsed, revealing the full force of the institutional boundary.',
+        desc: 'The interruption made visible how absolute the institutional border could become once ordinary clearance collapsed.',
+        fact: 'Heung Yuen Wai opened for cargo in 2020; annual passenger movements fell to about 1.95 million in 2021 and only 5.3 million in 2022.',
+        visualLabel: 'Interruption',
+        image: "url('images/2020-2022.jpg')"
+      },
+      {
+        year: '2023',
+        title: 'Reorganized Reopening',
+        teaser: 'What returned was mobility, but not exactly the old everyday logic behind it.',
+        desc: 'Mobility returned quickly, but not as a simple restoration. Routes, motives, directionality, and everyday patterns were reorganized.',
+        fact: 'Phased reopening began on 8 January 2023, full normal travel resumed on 6 February, and annual passenger movements rose to about 212 million.',
+        visualLabel: 'Reopening',
+        image: "url('images/2023.png')"
+      },
+      {
+        year: '2024–25',
+        title: 'Beyond the Old Baseline',
+        teaser: 'Traffic overtook the pre-pandemic benchmark, under a different pattern of life.',
+        desc: 'The border reopened into a different everyday logic, not a return to an unchanged one.',
+        fact: 'Annual passenger movements climbed to about 298 million in 2024 and 335 million in 2025.',
+        visualLabel: 'New Normal',
+        image: "url('images/2025.png')"
+      }
+    ];
+
+    function renderTimeline() {
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = '';
+
+      timelineData.forEach((item, index) => {
+        const isLeft = index % 2 === 0;
+        const node = document.createElement('article');
+        node.className = 'timeline-node gsap-reveal';
+        node.dataset.index = index;
+
+        node.innerHTML = `
+          <div class="timeline-summary relative w-full flex items-start lg:justify-between cursor-pointer timeline-mobile-wrap" role="button" tabindex="0" aria-expanded="false">
+            <div class="hidden lg:block w-5/12 ${isLeft ? 'text-right pr-12' : 'invisible'}">
+              <h3 class="font-mono text-primary font-bold text-xl tracking-tight">${item.year}</h3>
+              <h4 class="font-serif text-slate-700 text-xl leading-snug mt-1">${item.title}</h4>
+              <p class="timeline-teaser text-sm text-slate-400 mt-3 leading-relaxed ${isLeft ? 'ml-auto max-w-xs' : ''}">${item.teaser}</p>
+            </div>
+
+            <div class="timeline-dot absolute left-[24px] lg:left-1/2 -translate-x-1/2 top-2.5 w-4 h-4 rounded-full bg-white border-2 border-primary shadow-[0_0_0_4px_rgba(255,255,255,0.82)] z-20 transition-all duration-300"></div>
+
+            <div class="hidden lg:block w-5/12 ${isLeft ? 'invisible' : 'pl-12'} ${isLeft ? '' : ''}">
+              <h3 class="font-mono text-primary font-bold text-xl tracking-tight">${item.year}</h3>
+              <h4 class="font-serif text-slate-700 text-xl leading-snug mt-1">${item.title}</h4>
+              <p class="timeline-teaser text-sm text-slate-400 mt-3 leading-relaxed max-w-xs">${item.teaser}</p>
+            </div>
+
+            <div class="lg:hidden">
+              <h3 class="font-mono text-primary font-bold text-lg tracking-tight">${item.year}</h3>
+              <h4 class="font-serif text-slate-700 text-lg mt-1 leading-snug">${item.title}</h4>
+              <p class="timeline-teaser text-sm text-slate-400 mt-2 leading-relaxed">${item.teaser}</p>
+            </div>
+          </div>
+
+          <div class="timeline-detail-shell ${isLeft ? 'lg:pr-[52%]' : 'lg:pl-[52%]'}">
+            <div class="timeline-detail-inner">
+              <div class="timeline-detail-panel ${isLeft ? '' : ''}">
+                <div class="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr]">
+                  <div class="timeline-detail-image" style="background-image:${item.image};">
+                    <span class="timeline-detail-image-label">${item.visualLabel}</span>
+                  </div>
+                  <div class="p-6 lg:p-7">
+                    <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-primary mb-3">${item.year}</p>
+                    <h5 class="font-serif text-slate-800 text-xl leading-snug mb-3">${item.title}</h5>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">${item.desc}</p>
+                    <div class="pt-4 border-t border-slate-100">
+                      <p class="font-mono text-[11px] leading-relaxed text-slate-500"><i class="fas fa-info-circle mr-1 text-primary"></i>${item.fact}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(node);
+      });
+
+      setupTimelineInteractions();
+    }
+
+    function setupTimelineInteractions() {
+      const nodes = [...document.querySelectorAll('.timeline-node')];
+      let pinnedIndex = null;
+
+      const setActive = (index) => {
+        nodes.forEach((node, i) => {
+          const active = i === index;
+          node.classList.toggle('is-active', active);
+          const summary = node.querySelector('.timeline-summary');
+          if (summary) summary.setAttribute('aria-expanded', active || pinnedIndex === i ? 'true' : 'false');
+        });
+      };
+
+      const syncVisualState = () => {
+        nodes.forEach((node, i) => {
+          node.classList.toggle('is-pinned', pinnedIndex === i);
+          if (pinnedIndex !== null) {
+            node.classList.toggle('is-active', pinnedIndex === i);
+          }
+          const summary = node.querySelector('.timeline-summary');
+          if (summary) summary.setAttribute('aria-expanded', pinnedIndex === i ? 'true' : 'false');
+        });
+      };
+
+      nodes.forEach((node, index) => {
+        const summary = node.querySelector('.timeline-summary');
+        if (!summary) return;
+
+        summary.addEventListener('mouseenter', () => {
+          if (window.innerWidth >= 1024 && pinnedIndex === null) setActive(index);
+        });
+
+        node.addEventListener('mouseleave', () => {
+          if (window.innerWidth >= 1024 && pinnedIndex === null) setActive(-1);
+        });
+
+        summary.addEventListener('click', () => {
+          pinnedIndex = pinnedIndex === index ? null : index;
+          if (pinnedIndex === null) {
+            nodes.forEach(n => n.classList.remove('is-pinned', 'is-active'));
+            nodes.forEach(n => {
+              const s = n.querySelector('.timeline-summary');
+              if (s) s.setAttribute('aria-expanded', 'false');
+            });
+          } else {
+            syncVisualState();
+            node.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        });
+
+        summary.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            summary.click();
+          }
+        });
+      });
+    }
+
+    function initTimelineProgress() {
+      const frame = document.getElementById('timeline-frame');
+      const progress = document.getElementById('timeline-progress');
+      if (!frame || !progress) return;
+
+      ScrollTrigger.create({
+        trigger: frame,
+        start: 'top 70%',
+        end: 'bottom 30%',
+        scrub: true,
+        onUpdate: self => {
+          const total = frame.offsetHeight;
+          progress.style.height = `${Math.max(0, total * self.progress)}px`;
+        }
+      });
+    }
+
+    function renderChart() {
+      const container = document.getElementById('d3-chart-container');
+      container.innerHTML = '';
+      const tooltip = d3.select('#chart-tooltip');
+
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = { top: 40, right: 42, bottom: 56, left: 68 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select('#d3-chart-container').append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .style('overflow', 'visible');
+
+      const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const phase1 = [
+        { year: 1997, normalized: 24, value: 'Approx. 173,500 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Derived from official crossing counts across major checkpoints.' },
+        { year: 2003, normalized: 46, value: 'Approx. 332,000 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'IVS and post-SARS mobility shift.' },
+        { year: 2005, normalized: 63, value: 'Approx. 453,100 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Daily movement becomes a mass routine.' },
+        { year: 2006, normalized: 67, value: 'Approx. 477,000 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Expansion continues before major new corridors open.' },
+        { year: 2014, normalized: 95, value: 'Approx. 678,000 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Infrastructure compresses time at scale.' },
+        { year: 2016, normalized: 95, value: 'Approx. 678,000 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'The one-hour living circle becomes more plausible.' },
+        { year: 2018, normalized: 100, value: 'Approx. 715,900 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Express Rail Link and HZMB intensify regional integration.' },
+        { year: 2019, normalized: 96, value: 'Approx. 691,200 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'The mature pre-pandemic benchmark.' }
+      ];
+
+      const phase2 = [
+        { year: 2021, normalized: 1, value: 'Approx. 1.95 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'Routine movement nearly collapses.' },
+        { year: 2022, normalized: 2, value: 'Approx. 5.3 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'A slight rebound, still far below the old norm.' },
+        { year: 2023, normalized: 63, value: 'Approx. 212 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'Full reopening and rapid rebound.' },
+        { year: 2024, normalized: 89, value: 'Approx. 298 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'Flows intensify under a reorganized logic.' },
+        { year: 2025, normalized: 100, value: 'Approx. 335 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'Traffic surpasses the old benchmark.' }
+      ];
+
+      const allPoints = [...phase1, ...phase2];
+      const activeMap = new Map();
+      allPoints.forEach(d => activeMap.set(d.year, d));
+
+      const xScale = d3.scaleLinear().domain([1997, 2025]).range([0, innerWidth]);
+      const yScale = d3.scaleLinear().domain([0, 105]).range([innerHeight, 0]);
+
+      const xAxis = d3.axisBottom(xScale)
+        .tickFormat(d3.format('d'))
+        .tickValues([1997, 2003, 2007, 2014, 2018, 2021, 2025])
+        .tickSize(-innerHeight);
+
+      g.append('g')
+        .attr('transform', `translate(0,${innerHeight})`)
+        .call(xAxis)
+        .call(axis => axis.select('.domain').attr('stroke', '#cbd5e1'))
+        .call(axis => axis.selectAll('.tick line').attr('stroke', '#f1f5f9'))
+        .call(axis => axis.selectAll('.tick text').attr('fill', '#64748b').attr('font-family', 'JetBrains Mono').attr('dy', '15px'));
+
+      const line = d3.line()
+        .x(d => xScale(d.year))
+        .y(d => yScale(d.normalized))
+        .curve(d3.curveMonotoneX);
+
+      g.append('line')
+        .attr('x1', xScale(2020))
+        .attr('x2', xScale(2020))
+        .attr('y1', 0)
+        .attr('y2', innerHeight)
+        .attr('stroke', '#cbd5e1')
+        .attr('stroke-dasharray', '4 5');
+
+      g.append('text')
+        .attr('class', 'chart-separator-label')
+        .attr('x', xScale(2011))
+        .attr('y', -8)
+        .attr('text-anchor', 'middle')
+        .text('daily traffic');
+
+      g.append('text')
+        .attr('class', 'chart-separator-label')
+        .attr('x', xScale(2023.5))
+        .attr('y', -8)
+        .attr('text-anchor', 'middle')
+        .text('annual movements');
+
+      g.append('path')
+        .datum([{ year: 2019, normalized: 96 }, { year: 2021, normalized: 1 }])
+        .attr('fill', 'none')
+        .attr('stroke', '#94a3b8')
+        .attr('stroke-width', 1.5)
+        .attr('stroke-dasharray', '4,4')
+        .attr('d', line);
+
+      const path1 = g.append('path')
+        .datum(phase1)
+        .attr('fill', 'none')
+        .attr('stroke', '#0E7490')
+        .attr('stroke-width', 3)
+        .attr('d', line);
+
+      const path2 = g.append('path')
+        .datum(phase2)
+        .attr('fill', 'none')
+        .attr('stroke', '#0E7490')
+        .attr('stroke-width', 3)
+        .attr('d', line);
+
+      [path1, path2].forEach((path, i) => {
+        const length = path.node().getTotalLength();
+        path.attr('stroke-dasharray', `${length} ${length}`)
+          .attr('stroke-dashoffset', length)
+          .transition()
+          .delay(i === 0 ? 0 : 700)
+          .duration(i === 0 ? 1800 : 1300)
+          .ease(d3.easeCubicOut)
+          .attr('stroke-dashoffset', 0);
+      });
+
+      const pointGroup = g.selectAll('.point-group')
+        .data(allPoints)
+        .enter()
+        .append('g')
+        .attr('class', 'point-group')
+        .attr('transform', d => `translate(${xScale(d.year)},${yScale(d.normalized)})`)
+        .style('cursor', 'pointer')
+        .attr('tabindex', 0);
+
+      pointGroup.append('circle')
+        .attr('class', 'dot-hit')
+        .attr('r', 16)
+        .attr('fill', 'transparent');
+
+      pointGroup.append('circle')
+        .attr('class', 'dot')
+        .attr('r', 5)
+        .attr('fill', '#ffffff')
+        .attr('stroke', '#0E7490')
+        .attr('stroke-width', 2)
+        .style('pointer-events', 'none')
+        .style('opacity', 0);
+
+      let pinnedYear = null;
+
+      const updateDotStyles = () => {
+        pointGroup.select('.dot')
+          .attr('r', d => pinnedYear === d.year ? 7 : 5)
+          .attr('fill', d => pinnedYear === d.year ? '#0E7490' : '#ffffff');
+      };
+
+      const showTooltip = (event, d) => {
+        const rect = container.getBoundingClientRect();
+        const localX = margin.left + xScale(d.year);
+        const localY = margin.top + yScale(d.normalized);
+        const x = event && event.clientX ? (event.clientX - rect.left) : localX;
+        const y = event && event.clientY ? (event.clientY - rect.top) : localY;
+
+        tooltip
+          .style('opacity', 1)
+          .html(`
+            <div class="font-mono text-[11px] uppercase tracking-[0.16em] text-primary mb-1">${d.year}</div>
+            <div class="text-slate-800 font-medium leading-snug mb-1">${d.value}</div>
+            <div class="text-slate-500 text-[11px] leading-relaxed mb-1">${d.basis}</div>
+            <div class="text-slate-400 text-[11px] leading-relaxed">${d.note}</div>
+          `)
+          .style('left', `${Math.min(Math.max(x + 14, 12), rect.width - 230)}px`)
+          .style('top', `${Math.max(y - 20, 12)}px`);
+      };
+
+      const moveTooltip = (event) => {
+        if (!event || tooltip.style('opacity') === '0') return;
+        const rect = container.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        tooltip
+          .style('left', `${Math.min(Math.max(x + 14, 12), rect.width - 230)}px`)
+          .style('top', `${Math.max(y - 20, 12)}px`);
+      };
+
+      const clearTooltip = () => {
+        if (pinnedYear !== null) return;
+        tooltip.style('opacity', 0);
+      };
+
+      pointGroup
+        .on('mouseenter', function(event, d) {
+          if (pinnedYear === null) showTooltip(event, d);
+          d3.select(this).select('.dot').attr('r', 7).attr('fill', '#0E7490');
+        })
+        .on('mousemove', function(event) {
+          if (pinnedYear === null) moveTooltip(event);
+        })
+        .on('mouseleave', function() {
+          if (pinnedYear === null) {
+            clearTooltip();
+            d3.select(this).select('.dot').attr('r', 5).attr('fill', '#ffffff');
+          }
+        })
+        .on('focus', function(event, d) {
+          showTooltip(event, d);
+          d3.select(this).select('.dot').attr('r', 7).attr('fill', '#0E7490');
+        })
+        .on('blur', function() {
+          if (pinnedYear === null) {
+            clearTooltip();
+            d3.select(this).select('.dot').attr('r', 5).attr('fill', '#ffffff');
+          }
+        })
+        .on('click', function(event, d) {
+          event.stopPropagation();
+          pinnedYear = pinnedYear === d.year ? null : d.year;
+          if (pinnedYear === null) {
+            tooltip.style('opacity', 0);
+          } else {
+            showTooltip(event, d);
+          }
+          updateDotStyles();
+        })
+        .on('keydown', function(event, d) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            pinnedYear = pinnedYear === d.year ? null : d.year;
+            if (pinnedYear === null) {
+              tooltip.style('opacity', 0);
+            } else {
+              showTooltip(null, d);
+            }
+            updateDotStyles();
+          }
+        });
+
+      pointGroup.select('.dot')
+        .transition().delay((d, i) => i * 110).duration(420)
+        .style('opacity', 1);
+
+      d3.select(container).on('click.chart-tooltip-dismiss', function() {
+        pinnedYear = null;
+        tooltip.style('opacity', 0);
+        updateDotStyles();
+      });
+
+      const annotations = [
+        { year: 2003, normalized: 46, text: 'IVS implementation', anchor: 'middle', dy: -20 },
+        { year: 2018, normalized: 100, text: 'Express Rail + HZMB', anchor: 'middle', dy: -18 },
+        { year: 2021, normalized: 1, text: 'Pandemic suspension', anchor: 'middle', dy: -18 },
+        { year: 2025, normalized: 100, text: 'Recovery beyond baseline', anchor: 'end', dy: -18 }
+      ];
+
+      g.selectAll('.annotation')
+        .data(annotations)
+        .enter()
+        .append('text')
+        .attr('x', d => xScale(d.year))
+        .attr('y', d => yScale(d.normalized) + d.dy)
+        .attr('text-anchor', d => d.anchor)
+        .attr('font-family', 'Inter')
+        .attr('font-size', '11px')
+        .attr('fill', '#64748b')
+        .attr('font-weight', '500')
+        .style('opacity', 0)
+        .text(d => d.text)
+        .transition().delay(2100).duration(800).style('opacity', 1);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTimeline();
+
+      document.querySelectorAll('.gsap-reveal').forEach(el => {
+        gsap.to(el, {
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 86%',
+            toggleActions: 'play none none reverse'
+          },
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: 'power3.out'
+        });
+      });
+
+      initTimelineProgress();
+
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('nav a');
+      window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (window.scrollY >= sectionTop - sectionHeight / 3) current = section.getAttribute('id');
+        });
+
+        navLinks.forEach(link => {
+          link.classList.remove('bg-primary');
+          link.classList.add('bg-slate-300');
+          if (link.dataset.target === current) {
+            link.classList.remove('bg-slate-300');
+            link.classList.add('bg-primary');
+          }
+        });
+      });
+
+      renderChart();
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          renderChart();
+          ScrollTrigger.refresh();
+        }, 200);
+      });
+    });
+  </script>
+</body>
+</html>

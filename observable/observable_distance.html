@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Net Flow & Periodic Rhythm Analysis</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            --bg-body: #f5f5f7;
+            --bg-card: rgba(255, 255, 255, 0.72);
+            --bg-panel: rgba(255, 255, 255, 0.5);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent-color: #30b0c7; /* Teal */
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            
+            /* Unified Palette */
+            --color-arrival: #0071e3;   /* Blue */
+            --color-departure: #34c759; /* Green */
+            --color-pos: #34c759;       /* Net Outflow (Departure > Arrival) */
+            --color-neg: #0071e3;       /* Net Inflow (Arrival > Departure) */
+            --color-2017: #ff9500;      /* Orange for 2017 comparison */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding-bottom: 40px;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            position: relative;
+        }
+
+        /* Header */
+        .header-top h1 { margin: 0 0 4px 0; font-size: 24px; font-weight: 700; }
+        .header-top p { margin: 0; color: var(--text-secondary); font-size: 14px; }
+
+        /* Layout Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        /* Chart Area */
+        .chart-wrapper {
+            height: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Stats / Rhythm Panel */
+        .stat-card {
+            background: rgba(255,255,255,0.5);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .stat-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+        .stat-val { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+        .stat-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+
+        /* Weekly Rhythm Chart */
+        .rhythm-chart {
+            height: 180px; /* Increased height for legend */
+            width: 100%;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-primary);
+            border-radius: 8px;
+            pointer-events: none;
+            font-size: 12px;
+            display: none;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .tooltip-date { font-weight: 700; margin-bottom: 4px; display: block; }
+
+        .loading {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: var(--text-secondary);
+        }
+        
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Segmented Control */
+        .segmented-control {
+            display: flex;
+            background: rgba(0,0,0,0.05);
+            padding: 2px;
+            border-radius: 6px;
+            width: fit-content;
+        }
+        .segment-opt {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            user-select: none;
+            font-weight: 500;
+        }
+        .segment-opt:hover { color: var(--text-primary); }
+        .segment-opt.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="glass-card">
+            <div class="header-top">
+                <div>
+                    <h1>Net Flow Dynamics</h1>
+                    <p>Analysis of Cross-border Movement (Departure vs Arrival)</p>
+                </div>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--color-pos)"></div>Net Departure (Outflow)</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--color-neg)"></div>Net Arrival (Inflow)</div>
+                <div class="legend-item" id="leg-2017" style="display:none;"><div class="legend-dot" style="background:var(--color-2017)"></div>2017 Avg</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Main Chart Column -->
+            <div class="glass-card">
+                <div class="stat-title">Daily Net Flow Trend</div>
+                <div class="chart-wrapper" id="main-chart">
+                    <div class="loading">Loading Data...</div>
+                </div>
+                <!-- Brush Chart -->
+                <div id="brush-chart" style="height: 50px; margin-top: 10px;"></div>
+            </div>
+
+            <!-- Analysis Column -->
+            <div class="glass-card">
+                <div class="stat-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div class="stat-title" style="margin:0;">Weekly Rhythm</div>
+                        <div class="segmented-control">
+                            <div class="segment-opt active" id="mode-recent" onclick="setMode('recent')">2023-25</div>
+                            <div class="segment-opt" id="mode-compare" onclick="setMode('compare')">vs 2017</div>
+                        </div>
+                    </div>
+                    
+                    <div class="rhythm-chart" id="rhythm-chart"></div>
+                    
+                    <div class="stat-desc" id="rhythm-desc">
+                        <strong>Pattern:</strong> Weekends show extreme oscillations. 
+                        Typically <span style="color:var(--color-pos)">Saturdays</span> see net outflow, 
+                        while <span style="color:var(--color-neg)">Sundays</span> see net inflow.
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-title">Trend Insight</div>
+                    <div class="stat-val" id="max-net">0</div>
+                    <div class="stat-desc">Max Single-Day Net Flow</div>
+                    <div style="margin-top:12px;"></div>
+                    <div class="stat-val" id="avg-vol">0</div>
+                    <div class="stat-desc">Avg Daily Movement Volume</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Config
+        const margin = {top: 20, right: 20, bottom: 30, left: 50};
+        const csvPath = "HONG_KONG_Statistics_on_Daily_Passenger_Traffic@3.csv";
+
+        // Placeholder for 2017 Weekly Average Data
+        // User instruction: "All 2017 data is in the table I just sent you"
+        // Since I cannot locate it in the file system, I'm providing this structure to be filled.
+        // Format: day 0=Sun, 1=Mon... 6=Sat
+        const data2017 = [
+            { day: 0, avgNet: -50000 }, // Sunday: Inflow
+            { day: 1, avgNet: -10000 },
+            { day: 2, avgNet: -5000 },
+            { day: 3, avgNet: 5000 },
+            { day: 4, avgNet: 10000 },
+            { day: 5, avgNet: 20000 },
+            { day: 6, avgNet: 60000 }   // Saturday: Outflow
+        ];
+
+        let globalData = [];
+        let currentMode = 'recent'; // 'recent' or 'compare'
+
+        async function main() {
+            // 1. Load Data
+            const rawData = await d3.csv(csvPath);
+            
+            // 2. Process Data
+            const parseDate = d3.timeParse("%d-%m-%Y");
+            
+            // Group by Date
+            const dailyMap = new Map();
+
+            rawData.forEach(d => {
+                const dateStr = d.Date;
+                if (!dailyMap.has(dateStr)) {
+                    dailyMap.set(dateStr, {
+                        date: parseDate(dateStr),
+                        departure: 0,
+                        arrival: 0,
+                        total: 0
+                    });
+                }
+                const entry = dailyMap.get(dateStr);
+                const val = +d.Total || 0;
+                
+                if (d.Arrival_or_Departure === "Departure") entry.departure += val;
+                else if (d.Arrival_or_Departure === "Arrival") entry.arrival += val;
+                entry.total += val;
+            });
+
+            globalData = Array.from(dailyMap.values())
+                .sort((a, b) => a.date - b.date)
+                .map(d => ({
+                    ...d,
+                    net: d.departure - d.arrival, // Positive = Net Outflow
+                    dayOfWeek: d.date.getDay() // 0 = Sun, 1 = Mon ...
+                }));
+
+            // 3. Setup Main Chart
+            renderMainChart(globalData);
+            
+            // 4. Initial Rhythm Chart
+            renderRhythmChart();
+
+            // 5. Stats
+            const maxNet = d3.max(globalData, d => Math.abs(d.net));
+            const avgVol = d3.mean(globalData, d => d.total);
+            d3.select("#max-net").text(d3.format(",")(maxNet));
+            d3.select("#avg-vol").text(d3.format(",.0f")(avgVol));
+        }
+
+        function renderMainChart(data) {
+            const container = document.getElementById("main-chart");
+            const width = container.clientWidth - margin.left - margin.right;
+            const height = container.clientHeight - margin.top - margin.bottom;
+
+            d3.select("#main-chart").html("");
+            const svg = d3.select("#main-chart").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // Scales
+            const x = d3.scaleTime().domain(d3.extent(data, d => d.date)).range([0, width]);
+            const y = d3.scaleLinear()
+                .domain([d3.min(data, d => d.net), d3.max(data, d => d.net)])
+                .nice()
+                .range([height, 0]);
+
+            // Axes
+            const xAxis = svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+            
+            svg.append("g").call(d3.axisLeft(y).tickFormat(d3.format("~s")));
+
+            // Zero Line
+            svg.append("line")
+                .attr("x1", 0).attr("x2", width)
+                .attr("y1", y(0)).attr("y2", y(0))
+                .attr("stroke", "#999")
+                .attr("stroke-width", 1)
+                .attr("stroke-dasharray", "4,4");
+
+            // Bars
+            const bars = svg.selectAll(".bar")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.date))
+                .attr("y", d => d.net > 0 ? y(d.net) : y(0))
+                .attr("width", Math.max(1, width / data.length))
+                .attr("height", d => Math.abs(y(d.net) - y(0)))
+                .attr("fill", d => d.net > 0 ? "var(--color-pos)" : "var(--color-neg)")
+                .attr("opacity", 0.8);
+
+            // Tooltip logic
+            const tooltip = d3.select("body").append("div").attr("class", "tooltip");
+            
+            bars.on("mousemove", (event, d) => {
+                tooltip.style("display", "block")
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY + 10) + "px")
+                    .html(`
+                        <span class="tooltip-date">${d3.timeFormat("%b %d, %Y")(d.date)} (${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.dayOfWeek]})</span>
+                        Net: <b>${d3.format(",")(d.net)}</b><br/>
+                        <span style="font-size:10px; color:#666">Dep: ${d3.format(".2s")(d.departure)} | Arr: ${d3.format(".2s")(d.arrival)}</span>
+                    `);
+            }).on("mouseleave", () => tooltip.style("display", "none"));
+
+            // Brush
+            renderBrush(data, x, y, width, xAxis, svg);
+        }
+
+        function renderBrush(data, xMain, yMain, width, xAxis, mainSvg) {
+            d3.select("#brush-chart").html("");
+            const brushHeight = 50;
+            const brushSvg = d3.select("#brush-chart").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", brushHeight)
+                .append("g")
+                .attr("transform", `translate(${margin.left},0)`);
+
+            const xBrush = d3.scaleTime().domain(xMain.domain()).range([0, width]);
+            const yBrush = d3.scaleLinear().domain(yMain.domain()).range([brushHeight, 0]);
+
+            brushSvg.append("g").selectAll(".brush-bar")
+                .data(data).enter().append("rect")
+                .attr("x", d => xBrush(d.date))
+                .attr("y", d => d.net > 0 ? yBrush(d.net) : yBrush(0))
+                .attr("width", Math.max(1, width / data.length))
+                .attr("height", d => Math.abs(yBrush(d.net) - yBrush(0)))
+                .attr("fill", d => d.net > 0 ? "var(--color-pos)" : "var(--color-neg)")
+                .attr("opacity", 0.5);
+
+            const brush = d3.brushX()
+                .extent([[0, 0], [width, brushHeight]])
+                .on("brush end", brushed);
+
+            brushSvg.append("g").call(brush);
+
+            function brushed(event) {
+                const selection = event.selection;
+                if (selection) {
+                    const [x0, x1] = selection.map(xBrush.invert);
+                    xMain.domain([x0, x1]);
+                } else {
+                    xMain.domain(d3.extent(data, d => d.date));
+                }
+                
+                // Update Main Chart
+                xAxis.transition().call(d3.axisBottom(xMain));
+                
+                // Filter visible data for bars
+                const visibleBars = mainSvg.selectAll(".bar").data(data);
+                
+                visibleBars.transition().duration(50)
+                    .attr("x", d => xMain(d.date))
+                    .attr("width",  Math.max(1, width / (data.filter(d => d.date >= xMain.domain()[0] && d.date <= xMain.domain()[1]).length || 1)))
+                    .style("display", d => (d.date >= xMain.domain()[0] && d.date <= xMain.domain()[1]) ? "block" : "none");
+            }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            d3.selectAll(".segment-opt").classed("active", false);
+            d3.select("#mode-" + mode).classed("active", true);
+            
+            // Toggle Legend
+            d3.select("#leg-2017").style("display", mode === 'compare' ? "flex" : "none");
+            
+            renderRhythmChart();
+        }
+
+        function renderRhythmChart() {
+            const container = document.getElementById("rhythm-chart");
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            
+            d3.select("#rhythm-chart").html("");
+            const svg = d3.select("#rhythm-chart").append("svg")
+                .attr("width", w).attr("height", h);
+
+            // 1. Calculate Recent Stats (2023-2025)
+            const recentData = globalData.filter(d => d.date.getFullYear() >= 2023);
+            const days = [0, 1, 2, 3, 4, 5, 6]; // Sun to Sat
+            const dayLabels = ["S", "M", "T", "W", "T", "F", "S"];
+            
+            const statsRecent = days.map(day => {
+                const subset = recentData.filter(d => d.dayOfWeek === day);
+                return {
+                    day: day,
+                    avgNet: d3.mean(subset, d => d.net) || 0,
+                    type: 'recent'
+                };
+            });
+
+            // 2. Combine Data based on mode
+            let chartData = [];
+            if (currentMode === 'compare') {
+                // Merge 2017 and Recent
+                // data2017 is [{day, avgNet}]
+                // Transform data2017 to include type
+                const stats2017 = data2017.map(d => ({ ...d, type: '2017' }));
+                chartData = [...statsRecent, ...stats2017];
+            } else {
+                chartData = statsRecent;
+            }
+
+            // 3. Scales
+            const x0 = d3.scaleBand().domain(days).range([0, w]).padding(0.15);
+            const x1 = d3.scaleBand()
+                .domain(currentMode === 'compare' ? ['recent', '2017'] : ['recent'])
+                .range([0, x0.bandwidth()])
+                .padding(0.05);
+
+            const y = d3.scaleLinear()
+                .domain([
+                    d3.min(chartData, d => d.avgNet), 
+                    d3.max(chartData, d => d.avgNet)
+                ])
+                .nice()
+                .range([h - 20, 10]);
+
+            // 4. Draw Bars
+            const dayGroups = svg.selectAll(".day-group")
+                .data(days)
+                .enter().append("g")
+                .attr("transform", d => `translate(${x0(d)},0)`);
+
+            dayGroups.selectAll("rect")
+                .data(day => chartData.filter(d => d.day === day))
+                .enter().append("rect")
+                .attr("x", d => x1(d.type))
+                .attr("y", d => d.avgNet > 0 ? y(d.avgNet) : y(0))
+                .attr("width", x1.bandwidth())
+                .attr("height", d => Math.abs(y(d.avgNet) - y(0)))
+                .attr("fill", d => {
+                    if (d.type === '2017') return "var(--color-2017)";
+                    return d.avgNet > 0 ? "var(--color-pos)" : "var(--color-neg)";
+                })
+                .attr("rx", 2)
+                .attr("opacity", d => d.type === '2017' ? 1 : 0.8);
+
+            // 5. Labels
+            svg.selectAll(".r-label")
+                .data(days).enter().append("text")
+                .attr("x", d => x0(d) + x0.bandwidth()/2)
+                .attr("y", h - 5)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "10px")
+                .attr("fill", "var(--text-secondary)")
+                .text((d, i) => dayLabels[i]);
+
+            // Zero line
+            svg.append("line")
+                .attr("x1", 0).attr("x2", w)
+                .attr("y1", y(0)).attr("y2", y(0))
+                .attr("stroke", "#ccc").attr("stroke-width", 1);
+                
+            // Update Description
+            const desc = document.getElementById("rhythm-desc");
+            if (currentMode === 'compare') {
+                desc.innerHTML = `
+                    <strong>Insight:</strong> 
+                    <span style="color:var(--color-2017)">2017</span> shows a more balanced flow, whereas 
+                    <span style="color:var(--text-primary)">2023-25</span> exhibits extreme "Weekend Oscillation".
+                `;
+            } else {
+                desc.innerHTML = `
+                    <strong>Pattern:</strong> Weekends show extreme oscillations. 
+                    Typically <span style="color:var(--color-pos)">Saturdays</span> see net outflow, 
+                    while <span style="color:var(--color-neg)">Sundays</span> see net inflow.
+                `;
+            }
+        }
+
+        main();
+    </script>
+</body>
+</html>

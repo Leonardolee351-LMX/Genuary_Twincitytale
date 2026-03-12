@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>跨境生活 - Cross-Boundary Living</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0E7490', // Cyan 700
+            secondary: '#06B6D4', // Cyan 500
+            slate: { 850: '#1e293b' }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Custom Scrollbar */
+    .scrollbar-thin::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: rgba(77, 182, 172, 0.3);
+      border-radius: 4px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+      background: rgba(77, 182, 172, 0.5);
+    }
+
+    /* Smooth Transitions */
+    .fade-enter {
+      opacity: 0;
+    }
+
+    .fade-enter-active {
+      opacity: 1;
+      transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .fade-exit {
+      opacity: 1;
+    }
+
+    .fade-exit-active {
+      opacity: 0;
+      transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Timeline Card Hover Effects */
+    .timeline-card {
+      position: relative;
+      transition: transform 300ms ease;
+    }
+
+    .timeline-card:hover {
+      transform: scale(1.05);
+    }
+
+    .timeline-card img {
+      transition: transform 500ms ease;
+    }
+
+    .timeline-card:hover img {
+      transform: scale(1.1);
+    }
+
+    .timeline-gradient-default {
+      background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.4), transparent);
+      transition: opacity 300ms ease;
+    }
+
+    .timeline-card:hover .timeline-gradient-default {
+      opacity: 0;
+    }
+
+    .timeline-overlay-teal {
+      background: rgba(77, 182, 172, 0.9);
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    .timeline-card:hover .timeline-overlay-teal {
+      opacity: 1;
+    }
+
+    .timeline-card:hover .timeline-description {
+      max-height: 12rem;
+      opacity: 1;
+    }
+
+    /* Persona Card Hover */
+    .persona-card {
+      transition: transform 300ms ease, opacity 300ms ease;
+    }
+
+    .persona-card:hover {
+      transform: translateY(-4px);
+    }
+
+    /* Hide scrollbar for timeline */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Loading placeholder for images */
+    .image-loading {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <style>
+        .nav-link { color: #64748b; position: relative; }
+        .nav-link.active, .nav-link:hover { color: #0E7490; }
+        .nav-link.active::after, .nav-link:hover::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #0E7490;
+            border-radius: 2px;
+        }
+        #contentSection .content-inner { padding-top: 6rem !important; }
+        body { animation: fadeInPage 0.8s ease-out; }
+        @keyframes fadeInPage { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CHAPTER NAVIGATOR (CAPSULE) --- */
+        .chapter-nav-container {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 4px;
+            border-radius: 100px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-btn {
+            border: none;
+            background: transparent;
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav-btn.active {
+            background: #0f172a;
+            color: white;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.15);
+        }
+
+        .nav-btn:hover:not(.active) {
+            background: rgba(0,0,0,0.04);
+            color: #0f172a;
+        }
+    </style>
+
+  <script>
+    // Global language state
+    let lang = localStorage.getItem('lang') || 'en';
+  </script>
+  
+  <div id="app" class="min-h-screen w-full overflow-hidden bg-gradient-to-br from-[#F0F9F9] to-white">
+    <!-- Left Hero Section - Fixed -->
+    <div id="heroSection" class="fixed left-0 top-0 h-screen w-[35vw] hidden lg:block">
+      <img id="heroImage" src="" alt="Hero" class="w-full h-full object-cover fade-enter">
+    </div>
+
+    <!-- Right Content Section - Scrollable -->
+    <div id="contentSection" class="lg:ml-[35vw] ml-0 h-screen overflow-y-auto overflow-x-hidden">
+      <div class="content-inner max-w-[1024px] mx-auto px-8 py-12">
+        <!-- Chapter Navigation -->
+        <div class="chapter-nav-container">
+            <a href="Chapter3_Persona.HTML" class="nav-btn active">3.1 Persona</a>
+            <a href="Chapter3_Timeline.HTML" class="nav-btn">3.2 Timeline</a>
+            <a href="Chapter3_Phenomenon.HTML" class="nav-btn">3.3 Phenomenon</a>
+        </div>
+        
+        <!-- Mobile Hero Banner -->
+        <div class="lg:hidden mb-8 -mx-8 h-[40vh] relative">
+          <img id="mobileHeroImage" src="" alt="Mobile Hero" class="w-full h-full object-cover">
+        </div>
+
+        <p class="text-sm text-slate-500 italic mb-8">
+            Through user interviews, we can gain a deeper understanding of their daily lives and thoughts. To protect the privacy of the interviewees and adhere to the principle of anonymity, all names are pseudonyms, and the images are primarily perceptual materials that do not infringe on user privacy.
+        </p>
+
+
+
+        <!-- Persona Selector Cards -->
+        <div id="personaCards" class="grid grid-cols-4 gap-4 mb-12">
+          <!-- Cards will be generated by JavaScript -->
+        </div>
+
+        <!-- Main Content Container -->
+        <div id="mainContent">
+          <!-- Content will be generated by JavaScript -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // DATA LAYER
+    // ============================================
+    const ASSETS = {
+      hero: 'images/The Reopening.jpg',
+      avatar1: 'images/imgLeiCard.png',
+      avatar2: 'images/imgHuCard.png',
+      avatar3: 'images/imgZhangCard.png',
+      avatar4: 'images/imgPolinCard.png',
+      timeline1: 'images/The Hard Border.jpg',
+      timeline2: 'images/The Blueprint.jpg',
+      timeline3: 'images/Infrastructure Leap.jpg',
+      timeline4: 'images/GBA Strategy.jpg',
+      timeline5: 'images/The Freeze.jpg',
+      timeline6: 'images/Digital Integration.jpg',
+      timeline7: 'images/Transport Links.jpg',
+      timeline8: 'images/Living Circle.jpg',
+      timeline9: 'images/Future Fusion.jpg'
+    };
+
+    const personasData = [
+      {
+        id: "leilei",
+        name: "Lei",
+        nameEn: "Lei",
+        age: 12,
+        role: "Cross-border Student",
+        roleEn: "Cross-border Student",
+        description: "Commuting between SZ and HK for education",
+        descriptionEn: "Commuting between SZ and HK for education",
+        heroImage: "./images/imgLeiPortrait.png",
+        avatarImage: "./images/imgLeiCard.png",
+        avatarOverlay: null,
+        motivation: "Growing up in Shenzhen, she crosses the border daily to attend school in Hong Kong, seeking broader international educational opportunities. Though the commute is exhausting, she views it as a worthwhile investment in her future.",
+        motivationEn: "Growing up in Shenzhen, she crosses the border daily to attend school in Hong Kong, seeking broader international educational opportunities. Though the commute is exhausting, she views it as a worthwhile investment in her future.",
+        adaptLiving: [
+          { zh: "早起已成习惯，6点起床对她来说是日常", en: "Waking up at 6:00 AM has become her daily routine, a discipline forged by necessity." },
+          { zh: "在通勤路上完成作业预习，充分利用每分钟", en: "She masters time management, using the commute to preview lessons and finish homework." },
+          { zh: "周末会和同样跨境的朋友一起活动，互相支持", en: "Weekends are spent with fellow cross-border students, forming a supportive community." }
+        ],
+        challenges: [
+          { zh: "每天往返需要3小时，严重压缩了课外活动时间", en: "The 3-hour daily round trip severely squeezes her time for extracurricular activities." },
+          { zh: "经常因口岸拥堵而迟到，影响出勤记录", en: "Unpredictable border congestion often leads to tardiness, impacting her attendance record." },
+          { zh: "难以参与放学后的社团活动和同学聚会", en: "It's hard to join after-school clubs or hang out with classmates who live in HK." }
+        ],
+        thoughts: [
+          { zh: "我羡慕住在香港的同学，他们放学后可以自由活动", en: "I sometimes envy my HK classmates; they have so much freedom after school." },
+          { zh: "虽然很累，但想到能接受更好的教育就觉得值得", en: "It's tiring, but when I think about the education I'm getting, I know it's worth it." },
+          { zh: "希望未来口岸通关能更快一些", en: "I just wish the border crossing could be a little faster and less stressful." }
+        ],
+        opinion: {
+          title: "About the Border",
+          titleEn: "About the Border",
+          content: "The Shenzhen-Hong Kong border is like a magic door to me. One side holds the delicious warmth of home cooking; the other, the strict discipline of school. I wish this door could remain open forever, without the long queues and barriers.",
+          contentEn: "The Shenzhen-Hong Kong border is like a magic door to me. One side holds the delicious warmth of home cooking; the other, the strict discipline of school. I wish this door could remain open forever, without the long queues and barriers."
+        },
+        timeline: [
+          { time: "6:00", title: "Wake Up", titleEn: "Wake Up", description: "The alarm rings. I'm dragged out of bed to change into my uniform while Shenzhen's sky is still waking up.", descriptionEn: "The alarm rings. I'm dragged out of bed to change into my uniform while Shenzhen's sky is still waking up.", image: "./images/imgLeiTL (1).png" },
+          { time: "6:45", title: "Leave Home", titleEn: "Leave Home", description: "Leaving home with a heavy backpack. Mom stuffs a warm breakfast into my hand, her daily reminder to be safe echoing.", descriptionEn: "Leaving home with a heavy backpack. Mom stuffs a warm breakfast into my hand, her daily reminder to be safe echoing.", image: "./images/imgLeiTL (2).png" },
+          { time: "7:30", title: "Border Crossing", titleEn: "Border Crossing", description: "I join the army of uniforms at the border. We are all the same here, expert travelers swiping cards to cross the line.", descriptionEn: "I join the army of uniforms at the border. We are all the same here, expert travelers swiping cards to cross the line.", image: "./images/imgLeiTL (3).png" },
+          { time: "8:30", title: "Arrive School", titleEn: "Arrive School", description: "Boarding the HK school bus, I finally reach school. I managed a quick nap on the bus, recharging just enough.", descriptionEn: "Boarding the HK school bus, I finally reach school. I managed a quick nap on the bus, recharging just enough.", image: "./images/imgLeiTL (4).png" },
+          { time: "15:00", title: "After School", titleEn: "After School", description: "The bell rings. While others head to the playground, I sprint to catch the cross-border bus. Missing it means not getting home.", descriptionEn: "The bell rings. While others head to the playground, I sprint to catch the cross-border bus. Missing it means not getting home.", image: "./images/imgLeiTL (5).png" },
+          { time: "17:30", title: "On the Way Back", titleEn: "On the Way Back", description: "Queuing at the border again. I take out my vocab book. The noise around me fades as I focus on my words.", descriptionEn: "Queuing at the border again. I take out my vocab book. The noise around me fades as I focus on my words.", image: "./images/imgLeiTL (6).png" },
+          { time: "18:30", title: "Return Home", titleEn: "Return Home", description: "Back in Shenzhen. The smell of dinner welcomes me. I eat, then it's straight back to homework until late.", descriptionEn: "Back in Shenzhen. The smell of dinner welcomes me. I eat, then it's straight back to homework until late.", image: "./images/imgLeiTL (7).png" },
+          { time: "21:00", title: "Bedtime", titleEn: "Bedtime", description: "Finally, sleep. My eyes close, knowing the 6 AM alarm is already ticking closer.", descriptionEn: "Finally, sleep. My eyes close, knowing the 6 AM alarm is already ticking closer.", image: "./images/imgLeiTL (8).png" }
+        ]
+      },
+      {
+        id: "mrhu",
+        name: "Mr. Hu",
+        nameEn: "Mr. Hu",
+        age: 35,
+        role: "Cross-border Worker",
+        roleEn: "Cross-border Worker",
+        description: "HK-SZ dual city life, corporate elite",
+        descriptionEn: "HK-SZ dual city life, corporate elite",
+        heroImage: "./images/imgHuPortrait.png",
+        avatarImage: "./images/imgHuCard.png",
+        avatarOverlay: null,
+        motivation: "He works in HK finance but lives in Shenzhen. It's a strategic choice: Shenzhen offers spacious living and a high quality of life at a reasonable cost, while his Hong Kong salary supports it all.",
+        motivationEn: "He works in HK finance but lives in Shenzhen. It's a strategic choice: Shenzhen offers spacious living and a high quality of life at a reasonable cost, while his Hong Kong salary supports it all.",
+        adaptLiving: [
+          { zh: "办理了多次往返签注，通关已经非常熟练", en: "With his multiple-entry visa, border clearance has become second nature, a seamless part of his day." },
+          { zh: "在深圳享受更宽敞的居住空间和更低的生活成本", en: "He enjoys a spacious apartment in Shenzhen, a luxury that would be unaffordable in Central HK." },
+          { zh: "周末会在深圳和朋友聚会，享受内地的便利生活", en: "Weekends are for Shenzhen: friends, food delivery, and the convenience of mainland digital life." }
+        ],
+        challenges: [
+          { zh: "每天通勤消耗大量时间和精力", en: "The daily commute is a significant drain on time and energy, requiring strict discipline." },
+          { zh: "工作加班时无法及时回家，需要临时住宿", en: "Late overtime means missing the border closing, sometimes forcing unplanned stays in HK." },
+          { zh: "两地医疗和社保制度不同，就医不便", en: "Navigating two different medical and social security systems can be a bureaucratic headache." }
+        ],
+        thoughts: [
+          { zh: "跨境工作让我既能赚香港的薪水，又能享受深圳的生活", en: "Cross-border work is the best of both worlds: HK salary, Shenzhen lifestyle." },
+          { zh: "希望未来两地融合能更深入，减少通关障碍", en: "I hope for deeper integration. A borderless future would make my life so much smoother." },
+          { zh: "这种生活方式需要很强的时间管理能力", en: "You need military-grade time management to make this dual-city life work." }
+        ],
+        opinion: {
+          title: "About the Border",
+          titleEn: "About the Border",
+          content: "The border defines my existence. It's a calculated trade-off between high income and living costs. Efficient? Yes. But sometimes, I feel like a pendulum, forever swinging between two distinct worlds, never fully resting in either.",
+          contentEn: "The border defines my existence. It's a calculated trade-off between high income and living costs. Efficient? Yes. But sometimes, I feel like a pendulum, forever swinging between two distinct worlds, never fully resting in either."
+        },
+        timeline: [
+          { time: "7:00", title: "Morning Routine", titleEn: "Morning Routine", description: "Waking up in my spacious Futian apartment. Coffee in hand, I watch the Shenzhen skyline. This is my moment of peace.", descriptionEn: "Waking up in my spacious Futian apartment. Coffee in hand, I watch the Shenzhen skyline. This is my moment of peace.", image: "./images/imgHuTL (1).png" },
+          { time: "8:00", title: "Commute", titleEn: "Commute", description: "Walking to Futian Port. The E-channel fingerprint scan takes seconds. It's as fast as a subway gate, but it crosses a system.", descriptionEn: "Walking to Futian Port. The E-channel fingerprint scan takes seconds. It's as fast as a subway gate, but it crosses a system.", image: "./images/imgHuTL (2).png" },
+          { time: "9:00", title: "At Office", titleEn: "At Office", description: "Arrive at Central. I switch modes: English and Cantonese on, high-intensity finance work begins. The pace is relentless.", descriptionEn: "Arrive at Central. I switch modes: English and Cantonese on, high-intensity finance work begins. The pace is relentless.", image: "./images/imgHuTL (3).png" },
+          { time: "12:30", title: "Lunch Break", titleEn: "Lunch Break", description: "A quick lunch in the crowded streets of Central. Expensive and rushed. I find myself missing the ease of Shenzhen delivery.", descriptionEn: "A quick lunch in the crowded streets of Central. Expensive and rushed. I find myself missing the ease of Shenzhen delivery.", image: "./images/imgHuTL (4).png" },
+          { time: "18:00", title: "Evening Work", titleEn: "Evening Work", description: "Colleagues are still going strong. I have to finish this report, but my eye is on the clock—checking the last train home.", descriptionEn: "Colleagues are still going strong. I have to finish this report, but my eye is on the clock—checking the last train home.", image: "./images/imgHuTL (5).png" },
+          { time: "19:30", title: "Head Home", titleEn: "Head Home", description: "Off work. I join the northbound flow. Crossing the border feels like shedding heavy armor. I can breathe again.", descriptionEn: "Off work. I join the northbound flow. Crossing the border feels like shedding heavy armor. I can breathe again.", image: "./images/imgHuTL (6).png" },
+          { time: "21:00", title: "Home Sweet Home", titleEn: "Home Sweet Home", description: "Back in Shenzhen. Late-night snacks with friends. The lively, smoky street food atmosphere makes me feel truly alive.", descriptionEn: "Back in Shenzhen. Late-night snacks with friends. The lively, smoky street food atmosphere makes me feel truly alive.", image: "./images/imgHuTL (7).png" },
+          { time: "22:00", title: "Rest", titleEn: "Rest", description: "Preparing for bed. The dual-city shuttle pauses for a few hours. Tomorrow, we do it all again.", descriptionEn: "Preparing for bed. The dual-city shuttle pauses for a few hours. Tomorrow, we do it all again.", image: "./images/imgHuTL (8).png" }
+        ]
+      },
+      {
+        id: "zhang",
+        name: "Zhang",
+        nameEn: "Zhang",
+        age: 23,
+        role: "Hong Kong Postgraduate",
+        roleEn: "Hong Kong Postgraduate",
+        description: "Pursuing master's in HK, loves shopping and concerts",
+        descriptionEn: "Pursuing master's in HK, loves shopping and concerts",
+        heroImage: "./images/imgZhangPortrait.png",
+        avatarImage: "./images/imgZhangCard.png",
+        avatarOverlay: null,
+        motivation: "After a year of work, she came to HK for a master's degree, aiming to pivot to Marketing. She finds HK's workplace and daily life more female-friendly.",
+        motivationEn: "After a year of work, she came to HK for a master's degree, aiming to pivot to Marketing. She finds HK's workplace and daily life more female-friendly.",
+        adaptLiving: [
+          { zh: "选课自由，自由时间多。为了能减少通勤开支，她会把课程集中到三天来上课，剩下的时间就可以实习或游乐。", en: "Flexible course selection. She clusters classes into three days to cut commute costs, leaving time for internships or leisure." },
+          { zh: "因为课程密集，中午不追求精致午餐，优先解决\"能睡一会儿\"的地点（图书馆角落/学生中心沙发/空教室）", en: "With dense classes, she prioritizes quick naps over fancy lunches—finding spots in library corners or student center sofas." }
+        ],
+        challenges: [
+          { zh: "早课=必须准点，任何口岸拥堵/交通延误都会让她整天节奏崩盘。", en: "Morning classes require punctuality; any border or transit delay ruins the day's rhythm." },
+          { zh: "长期早起+跨境折返，午睡变成刚需；一累就很难保持课堂专注与产出。", en: "Early rising and daily crossing make naps essential; fatigue impacts classroom focus and output." },
+          { zh: "由于也有不少人与她一样港读深居，因此社交上不会有过多障碍。但她与香港的生活文化依旧存在一层薄膜。", en: "Many peers also live in SZ and study in HK, so social life is fine; yet a thin film separates her from HK’s local culture." }
+        ],
+        thoughts: [
+          { zh: "我不是不想参与同学的after class，我是真的回不去那么晚。而且深圳的饭菜和shopping环境不香吗哈哈", en: "I'm not avoiding after-class hangouts, I just can't stay that late. Plus, isn't Shenzhen's food and shopping great? Haha." },
+          { zh: "我最羡慕住港岛的同学：他们下课回家就能去海边city-walk，而我只有说下午没课的时候才能偶尔在香港街边种草散步玩耍", en: "I envy classmates on HK Island who can go for a seaside city-walk after class. I can only explore HK streets when I have free afternoons." },
+          { zh: "幸好在香港还有我的姐妹居住，不然晚上听完演唱会很晚了就没地方住了。晚上的边境口岸并不是所有都会开放，凌晨的深港通勤难度还是很大很大的。", en: "Luckily I have sisters in HK to crash with after late concerts. Not all borders are open at night, making midnight commuting extremely difficult." }
+        ],
+        opinion: {
+          title: "About the Border",
+          titleEn: "About the Border",
+          content: "The border is like a filter. It filters out Shenzhen's noise so I can study, and HK's stress so I can rest. But it also seems to filter out my complete sense of belonging to either city.",
+          contentEn: "The border is like a filter. It filters out Shenzhen's noise so I can study, and HK's stress so I can rest. But it also seems to filter out my complete sense of belonging to either city."
+        },
+        timeline: [
+          { time: "6:55", title: "Departure", titleEn: "Departure", description: "Waking up to the alarm, thinking about what to bring. ID, breakfast—double checking before leaving.", descriptionEn: "Waking up to the alarm, thinking about what to bring. ID, breakfast—double checking before leaving.", image: "./images/imgZhangTL (1).png" },
+          { time: "7:30", title: "On the way", titleEn: "On the way", description: "Shenzhen's morning is quiet; she eats breakfast silently on the metro. No eating allowed on HK transport.", descriptionEn: "Shenzhen's morning is quiet; she eats breakfast silently on the metro. No eating allowed on HK transport.", image: "./images/imgZhangTL (2).png" },
+          { time: "7:55", title: "Arrived at Border", titleEn: "Arrived at Border", description: "The crowd becomes a line; she enters 'auto mode': swipe ID, walk, follow. Sometimes she forgets her ID—a devastating blow.", descriptionEn: "The crowd becomes a line; she enters 'auto mode': swipe ID, walk, follow. Sometimes she forgets her ID—a devastating blow.", image: "./images/imgZhangTL (3).png" },
+          { time: "8:10", title: "Metro Transfer", titleEn: "Metro Transfer", description: "Rush hour metro is crowded. Need to maintain image. The HK leg is the longest wait. Bought a first-class seat today to recover energy.", descriptionEn: "Rush hour metro is crowded. Need to maintain image. The HK leg is the longest wait. Bought a first-class seat today to recover energy.", image: "./images/imgZhangTL (4).png" },
+          { time: "9:15", title: "Arrive at School", titleEn: "Arrive at School", description: "Entering the school gate, realizing class is starting soon, she speeds up to the classroom.", descriptionEn: "Entering the school gate, realizing class is starting soon, she speeds up to the classroom.", image: "./images/imgZhangTL (5).png" },
+          { time: "12:00", title: "Group Work", titleEn: "Group Work", description: "To save commute costs, she packs three classes into one day, meaning busy group discussions. She must resist napping.", descriptionEn: "To save commute costs, she packs three classes into one day, meaning busy group discussions. She must resist napping.", image: "./images/imgZhangTL (6).png" },
+          { time: "16:00", title: "Library Time", titleEn: "Library Time", description: "Researching in the library after class. HK's academic resources are rich; must make the most of them.", descriptionEn: "Researching in the library after class. HK's academic resources are rich; must make the most of them.", image: "./images/imgZhangTL (7).png" },
+          { time: "19:25", title: "CityWalk Wander", titleEn: "CityWalk Wander", description: "After class, she lingers in HK for fresh air, city-walking with her limited time. Sometimes she gets too excited and forgets to go home.", descriptionEn: "After class, she lingers in HK for fresh air, city-walking with her limited time. Sometimes she gets too excited and forgets to go home.", image: "./images/imgZhangTL (8).png" },
+          { time: "20:30", title: "Cross the Border", titleEn: "Cross the Border", description: "Queue, swipe, wait again. Phone signal switches here. Luckily, night crossing is faster with fewer people.", descriptionEn: "Queue, swipe, wait again. Phone signal switches here. Luckily, night crossing is faster with fewer people.", image: "./images/imgZhangTL (9).png" },
+          { time: "21:00", title: "Go back home", titleEn: "Go back home", description: "Back home, eating takeout while doing homework.", descriptionEn: "Back home, eating takeout while doing homework.", image: "./images/imgZhangTL (9).png" }
+        ]
+      },
+      {
+        id: "polin",
+        name: "Polin",
+        nameEn: "Polin",
+        age: 28,
+        role: "北上消费",
+        roleEn: "Northbound Consumer",
+        description: "香港居民，深圳购物达人",
+        descriptionEn: "Hong Kong resident, Shenzhen shopping expert",
+        heroImage: "./images/imgPolinPortrait.png",
+        avatarImage: "./images/imgPolinCard.png",
+        avatarOverlay: null,
+        motivation: "作为土生土长的香港人，她发现深圳的消费环境更丰富多样且价格实惠。从美食到购物，从美容到娱乐，深圳都提供了更多选择和性价比。",
+        motivationEn: "Born and raised in HK, she finds Shenzhen’s consumption richer and more affordable—from food and shopping to beauty and entertainment.",
+        adaptLiving: [
+          { zh: "周末必定北上，已经办理了深圳通等便利卡", en: "Northbound every weekend; holds Shenzhen travel cards." },
+          { zh: "熟悉深圳各大商圈，从罗湖到福田，从南山到前海", en: "Familiar with major SZ malls—from Luohu and Futian to Nanshan and Qianhai." },
+          { zh: "和朋友组团消费，分享折扣和优惠信息", en: "Shops with friends, sharing deals and discounts." }
+        ],
+        challenges: [
+          { zh: "需要合理安排时间，避免在口岸浪费太多通关时间", en: "Needs smart planning to avoid long border times." },
+          { zh: "携带大量购物品过关时需要注意海关规定", en: "Customs rules matter when carrying many goods." },
+          { zh: "有时会因为消费太尽兴而错过最后的过关时间", en: "Sometimes misses the last border closing after too much fun." }
+        ],
+        thoughts: [
+          { zh: "深圳的消费真的太香了！同样的价格能买到更多东西", en: "Shenzhen’s consumption is amazing—more for the same price." },
+          { zh: "每次北上都像是探险，总能发现新的好店和美食", en: "Every northbound trip is an adventure with new shops and foods." },
+          { zh: "希望通关能更便利，这样就能更频繁地来深圳了", en: "Hopes easier clearance for more frequent SZ trips." }
+        ],
+        opinion: {
+          title: "关于边界",
+          titleEn: "About the Border",
+          content: "作为消费者，边界对我来说就是'性价比'的分界线。我希望两边的支付和物流能完全打通，那样我就真的可以把深圳当成我的后花园了。",
+          contentEn: "As a consumer, the border is the line of 'cost-performance ratio'. I hope payment and logistics will be fully integrated, so I can truly treat Shenzhen as my backyard."
+        },
+        timeline: [
+          { time: "10:00", title: "Start Journey", titleEn: "Start Journey", description: "周末早晨，准备北上消费", descriptionEn: "Weekend morning, ready to go north for shopping.", image: ASSETS.timeline1 },
+          { time: "11:00", title: "Arrive Shenzhen", titleEn: "Arrive Shenzhen", description: "顺利过关，开始购物之旅", descriptionEn: "Smooth crossing, start the shopping spree.", image: ASSETS.timeline2 },
+          { time: "12:30", title: "Lunch Time", titleEn: "Lunch Time", description: "品尝深圳美食", descriptionEn: "Tasting Shenzhen cuisine.", image: ASSETS.timeline3 },
+          { time: "14:00", title: "Shopping", titleEn: "Shopping", description: "商场扫货，买买买", descriptionEn: "Mall shopping, buy buy buy.", image: ASSETS.timeline4 },
+          { time: "16:30", title: "Beauty Treatment", titleEn: "Beauty Treatment", description: "享受美容服务", descriptionEn: "Enjoying beauty treatment.", image: ASSETS.timeline5 },
+          { time: "18:00", title: "Dinner", titleEn: "Dinner", description: "晚餐聚会", descriptionEn: "Dinner gathering.", image: ASSETS.timeline6 },
+          { time: "20:00", title: "Return Home", titleEn: "Return Home", description: "满载而归，准备回香港", descriptionEn: "Returning to HK with a full load.", image: ASSETS.timeline7 }
+        ]
+      }
+    ];
+
+    // ============================================
+    // STATE MANAGEMENT
+    // ============================================
+    let currentPersona = personasData[2]; // Zhang as default
+    let scrollY = 0;
+    let activeTimelineIndex = 0;
+
+    // ============================================
+    // DOM ELEMENTS
+    // ============================================
+    const heroImage = document.getElementById('heroImage');
+    const mobileHeroImage = document.getElementById('mobileHeroImage');
+    const contentSection = document.getElementById('contentSection');
+    const personaCards = document.getElementById('personaCards');
+    const mainContent = document.getElementById('mainContent');
+
+    // ============================================
+    // RENDER FUNCTIONS
+    // ============================================
+    
+    function renderPersonaCards() {
+      personaCards.innerHTML = personasData.map(persona => `
+        <button
+          data-persona-id="${persona.id}"
+          class="persona-card relative rounded-[20px] p-4 flex flex-col items-center gap-3 transition-all duration-300 backdrop-blur-[10px] ${
+            currentPersona.id === persona.id
+              ? 'bg-white/80 ring-2 ring-[#4DB6AC] shadow-[0_8px_32px_rgba(77,182,172,0.3)]'
+              : 'bg-white/60 opacity-60 hover:opacity-80 shadow-[0_4px_16px_rgba(184,214,214,0.2)]'
+          }"
+        >
+          <div class="relative w-16 h-16 rounded-full overflow-hidden shrink-0">
+            <img src="${persona.avatarImage}" alt="${lang==='en' ? (persona.nameEn || persona.name) : persona.name}" class="w-full h-full object-cover" />
+          </div>
+          <div class="text-center">
+            <p class="font-bold text-[#2C3E50] text-sm">${lang==='en' ? (persona.nameEn || persona.name) : persona.name}</p>
+            <p class="text-xs text-[#546E7A]">${lang==='en' ? (persona.roleEn || persona.role) : persona.role}</p>
+          </div>
+        </button>
+      `).join('');
+
+      // Add click handlers
+      document.querySelectorAll('[data-persona-id]').forEach(card => {
+        card.addEventListener('click', () => {
+          const personaId = card.getAttribute('data-persona-id');
+          const persona = personasData.find(p => p.id === personaId);
+          if (persona) {
+            changePersona(persona);
+          }
+        });
+      });
+    }
+
+    function renderMainContent(persona) {
+      if (!persona) return;
+      
+      const isEn = lang === 'en';
+      
+      mainContent.innerHTML = `
+        <div class="fade-enter-active">
+          <!-- Persona Header -->
+          <div class="mb-8">
+            <div class="flex items-baseline gap-4 mb-2">
+              <h1 class="text-5xl font-extrabold text-slate-900">${isEn ? (persona.nameEn || persona.name) : persona.name}</h1>
+              <span class="text-xl text-[#2C3E50] font-semibold">Age: ${persona.age}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 bg-[#4DB6AC] text-white text-sm rounded-full">
+                ${isEn ? (persona.roleEn || persona.role) : persona.role}
+              </span>
+              <p class="text-[#546E7A] text-sm">${isEn ? (persona.descriptionEn || persona.description) : persona.description}</p>
+            </div>
+          </div>
+
+          <!-- Main Info Grid -->
+          <div class="grid lg:grid-cols-[2fr_1fr] gap-8 mb-12">
+            <!-- Left: Motivation & Adapt -->
+            <div class="rounded-[20px] bg-white/80 backdrop-blur-[12px] p-8 shadow-[0_8px_32px_rgba(184,214,214,0.3)]">
+              <div class="mb-6">
+                <h3 class="text-xl font-bold text-[#2C3E50] mb-3">Motivation</h3>
+                <p class="text-[#546E7A] leading-relaxed">${isEn ? (persona.motivationEn || persona.motivation) : persona.motivation}</p>
+              </div>
+
+              <div class="h-px bg-gradient-to-r from-[#4DB6AC] to-transparent mb-6"></div>
+
+              <div>
+                <h3 class="text-xl font-bold text-[#2C3E50] mb-3">Adapt to Living</h3>
+                <div class="space-y-3">
+                  ${persona.adaptLiving.map(item => `
+                    <div class="flex gap-3">
+                      <div class="w-2 h-2 rounded-full bg-[#4DB6AC] mt-2 shrink-0"></div>
+                      <p class="text-[#546E7A] leading-relaxed">${isEn ? item.en : item.zh}</p>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="h-px bg-gradient-to-r from-[#4DB6AC] to-transparent my-6"></div>
+
+              <div>
+                <h3 class="text-xl font-bold text-[#2C3E50] mb-3">Facing Challenges</h3>
+                <div class="space-y-4">
+                  ${persona.challenges.map(challenge => `
+                    <div class="p-4 bg-white/60 backdrop-blur-[8px] rounded-[16px] border border-[#4DB6AC]/20 shadow-[0_4px_16px_rgba(77,182,172,0.1)]">
+                      <p class="text-[#546E7A] text-sm leading-relaxed">${isEn ? challenge.en : challenge.zh}</p>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Thoughts with Parallax -->
+            <div class="space-y-4">
+              <h3 class="text-xl font-bold text-[#2C3E50] mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-full bg-[#4DB6AC]/20 flex items-center justify-center">
+                  💭
+                </span>
+                Thoughts
+              </h3>
+              ${persona.thoughts.map((thought, idx) => `
+                <div 
+                  class="thought-bubble p-5 bg-white/70 backdrop-blur-[12px] rounded-[20px] shadow-[0_8px_24px_rgba(184,214,214,0.25)] border border-[#4DB6AC]/10"
+                  data-parallax-speed="${0.05 + idx * 0.03}"
+                >
+                  <p class="text-[#546E7A] text-sm leading-relaxed italic">"${isEn ? thought.en : thought.zh}"</p>
+                </div>
+              `).join('')}
+              
+              <!-- Opinion Card (Bento Box) -->
+              <div class="mt-8 p-6 bg-gradient-to-br from-white/90 to-white/50 backdrop-blur-[16px] rounded-[24px] shadow-[0_8px_32px_rgba(77,182,172,0.2)] border border-[#4DB6AC]/20 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-[#4DB6AC]/10 rounded-bl-[100px] -mr-4 -mt-4 transition-all duration-500 group-hover:bg-[#4DB6AC]/20"></div>
+                
+                <h3 class="text-xl font-bold text-[#2C3E50] mb-3 flex items-center gap-2 relative z-10">
+                  <span class="text-2xl">🍱</span>
+                  ${isEn ? (persona.opinion.titleEn || persona.opinion.title) : persona.opinion.title}
+                </h3>
+                
+                <p class="text-[#546E7A] text-sm leading-relaxed relative z-10 italic">
+                  "${isEn ? (persona.opinion.contentEn || persona.opinion.content) : persona.opinion.content}"
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Timeline Section -->
+          <div class="mb-8">
+            <h2 class="text-2xl font-extrabold text-[#2C3E50] mb-4 flex items-center gap-3">
+              <span class="w-10 h-10 rounded-full bg-[#4DB6AC] flex items-center justify-center text-white text-xl">
+                📅
+              </span>
+              <span data-zh="Daily Cross-Border Living" data-en="Daily Cross-Border Living">Daily Cross-Border Living</span>
+            </h2>
+            <p class="text-xs text-[#4DB6AC] mb-4"><span data-zh="Scroll to view a full day →" data-en="Scroll to view a full day →">Scroll to view a full day →</span></p>
+
+            <!-- Timeline Container -->
+            <div id="timelineContainer" class="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+              ${persona.timeline.map((item, idx) => `
+                <div class="timeline-card relative shrink-0 w-[280px] h-[360px] rounded-[20px] overflow-hidden cursor-pointer shadow-[0_8px_32px_rgba(184,214,214,0.3)]">
+                  <!-- Background Image -->
+                  <img
+                    src="${item.image}"
+                    alt="${isEn ? item.titleEn : item.title}"
+                    class="absolute inset-0 w-full h-full object-cover"
+                  />
+
+                  <!-- Gradient Overlay - Default -->
+                  <div class="timeline-gradient-default absolute inset-0"></div>
+
+                  <!-- Teal Overlay - Show on hover -->
+                  <div class="timeline-overlay-teal absolute inset-0"></div>
+
+                  <!-- Content -->
+                  <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <div class="text-3xl font-bold mb-2 transition-all duration-300">${item.time}</div>
+                    <div class="text-xl font-semibold mb-2 transition-all duration-300">${isEn ? item.titleEn : item.title}</div>
+                    
+                    <!-- Description - Show on hover -->
+                    <div class="timeline-description max-h-0 opacity-0 overflow-hidden text-sm leading-relaxed transition-all duration-500 ease-in-out">${isEn ? item.descriptionEn : item.description}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Dot Navigation -->
+            <div class="flex justify-center items-center gap-2 mt-6">
+              ${persona.timeline.map((_, idx) => `
+                <button
+                  class="dot-nav transition-all duration-300 rounded-full ${
+                    activeTimelineIndex === idx
+                      ? 'w-8 h-2 bg-[#4DB6AC]'
+                      : 'w-2 h-2 bg-[#4DB6AC] opacity-30 hover:opacity-60'
+                  }"
+                  data-timeline-index="${idx}"
+                  aria-label="Jump to time point ${idx + 1}"
+                ></button>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Next Page Button -->
+          <div class="flex justify-end mt-12 mb-32 border-t border-[#4DB6AC]/20 pt-8 pb-24">
+            <a href="Chapter3_Timeline.HTML" class="group flex items-center gap-2 px-6 py-3 bg-[#4DB6AC] text-white rounded-full font-semibold hover:bg-[#00897B] transition-all duration-300 shadow-[0_4px_14px_rgba(77,182,172,0.4)] hover:shadow-[0_6px_20px_rgba(77,182,172,0.6)] hover:-translate-y-1">
+              <span>Next: Timeline</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      `;
+
+      // Setup timeline horizontal scroll
+      setupTimelineScroll();
+      
+      // Setup dot navigation
+      setupDotNavigation();
+    }
+
+    function updateHeroImage(persona) {
+      if (!persona) return;
+      const newImage = new Image();
+      newImage.src = persona.heroImage;
+      newImage.onload = () => {
+        if (heroImage) {
+          heroImage.classList.remove('fade-enter-active');
+          heroImage.classList.add('fade-exit-active');
+          
+          setTimeout(() => {
+            heroImage.src = persona.heroImage;
+            heroImage.classList.remove('fade-exit-active');
+            heroImage.classList.add('fade-enter-active');
+          }, 500);
+        }
+      };
+
+      // Mobile hero
+      if (mobileHeroImage) mobileHeroImage.src = persona.heroImage;
+    }
+
+    function changePersona(persona) {
+      currentPersona = persona;
+      activeTimelineIndex = 0;
+      
+      // Update hero image with fade effect
+      updateHeroImage(persona);
+      
+      // Re-render cards and content
+      renderPersonaCards();
+      renderMainContent(persona);
+      
+      // Reset scroll position
+      if (contentSection) {
+        contentSection.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollY = 0;
+      }
+      
+      // Reset timeline scroll
+      const timelineContainer = document.getElementById('timelineContainer');
+      if (timelineContainer) {
+        timelineContainer.scrollTo({ left: 0, behavior: 'smooth' });
+      }
+    }
+
+    // ============================================
+    // SCROLL & PARALLAX EFFECTS
+    // ============================================
+    
+    function setupScrollParallax() {
+      if (!contentSection) return;
+      contentSection.addEventListener('scroll', () => {
+        scrollY = contentSection.scrollTop;
+        
+        // Apply parallax to thought bubbles
+        document.querySelectorAll('.thought-bubble').forEach(bubble => {
+          const speed = parseFloat(bubble.getAttribute('data-parallax-speed'));
+          const yOffset = -scrollY * speed;
+          bubble.style.transform = `translateY(${yOffset}px)`;
+        });
+      });
+    }
+
+    function setupTimelineScroll() {
+      const timelineContainer = document.getElementById('timelineContainer');
+      if (!timelineContainer) return;
+
+      // Wheel event for horizontal scrolling
+      timelineContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        timelineContainer.scrollLeft += e.deltaY;
+      }, { passive: false });
+
+      // Scroll event to update active dot
+      timelineContainer.addEventListener('scroll', () => {
+        const scrollLeft = timelineContainer.scrollLeft;
+        const cardWidth = 280 + 24; // card width + gap
+        const newIndex = Math.round(scrollLeft / cardWidth);
+        
+        if (newIndex !== activeTimelineIndex) {
+          activeTimelineIndex = newIndex;
+          updateDotNavigation();
+        }
+      });
+    }
+
+    function setupDotNavigation() {
+      const dots = document.querySelectorAll('.dot-nav');
+      dots.forEach(dot => {
+        dot.addEventListener('click', () => {
+          const index = parseInt(dot.getAttribute('data-timeline-index'));
+          scrollToTimelineItem(index);
+        });
+      });
+    }
+
+    function scrollToTimelineItem(index) {
+      const timelineContainer = document.getElementById('timelineContainer');
+      if (!timelineContainer) return;
+
+      const cardWidth = 280 + 24; // card width + gap
+      const scrollLeft = index * cardWidth;
+      timelineContainer.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+      activeTimelineIndex = index;
+      updateDotNavigation();
+    }
+
+    function updateDotNavigation() {
+      const dots = document.querySelectorAll('.dot-nav');
+      dots.forEach((dot, idx) => {
+        if (idx === activeTimelineIndex) {
+          dot.className = 'dot-nav transition-all duration-300 rounded-full w-8 h-2 bg-[#4DB6AC]';
+        } else {
+          dot.className = 'dot-nav transition-all duration-300 rounded-full w-2 h-2 bg-[#4DB6AC] opacity-30 hover:opacity-60';
+        }
+      });
+    }
+
+    function applyLang(l) {
+      // Update static text elements
+      document.querySelectorAll('[data-zh]').forEach(el => {
+        const txt = el.getAttribute(l === 'zh' ? 'data-zh' : 'data-en');
+        if (txt) el.textContent = txt;
+      });
+      
+      // Update HTML lang attribute
+      document.documentElement.lang = l === 'zh' ? 'zh-CN' : 'en';
+      
+      // Update toggle button text
+      const btn = document.getElementById('lang-toggle');
+      if (btn) btn.textContent = l === 'zh' ? 'EN' : '中文';
+      
+      // Re-render dynamic content
+      renderPersonaCards();
+      renderMainContent(currentPersona);
+    }
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
+    function init() {
+      // Handle Navigation Active State
+      const currentFile = window.location.pathname.split("/").pop();
+      if (currentFile.includes("Chapter3_Persona.HTML")) {
+        const el = document.querySelector('.nav-btn[href*="Persona"]'); if(el) el.classList.add('active');
+      } else if (currentFile.includes("Chapter3_Phenomenon.HTML")) {
+        const el = document.querySelector('.nav-btn[href*="Phenomenon"]'); if(el) el.classList.add('active');
+      } else if (currentFile.includes("Chapter3_Timeline.HTML")) {
+        const el = document.querySelector('.nav-btn[href*="Timeline"]'); if(el) el.classList.add('active');
+      }
+
+      // Handle Language Toggle
+      const toggle = document.getElementById('lang-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          lang = lang === 'zh' ? 'en' : 'zh';
+          localStorage.setItem('lang', lang);
+          applyLang(lang);
+        });
+      }
+
+      // Initial render
+      applyLang(lang);
+      updateHeroImage(currentPersona);
+      
+      // Setup scroll effects
+      setupScrollParallax();
+    }
+
+    // Start the app when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+
+    <script src="global-nav.js"></script>
+</body>
+</html>

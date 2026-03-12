@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0E7490;
+            --secondary: #06B6D4;
+            --bg-dark: #0f172a;
+        }
+        body { background: var(--bg-dark); color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .accent-bar { background: linear-gradient(90deg, var(--primary), var(--secondary)); }
+        
+        /* 模拟图表动画 */
+        @keyframes grow { from { width: 0; } to { width: var(--final-w); } }
+        .animate-bar { animation: grow 1.5s ease-out forwards; }
+    </style>
+</head>
+<body>
+
+    <section class="p-8 md:p-16 max-w-7xl mx-auto">
+        <div class="mb-12 border-l-4 border-cyan-700 pl-6">
+            <span class="mono text-cyan-500 text-sm tracking-widest uppercase">Statistical Archive</span>
+            <h2 class="text-4xl font-extrabold text-white mt-2">2017: NBSB 跨境行为年报分析</h2>
+            <p class="text-slate-400 mt-2 text-sm italic">Data Source: Chapter 3, Northbound Southbound 2017 Household Survey</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            
+            <div class="md:col-span-8 glass rounded-2xl p-8">
+                <div class="flex justify-between items-end mb-8">
+                    <h3 class="text-lg font-semibold text-cyan-100">跨界主要目的分布</h3>
+                    <span class="mono text-[10px] text-cyan-600">UNIT: PERCENTAGE (%)</span>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between text-xs mb-2"><span>上班/上学 (刚性)</span><span class="mono">44.8%</span></div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="accent-bar h-full animate-bar" style="--final-w: 44.8%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-2"><span>消闲/探亲</span><span class="mono">32.2%</span></div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="accent-bar h-full animate-bar opacity-70" style="--final-w: 32.2%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-2"><span>商务公干</span><span class="mono">18.5%</span></div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="accent-bar h-full animate-bar opacity-40" style="--final-w: 18.5%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-4 glass rounded-2xl p-8 flex flex-col justify-center">
+                <h3 class="text-sm font-semibold text-slate-400 mb-6 uppercase tracking-wider">每周通勤频率</h3>
+                <div class="relative h-32 w-32 mx-auto">
+                    <svg class="transform -rotate-90 w-32 h-32">
+                        <circle cx="64" cy="64" r="50" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-800" />
+                        <circle cx="64" cy="64" r="50" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="314" stroke-dashoffset="120" class="text-cyan-500" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-2xl font-bold">61%</span>
+                        <span class="text-[8px] opacity-50 uppercase">5+ Times/Week</span>
+                    </div>
+                </div>
+                <p class="text-[10px] text-center mt-6 text-slate-500">反映了高度依赖过境的“跨界生存模式”</p>
+            </div>
+
+            <div class="md:col-span-6 glass rounded-2xl p-8">
+                <h3 class="text-lg font-semibold text-cyan-100 mb-6">人口特征统计</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="border-t border-slate-700 pt-4">
+                        <p class="text-[10px] text-slate-500 uppercase">主要年龄段</p>
+                        <p class="text-xl font-semibold">25 - 44 <span class="text-xs font-normal">Years</span></p>
+                    </div>
+                    <div class="border-t border-slate-700 pt-4">
+                        <p class="text-[10px] text-slate-500 uppercase">月均收入中位数</p>
+                        <p class="text-xl font-semibold">$18,500 <span class="text-xs font-normal">HKD</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-6 glass rounded-2xl p-8 bg-gradient-to-br from-cyan-900/20 to-transparent">
+                <h3 class="text-lg font-semibold text-cyan-100 mb-4">平均交通支出</h3>
+                <p class="text-xs text-slate-400 mb-6">当时的跨境通勤费用是生活成本的主要变量之一。</p>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-4xl font-black text-cyan-500">$2,400+</span>
+                    <span class="text-xs text-slate-500 italic">Avg. Monthly Pass (HK-SZ)</span>
+                </div>
+            </div>
+
+            <div class="md:col-span-12 mt-10 p-6 rounded-xl border border-dashed border-slate-700 text-center">
+                <p class="text-sm text-slate-500 italic">
+                    疫情后的 2024 年，尽管这些“硬核指标”的官方更新尚未发布，但自媒体中个体叙事的激增，正预示着上述数据的解构与重组。
+                </p>
+            </div>
+
+        </div>
+    <section class="min-h-screen py-24 px-8 md:px-20 bg-[#0f172a] relative overflow-hidden">
+    <div class="absolute top-1/4 -right-20 w-96 h-96 bg-cyan-900/10 rounded-full blur-[120px] animate-pulse"></div>
+    
+    <div class="max-w-7xl mx-auto w-full relative z-10">
+        <div class="mb-16">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-cyan-900/30 border border-cyan-500/50 text-cyan-400 text-[10px] mono tracking-widest uppercase">Qualitative Analysis</span>
+                <span class="text-slate-500 mono text-[10px]">2024_FIELD_OBSERVATION</span>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">2024: 感官驱动的“无感融合”</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <p class="text-slate-400 leading-relaxed text-sm md:text-base">
+                    跨越疫情的裂缝，2024年的跨境叙事已不再仅仅是官方统计表上的数字，而是社交媒体上鲜活的<span class="text-cyan-400 font-semibold">生活流</span>。
+                    尽管官方微观统计（如收入阶层、精确目的）仍未公布，但通过 YouTube 等平台的港人自媒体，我们能清晰观察到这种“无感化”的剧烈演变。
+                </p>
+                <div class="border-l border-slate-700 pl-8 hidden md:block">
+                    <p class="text-xs text-slate-500 italic leading-relaxed">
+                        "现在的跨境不再是目的地的抵达，而是生活空间的横向延伸。从‘在港赚钱，在深居住’到‘北上寻找情绪平替’，数据的缺失由个体的真实足迹填补。"
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-cyan-500/30 transition-all group">
+                <div class="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-cloud-sun text-cyan-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4 italic">边界感的模糊</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                    “双城记”演变为“同城化”。跨境动力从<span class="text-white">刚性需求</span>转向<span class="text-cyan-400">情绪价值</span>与生活质量的平替。
+                </p>
+            </div>
+
+            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-cyan-500/30 transition-all group">
+                <div class="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-house-laptop text-cyan-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4 italic">职住的解构与重组</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                    随着远程办公渗透，“在港赚钱、在深居住”成为一种<span class="text-white">主动选择</span>。在昂贵地段与宽敞空间之间进行精密博弈。
+                </p>
+            </div>
+
+            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-cyan-500/30 transition-all group">
+                <div class="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-user-gear text-cyan-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4 italic">个体的深度实验</h3>
+                <p class="text-sm text-slate-400 leading-relaxed font-semibold text-cyan-50">
+                    一场关于“时间 vs 金钱”与“身份认同”的生存实验。
+                </p>
+            </div>
+        </div>
+
+        <div class="relative py-12 border-y border-white/5 overflow-hidden">
+            <h4 class="text-center mono text-[10px] text-slate-600 tracking-[0.5em] mb-12 uppercase">Emerging Personas / 2024 生活流图鉴</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="p-6 border border-white/5 rounded-2xl text-center hover:bg-white/5 transition-colors cursor-pointer">
+                    <span class="text-xs text-slate-500 block mb-2">01</span>
+                    <span class="text-sm font-semibold text-white">大厂北上青年</span>
+                </div>
+                <div class="p-6 border border-white/5 rounded-2xl text-center hover:bg-white/5 transition-colors cursor-pointer">
+                    <span class="text-xs text-slate-500 block mb-2">02</span>
+                    <span class="text-sm font-semibold text-white">周末特种兵</span>
+                </div>
+                <div class="p-6 border border-white/5 rounded-2xl text-center hover:bg-white/5 transition-colors cursor-pointer">
+                    <span class="text-xs text-slate-500 block mb-2">03</span>
+                    <span class="text-sm font-semibold text-white">北上安老长者</span>
+                </div>
+                <div class="p-6 border border-white/5 rounded-2xl text-center hover:bg-white/5 transition-colors cursor-pointer">
+                    <span class="text-xs text-slate-500 block mb-2">04</span>
+                    <span class="text-sm font-semibold text-white">留学硕博通勤者</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-24 text-center">
+            <p class="text-slate-500 italic text-sm mb-8">
+                “宏观数据终究是抽象的。为了理解这些社会变迁背后的真实红利，我们将镜头对准具体的个体。”
+            </p>
+            <button class="px-12 py-4 bg-transparent border border-cyan-700 text-cyan-400 hover:bg-cyan-700 hover:text-white transition-all rounded-full mono text-xs tracking-widest">
+                START_PERSONAL_JOURNEY →
+            </button>
+        </div>
+    </div>
+</section>
+    </section>
+
+</body>
+</html>

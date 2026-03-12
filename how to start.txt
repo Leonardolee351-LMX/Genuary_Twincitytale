@@ -1,0 +1,29 @@
+DOUBLE CLICK index.html TO START THE JOURNEY IS OKAY!
+
+
+This project is designed to be accessible to everyone, including those with no programming background.
+
+### Method 1: Direct Web Viewing (Recommended for Everyone)
+No installation is required. The project is built as a static web application.
+
+1.  **Download** the project zip file.
+2.  **Unzip/Extract** the folder to your computer.
+3.  **Double-click** the file named `index.html`.
+4.  The project will open in your default web browser (Chrome, Edge, Safari, etc.).
+
+> **Note:** Please ensure you have an **active Internet connection** while viewing. The project uses external libraries (React, Tailwind, D3.js) loaded via CDN to keep the file size small and ensure you always have the latest versions.
+
+### Method 2: Local Development (For Developers)
+If you wish to edit or run the project in a local server environment:
+
+1.  Open the project folder in VS Code or your preferred editor.
+2.  Use a simple HTTP server to open **index.html** in your browser. It is recommended to use Live Server extension in VS Code, or `python -m http.server` in the project folder.
+3.  **Open in Browser:**
+    *   Navigate to `http://localhost:8000` (or the port your server shows).
+    *   The project should load in your default browser.
+
+### **Requirements:**
+    *   No `npm install` is needed (libraries are CDN-based).
+    *   Modern Web Browser (Chrome/Edge/Firefox).
+
+ENJOY READING~

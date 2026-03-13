@@ -22,26 +22,26 @@
             match: (path, step) => path.includes("prologue.html") || (path.includes("index.html") && step === '1') 
         },
         { 
-            id: 'ch1', 
+            id: 'ch2', 
             title: 'CHAPTER 1', 
-            subtitle: 'RECOVERY', 
+            subtitle: 'THE FOLDED CITY', 
             url: 'index.html?step=2', 
-            match: (path, step) => path.includes("Chapter1.HTML") || (path.includes("index.html") && step === '2'),
+            match: (path, step) => path.includes("Chapter1.HTML") || path.toLowerCase().includes("chapter1-1.html") || path.toLowerCase().includes("chapter1_dualcity.html") || (path.includes("index.html") && step === '2'),
             subchapters: [
-                { title: '1.1 RECOVERY', url: 'Chapter1.HTML' },
-                { title: '1.2 COUNTERFLOW', url: 'Chapter1.HTML#section-4' }
+                { title: '1.1 FLOWS', url: 'chapter1-1.html?section=1' },
+                { title: '1.2 ANALYSIS', url: 'chapter1-1.html?section=2' },
+                { title: '1.3 DUAL CITY', url: 'chapter1_DualCity.html' }
             ]
         },
         { 
-            id: 'ch2', 
+            id: 'ch1', 
             title: 'CHAPTER 2', 
-            subtitle: 'THE FOLDED CITY', 
+            subtitle: 'RECOVERY', 
             url: 'index.html?step=3', 
-            match: (path, step) => path.includes("Chapter2.HTML") || path.toLowerCase().includes("chapter2-1.html") || path.includes("Chapter2_DualCity.html") || (path.includes("index.html") && step === '3'),
+            match: (path, step) => path.includes("Chapter2.HTML") || path.toLowerCase().includes("chapter2_recovery.html") || path.toLowerCase().includes("chapter2_counterflow.html") || (path.includes("index.html") && step === '3'),
             subchapters: [
-                { title: '2.1 FLOWS', url: 'chapter2-1.html?section=1' },
-                { title: '2.2 ANALYSIS', url: 'chapter2-1.html?section=2' },
-                { title: '2.3 DUAL CITY', url: 'Chapter2_DualCity.html' }
+                { title: '2.1 RECOVERY', url: 'Chapter2_Recovery.html' },
+                { title: '2.2 COUNTERFLOW', url: 'Chapter2_Counterflow.html' }
             ]
         },
         { 
@@ -49,12 +49,18 @@
             title: 'CHAPTER 3', 
             subtitle: 'CONCRETE LIVES', 
             url: 'index.html?step=4', 
-            match: (path, step) => path.includes("Chapter3_") || (path.includes("index.html") && step === '4'),
+            match: (path, step) => path.includes("chapter3_persona.html") || path.includes("chapter3_timeline.html") || (path.includes("index.html") && step === '4'),
             subchapters: [
                 { title: '3.1 PERSONA', url: 'Chapter3_Persona.HTML' },
-                { title: '3.2 TIMELINE', url: 'Chapter3_Timeline.HTML' },
-                { title: '3.3 PHENOMENON', url: 'Chapter3_Phenomenon.HTML' }
+                { title: '3.2 TIMELINE', url: 'Chapter3_Timeline.HTML' }
             ]
+        },
+        { 
+            id: 'reflection', 
+            title: 'REFLECTION', 
+            subtitle: 'MINOR CRITICAL NOTES', 
+            url: 'Chapter3_Phenomenon.HTML', 
+            match: (path, step) => path.includes("chapter3_phenomenon.html")
         },
         { 
             id: 'epilogue', 
@@ -437,7 +443,8 @@
     // Total segments calculation
     // Ch1: 2 segments
     // Ch2: 3 segments
-    // Ch3: 3 segments
+    // Ch3: 2 segments
+    // Reflection: 1 segment
     // Total = 8 segments for the main content
     // We map the progress bar 0-100% to these 8 segments.
     // Intro/Prologue/Epilogue are ignored for the "reading progress" or we can map them to 0% and 100%.
@@ -494,7 +501,7 @@
                 // Ch2 has 3 segments: 2.1 (Index 2), 2.2 (Index 3), 2.3 (Index 4)
                 let subIndex = 0;
                 
-                if (path.includes('Chapter2_DualCity.html')) {
+                if (path.toLowerCase().includes('chapter1_dualcity.html')) {
                     subIndex = 2;
                 } else {
                     const section = urlParams.get('section') || '1';
@@ -516,18 +523,16 @@
             // CHAPTER 3
             else if (currentChapter.id === 'ch3') {
                 isValidChapter = true;
-                // Ch3 has 3 segments: 3.1 (Index 5), 3.2 (Index 6), 3.3 (Index 7)
-                // Determine subsection from path
+                // Ch3 has 2 segments: 3.1 (Index 5), 3.2 (Index 6)
                 let subIndex = 0;
                 if (path.includes('timeline')) subIndex = 1;
-                else if (path.includes('phenomenon')) subIndex = 2;
-                
+
                 segmentIndex = 5 + subIndex;
-                
+
                 let localScrollTop = window.scrollY || document.documentElement.scrollTop;
                 let localScrollHeight = document.documentElement.scrollHeight;
                 let localClientHeight = document.documentElement.clientHeight;
-                
+
                 const content = document.getElementById('contentSection');
                 if (content && content.scrollHeight > content.clientHeight) {
                      localScrollTop = content.scrollTop;
@@ -535,6 +540,21 @@
                      localClientHeight = content.clientHeight;
                      currentScrollTop = localScrollTop;
                 }
+
+                if (localScrollHeight > localClientHeight) {
+                    localPercent = localScrollTop / (localScrollHeight - localClientHeight);
+                }
+
+                globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
+            }
+            // REFLECTION PAGE
+            else if (currentChapter.id === 'reflection') {
+                isValidChapter = true;
+                segmentIndex = 7;
+
+                let localScrollTop = window.scrollY || document.documentElement.scrollTop;
+                let localScrollHeight = document.documentElement.scrollHeight;
+                let localClientHeight = document.documentElement.clientHeight;
 
                 if (localScrollHeight > localClientHeight) {
                     localPercent = localScrollTop / (localScrollHeight - localClientHeight);

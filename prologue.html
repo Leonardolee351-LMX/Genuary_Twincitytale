@@ -310,7 +310,7 @@
 
         <div class="gsap-reveal mt-8 max-w-3xl mx-auto text-center">
           <p class="text-xs text-slate-400 font-sans leading-relaxed">
-            This overview combines selected official milestones reported in different but related measures — pre-2020 average daily cross-boundary passenger traffic and post-2020 annual control-point passenger movements. It is meant to show the changing rhythm of mobility, not a perfectly uniform statistical series.
+            This overview uses one unified metric: average daily passenger throughput (passengers/day). For 2021–2025, annual control-point totals are converted into daily averages (annual total ÷ 365) for direct year-to-year comparison.
           </p>
         </div>
 
@@ -582,22 +582,22 @@
       const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
       const phase1 = [
-        { year: 1997, normalized: 24, value: 'Approx. 173,500 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Derived from official crossing counts across major checkpoints.' },
-        { year: 2003, normalized: 46, value: 'Approx. 332,000 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'IVS and post-SARS mobility shift.' },
-        { year: 2005, normalized: 63, value: 'Approx. 453,100 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Daily movement becomes a mass routine.' },
-        { year: 2006, normalized: 67, value: 'Approx. 477,000 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Expansion continues before major new corridors open.' },
-        { year: 2014, normalized: 95, value: 'Approx. 678,000 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Infrastructure compresses time at scale.' },
-        { year: 2016, normalized: 95, value: 'Approx. 678,000 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'The one-hour living circle becomes more plausible.' },
-        { year: 2018, normalized: 100, value: 'Approx. 715,900 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'Express Rail Link and HZMB intensify regional integration.' },
-        { year: 2019, normalized: 96, value: 'Approx. 691,200 passengers/day', basis: 'Average daily cross-boundary passenger traffic', note: 'The mature pre-pandemic benchmark.' }
+        { year: 1997, normalized: 173500, value: 'Avg. 173,500.00 passengers/day', basis: 'Average daily passenger throughput', note: 'Derived from official crossing counts across major checkpoints.' },
+        { year: 2003, normalized: 332000, value: 'Avg. 332,000.00 passengers/day', basis: 'Average daily passenger throughput', note: 'IVS and post-SARS mobility shift.' },
+        { year: 2005, normalized: 453100, value: 'Avg. 453,100.00 passengers/day', basis: 'Average daily passenger throughput', note: 'Daily movement becomes a mass routine.' },
+        { year: 2006, normalized: 477000, value: 'Avg. 477,000.00 passengers/day', basis: 'Average daily passenger throughput', note: 'Expansion continues before major new corridors open.' },
+        { year: 2014, normalized: 678000, value: 'Avg. 678,000.00 passengers/day', basis: 'Average daily passenger throughput', note: 'Infrastructure compresses time at scale.' },
+        { year: 2016, normalized: 678000, value: 'Avg. 678,000.00 passengers/day', basis: 'Average daily passenger throughput', note: 'The one-hour living circle becomes more plausible.' },
+        { year: 2018, normalized: 715900, value: 'Avg. 715,900.00 passengers/day', basis: 'Average daily passenger throughput', note: 'Express Rail Link and HZMB intensify regional integration.' },
+        { year: 2019, normalized: 691200, value: 'Avg. 691,200.00 passengers/day', basis: 'Average daily passenger throughput', note: 'The mature pre-pandemic benchmark.' }
       ];
 
       const phase2 = [
-        { year: 2021, normalized: 1, value: 'Approx. 1.95 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'Routine movement nearly collapses.' },
-        { year: 2022, normalized: 2, value: 'Approx. 5.3 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'A slight rebound, still far below the old norm.' },
-        { year: 2023, normalized: 63, value: 'Approx. 212 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'Full reopening and rapid rebound.' },
-        { year: 2024, normalized: 89, value: 'Approx. 298 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'Flows intensify under a reorganized logic.' },
-        { year: 2025, normalized: 100, value: 'Approx. 335 million passenger movements/year', basis: 'Annual control-point passenger movements', note: 'Traffic surpasses the old benchmark.' }
+        { year: 2021, normalized: 5342.47, value: 'Avg. 5,342.47 passengers/day', basis: 'Average daily passenger throughput', note: 'Converted from annual total (1.95 million ÷ 365).' },
+        { year: 2022, normalized: 14520.55, value: 'Avg. 14,520.55 passengers/day', basis: 'Average daily passenger throughput', note: 'Converted from annual total (5.3 million ÷ 365).' },
+        { year: 2023, normalized: 580821.92, value: 'Avg. 580,821.92 passengers/day', basis: 'Average daily passenger throughput', note: 'Converted from annual total (212 million ÷ 365).' },
+        { year: 2024, normalized: 816438.36, value: 'Avg. 816,438.36 passengers/day', basis: 'Average daily passenger throughput', note: 'Converted from annual total (298 million ÷ 365).' },
+        { year: 2025, normalized: 917808.22, value: 'Avg. 917,808.22 passengers/day', basis: 'Average daily passenger throughput', note: 'Converted from annual total (335 million ÷ 365).' }
       ];
 
       const allPoints = [...phase1, ...phase2];
@@ -605,7 +605,8 @@
       allPoints.forEach(d => activeMap.set(d.year, d));
 
       const xScale = d3.scaleLinear().domain([1997, 2025]).range([0, innerWidth]);
-      const yScale = d3.scaleLinear().domain([0, 105]).range([innerHeight, 0]);
+      const maxDaily = d3.max(allPoints, d => d.normalized) || 1;
+      const yScale = d3.scaleLinear().domain([0, maxDaily * 1.08]).range([innerHeight, 0]);
 
       const xAxis = d3.axisBottom(xScale)
         .tickFormat(d3.format('d'))
@@ -644,10 +645,10 @@
         .attr('x', xScale(2023.5))
         .attr('y', -8)
         .attr('text-anchor', 'middle')
-        .text('annual movements');
+        .text('annual totals converted to daily avg');
 
       g.append('path')
-        .datum([{ year: 2019, normalized: 96 }, { year: 2021, normalized: 1 }])
+        .datum([{ year: 2019, normalized: 691200 }, { year: 2021, normalized: 5342.47 }])
         .attr('fill', 'none')
         .attr('stroke', '#94a3b8')
         .attr('stroke-width', 1.5)
@@ -802,10 +803,10 @@
       });
 
       const annotations = [
-        { year: 2003, normalized: 46, text: 'IVS implementation', anchor: 'middle', dy: -20 },
-        { year: 2018, normalized: 100, text: 'Express Rail + HZMB', anchor: 'middle', dy: -18 },
-        { year: 2021, normalized: 1, text: 'Pandemic suspension', anchor: 'middle', dy: -18 },
-        { year: 2025, normalized: 100, text: 'Recovery beyond baseline', anchor: 'end', dy: -18 }
+        { year: 2003, normalized: 332000, text: 'IVS implementation', anchor: 'middle', dy: -20 },
+        { year: 2018, normalized: 715900, text: 'Express Rail + HZMB', anchor: 'middle', dy: -18 },
+        { year: 2021, normalized: 5342.47, text: 'Pandemic suspension', anchor: 'middle', dy: -18 },
+        { year: 2025, normalized: 917808.22, text: 'Recovery beyond baseline', anchor: 'end', dy: -18 }
       ];
 
       g.selectAll('.annotation')

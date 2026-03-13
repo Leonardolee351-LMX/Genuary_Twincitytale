@@ -32,19 +32,20 @@
             background-color: var(--bg-body);
             color: var(--text-primary);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             min-height: 100vh;
             box-sizing: border-box;
             overflow-y: auto;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: none;
+            margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 24px;
-            padding-bottom: 40px;
+            gap: 12px;
+            padding-bottom: 10px;
         }
 
         /* Glassmorphism Card */
@@ -67,16 +68,28 @@
         .dashboard-grid {
             display: grid;
             grid-template-columns: 3fr 1fr;
-            gap: 24px;
+            gap: 16px;
         }
         @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
-        /* Chart Area */
+        .chart-panel {
+            padding: 14px 14px 10px;
+            position: relative;
+        }
+
         .chart-wrapper {
-            height: 400px;
+            height: min(76vh, 820px);
             width: 100%;
             position: relative;
         }
+
+        body.embedded .container { gap: 8px; }
+        body.embedded .glass-card { padding: 12px; }
+        body.embedded .dashboard-grid { grid-template-columns: 1fr; gap: 10px; }
+        body.embedded .dashboard-grid > .glass-card:nth-child(2) { display: none; }
+        body.embedded .chart-panel { padding: 10px 10px 8px; }
+        body.embedded .chart-wrapper { height: calc(100dvh - 190px); min-height: 560px; }
+        body.embedded #brush-chart { height: 74px !important; margin-top: 8px !important; }
 
         /* Stats / Rhythm Panel */
         .stat-card {
@@ -158,6 +171,35 @@
             color: var(--text-primary);
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
+        .reset-icon-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 0 12px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            z-index: 10;
+        }
+        .reset-icon-btn:hover {
+            background: white;
+            color: var(--accent-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .reset-icon-btn svg {
+            margin-right: 6px;
+            transition: transform 0.3s ease;
+        }
+        .reset-icon-btn:hover svg {
+            transform: rotate(-180deg);
+        }
 
     </style>
 </head>
@@ -166,9 +208,11 @@
         <!-- Header -->
         <div class="glass-card">
             <div class="header-top">
-                <div>
-                    <h1>Net Flow Dynamics</h1>
-                    <p>Analysis of Cross-border Movement (Departure vs Arrival)</p>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h1>Net Flow Dynamics</h1>
+                        <p>Analysis of Cross-border Movement (Departure vs Arrival)</p>
+                    </div>
                 </div>
             </div>
             <div class="legend">
@@ -179,8 +223,14 @@
         </div>
 
         <div class="dashboard-grid">
-            <!-- Main Chart Column -->
-            <div class="glass-card">
+            <div class="glass-card chart-panel">
+                <button id="btn-reset" class="reset-icon-btn" title="Reset View" onclick="resetAll()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                    </svg>
+                    <span style="font-size:12px; font-weight:600;">Reset</span>
+                </button>
                 <div class="stat-title">Daily Net Flow Trend</div>
                 <div class="chart-wrapper" id="main-chart">
                     <div class="loading">Loading Data...</div>
@@ -222,8 +272,18 @@
     </div>
 
     <script>
+        const isEmbedded = window.self !== window.top;
+        if (isEmbedded) document.body.classList.add("embedded");
+        const emitFrameHeight = () => {
+            if (!isEmbedded) return;
+            const height = Math.ceil(document.documentElement.scrollHeight || document.body.scrollHeight || 0);
+            window.parent.postMessage({ type: "observable-height", source: "observable_distance", height }, "*");
+        };
+        window.addEventListener("load", () => { emitFrameHeight(); setTimeout(emitFrameHeight, 180); setTimeout(emitFrameHeight, 680); });
+        window.addEventListener("resize", emitFrameHeight);
+
         // Config
-        const margin = {top: 20, right: 20, bottom: 30, left: 50};
+        const margin = {top: 12, right: 10, bottom: 24, left: 44};
         const csvPath = "HONG_KONG_Statistics_on_Daily_Passenger_Traffic@3.csv";
 
         // Placeholder for 2017 Weekly Average Data
@@ -242,6 +302,48 @@
 
         let globalData = [];
         let currentMode = 'recent'; // 'recent' or 'compare'
+        let narrativeRange = null;
+        let lastRangeEmitKey = "";
+
+        const toISODate = (d) => d ? d3.timeFormat("%Y-%m-%d")(d) : null;
+        const parseISODate = (v) => {
+            if (!v) return null;
+            const [y,m,d] = String(v).split("-").map(Number);
+            if (!y || !m || !d) return null;
+            return new Date(y, m - 1, d);
+        };
+        const emitRangeToParent = (from, to) => {
+            if (!isEmbedded || !from || !to) return;
+            const center = new Date((from.getTime() + to.getTime()) / 2);
+            const payload = { type:"observable-range-changed", rangeStart:toISODate(from), rangeEnd:toISODate(to), rangeCenter:toISODate(center), focusDate:toISODate(center) };
+            const key = `${payload.rangeStart}|${payload.rangeEnd}|${payload.rangeCenter}`;
+            if (key === lastRangeEmitKey) return;
+            lastRangeEmitKey = key;
+            window.parent?.postMessage(payload, "*");
+        };
+        const getVisibleData = (data, domain) => data.filter(d => d.date >= domain[0] && d.date <= domain[1]);
+        const getDynamicBarWidth = (containerWidth, lineCount, mode = "main") => {
+            const base = containerWidth / Math.max(1, lineCount);
+            if (mode === "brush") return Math.max(2.8, Math.min(14, base * 1.35));
+            return Math.max(2.2, Math.min(12, base * 1.12));
+        };
+
+        function resetAll() {
+            narrativeRange = null;
+            if (globalData.length) renderMainChart(globalData);
+            window.parent.postMessage({ type: "reset-view" }, "*");
+        }
+
+        const applyNarrativeFocus = (payload) => {
+            if (!payload) return;
+            if (payload.reset) narrativeRange = null;
+            const from = parseISODate(payload.rangeStart);
+            const to = parseISODate(payload.rangeEnd);
+            const focus = parseISODate(payload.focus || payload.focusDate || payload.date);
+            if (from && to) narrativeRange = [from, to];
+            else if (focus) narrativeRange = [d3.timeDay.offset(focus, -30), d3.timeDay.offset(focus, 45)];
+            if (globalData.length) renderMainChart(globalData);
+        };
 
         async function main() {
             // 1. Load Data
@@ -305,7 +407,8 @@
                 .attr("transform", `translate(${margin.left},${margin.top})`);
 
             // Scales
-            const x = d3.scaleTime().domain(d3.extent(data, d => d.date)).range([0, width]);
+            const domainAll = d3.extent(data, d => d.date);
+            const x = d3.scaleTime().domain((narrativeRange && narrativeRange[0] && narrativeRange[1]) ? narrativeRange : domainAll).range([0, width]);
             const y = d3.scaleLinear()
                 .domain([d3.min(data, d => d.net), d3.max(data, d => d.net)])
                 .nice()
@@ -327,16 +430,21 @@
                 .attr("stroke-dasharray", "4,4");
 
             // Bars
+            const domainNow = x.domain();
+            const visibleData = getVisibleData(data, domainNow);
+            const barW = getDynamicBarWidth(width, visibleData.length, "main");
             const bars = svg.selectAll(".bar")
                 .data(data)
                 .enter().append("rect")
                 .attr("class", "bar")
-                .attr("x", d => x(d.date))
+                .attr("x", d => x(d.date) - barW / 2)
                 .attr("y", d => d.net > 0 ? y(d.net) : y(0))
-                .attr("width", Math.max(1, width / data.length))
+                .attr("width", barW)
                 .attr("height", d => Math.abs(y(d.net) - y(0)))
                 .attr("fill", d => d.net > 0 ? "var(--color-pos)" : "var(--color-neg)")
-                .attr("opacity", 0.8);
+                .attr("opacity", 0.94)
+                .attr("shape-rendering", "crispEdges")
+                .style("display", d => (d.date >= domainNow[0] && d.date <= domainNow[1]) ? "block" : "none");
 
             // Tooltip logic
             const tooltip = d3.select("body").append("div").attr("class", "tooltip");
@@ -358,30 +466,40 @@
 
         function renderBrush(data, xMain, yMain, width, xAxis, mainSvg) {
             d3.select("#brush-chart").html("");
-            const brushHeight = 50;
+            const brushHeight = 74;
             const brushSvg = d3.select("#brush-chart").append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", brushHeight)
                 .append("g")
                 .attr("transform", `translate(${margin.left},0)`);
 
-            const xBrush = d3.scaleTime().domain(xMain.domain()).range([0, width]);
+            // Always use full domain for brush axis to keep timeline stable
+            const domainAll = d3.extent(data, d => d.date);
+            const xBrush = d3.scaleTime().domain(domainAll).range([0, width]);
             const yBrush = d3.scaleLinear().domain(yMain.domain()).range([brushHeight, 0]);
 
+            const brushW = getDynamicBarWidth(width, data.length, "brush");
             brushSvg.append("g").selectAll(".brush-bar")
                 .data(data).enter().append("rect")
-                .attr("x", d => xBrush(d.date))
+                .attr("x", d => xBrush(d.date) - brushW / 2)
                 .attr("y", d => d.net > 0 ? yBrush(d.net) : yBrush(0))
-                .attr("width", Math.max(1, width / data.length))
+                .attr("width", brushW)
                 .attr("height", d => Math.abs(yBrush(d.net) - yBrush(0)))
                 .attr("fill", d => d.net > 0 ? "var(--color-pos)" : "var(--color-neg)")
-                .attr("opacity", 0.5);
+                .attr("opacity", 0.86)
+                .attr("shape-rendering", "crispEdges");
 
             const brush = d3.brushX()
                 .extent([[0, 0], [width, brushHeight]])
                 .on("brush end", brushed);
 
-            brushSvg.append("g").call(brush);
+            const gBrush = brushSvg.append("g").call(brush);
+
+            // Sync initial selection if xMain is focused (subset of data)
+            const currentDomain = xMain.domain();
+            if (currentDomain[0].getTime() > domainAll[0].getTime() || currentDomain[1].getTime() < domainAll[1].getTime()) {
+                gBrush.call(brush.move, [xBrush(currentDomain[0]), xBrush(currentDomain[1])]);
+            }
 
             function brushed(event) {
                 const selection = event.selection;
@@ -389,19 +507,24 @@
                     const [x0, x1] = selection.map(xBrush.invert);
                     xMain.domain([x0, x1]);
                 } else {
-                    xMain.domain(d3.extent(data, d => d.date));
+                    xMain.domain(domainAll);
                 }
                 
                 // Update Main Chart
-                xAxis.transition().call(d3.axisBottom(xMain));
+                xAxis.transition().duration(50).call(d3.axisBottom(xMain));
                 
                 // Filter visible data for bars
                 const visibleBars = mainSvg.selectAll(".bar").data(data);
                 
+                const nowDomain = xMain.domain();
+                const visibleData = getVisibleData(data, nowDomain);
+                const barW = getDynamicBarWidth(width, visibleData.length, "main");
                 visibleBars.transition().duration(50)
-                    .attr("x", d => xMain(d.date))
-                    .attr("width",  Math.max(1, width / (data.filter(d => d.date >= xMain.domain()[0] && d.date <= xMain.domain()[1]).length || 1)))
-                    .style("display", d => (d.date >= xMain.domain()[0] && d.date <= xMain.domain()[1]) ? "block" : "none");
+                    .attr("x", d => xMain(d.date) - barW / 2)
+                    .attr("width", barW)
+                    .style("display", d => (d.date >= nowDomain[0] && d.date <= nowDomain[1]) ? "block" : "none");
+                emitRangeToParent(xMain.domain()[0], xMain.domain()[1]);
+                emitFrameHeight();
             }
         }
 
@@ -519,7 +642,25 @@
             }
         }
 
-        main();
+        window.addEventListener("message", (event) => {
+            const msg = event.data;
+            if (!msg) return;
+            if (msg.type === "counterflow-node") applyNarrativeFocus(msg.node || msg);
+            if (msg.type === "counterflow-stage") applyNarrativeFocus(msg.stage || msg);
+            if (msg.type === "counterflow-reset") applyNarrativeFocus({ reset:true });
+            if (msg.type === "recovery-node") applyNarrativeFocus(msg.node || msg);
+        });
+
+        const p = new URLSearchParams(window.location.search);
+        applyNarrativeFocus({ focus: p.get("focus"), rangeStart: p.get("rangeStart"), rangeEnd: p.get("rangeEnd") });
+
+        main().then(() => {
+            if (globalData.length) {
+                const d = narrativeRange || d3.extent(globalData, v => v.date);
+                emitRangeToParent(d[0], d[1]);
+            }
+            emitFrameHeight();
+        });
     </script>
 </body>
 </html>

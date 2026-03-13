@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "data-analysis": {
+      "source": "bytedance/deer-flow",
+      "sourceType": "github",
+      "computedHash": "02ff77b006e3330edac94c7a16262bc4a71ca5cefbabe784f43a34c88e6ed5c7"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "computedHash": "6337038fe1fe6bbe1b9f252ab678ee575859190bab6f0f246f4061824eb40875"
+    }
+  }
+}

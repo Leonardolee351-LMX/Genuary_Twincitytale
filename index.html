@@ -159,36 +159,36 @@
                 type: "prologue"
             },
             { 
-                id: 1, 
-                title: "RECOVERY", 
-                subtitle: "Chapter 1\nREBOOTED BOUNDARY", 
-                type: "chapter_intro", 
-                chapter: "01",
-                image: "images/第一章插图.jpg",
-                description: [
-                    "The full resumption of cross-border travel in February 2023 marked a crucial watershed in the history of Shenzhen-Hong Kong relations. The long-constrained border began to loosen, and the first to return was not a grand narrative but a sense of certainty that it was safe to venture out. ",
-                    "We conducted data cleaning on the data from January 2021 to December 2025 through the open data set of the Hong Kong government and obtained the daily entry and exit figures of different control points. Through this data visualization chart, we can more clearly perceive the recovery of cross-border travel after the pandemic and the joy and rhythm of life in the northward flow of people. "
-                ],
-                subchapters: [
-                    { title: "1.1 Recovery", url: "Chapter1.HTML" },
-                    { title: "1.2 Counterflow", url: "Chapter1.HTML" }
-                ]
-            },
-            { 
                 id: 2, 
                 title: "THE FOLDED CITY", 
-                subtitle: "Chapter 2\nFOLDED CITY", 
+                subtitle: "Chapter 1\nFOLDED CITY", 
                 type: "chapter_intro", 
-                chapter: "02",
+                chapter: "01",
                 image: "images/第二章插图.jpg",
                 description: [
                     "The end of the pandemic has triggered a rebound in consumption and travel frequency among residents of Shenzhen and Hong Kong. As the flow of people and vehicles gradually increases after the lifting of restrictions, the control points also need to be equipped with sufficient intelligence to handle the challenges posed by the huge volume of customs clearance traffic. ",
                     "From the perspectives of the development history of the border control station, the evolution of commuting patterns and the effectiveness of construction, we observe the iterative progress of this border in recent years with a historical monthly system perspective."
                 ],
                 subchapters: [
-                    { title: "2.1 Flows", url: "chapter2-1.html" },
-                    { title: "2.2 Analysis", url: "chapter2-1.html" },
-                    { title: "2.3 Dual City", url: "chapter2-1.html" }
+                    { title: "1.1 Flows", url: "chapter1-1.html" },
+                    { title: "1.2 Analysis", url: "chapter1-1.html" },
+                    { title: "1.3 Dual City", url: "chapter1-1.html" }
+                ]
+            },
+            { 
+                id: 1, 
+                title: "RECOVERY", 
+                subtitle: "Chapter 2\nREBOOTED BOUNDARY", 
+                type: "chapter_intro", 
+                chapter: "02",
+                image: "images/第一章插图.jpg",
+                description: [
+                    "The full resumption of cross-border travel in February 2023 marked a crucial watershed in the history of Shenzhen-Hong Kong relations. The long-constrained border began to loosen, and the first to return was not a grand narrative but a sense of certainty that it was safe to venture out. ",
+                    "We conducted data cleaning on the data from January 2021 to December 2025 through the open data set of the Hong Kong government and obtained the daily entry and exit figures of different control points. Through this data visualization chart, we can more clearly perceive the recovery of cross-border travel after the pandemic and the joy and rhythm of life in the northward flow of people. "
+                ],
+                subchapters: [
+                    { title: "2.1 Recovery", url: "Chapter2_Recovery.html" },
+                    { title: "2.2 Counterflow", url: "Chapter2_Counterflow.html" }
                 ]
             },
             { 
@@ -496,8 +496,8 @@
                             </div>
                             
                             <NextButton onClick={() => {
-                        if (data.id === 1) window.location.href = 'Chapter1.HTML';
-                        else if (data.id === 2) window.location.href = 'chapter2-1.html';
+                        if (data.id === 1) window.location.href = 'Chapter2_Recovery.html';
+                        else if (data.id === 2) window.location.href = 'chapter1-1.html';
                         else if (data.id === 3) window.location.href = 'Chapter3_Persona.HTML';
                         else onNext();
                     }} text="ENTER CHAPTER" />
@@ -515,7 +515,7 @@
         const DataVizPage = ({ onNext }) => (
             <div className="viewport-container w-full h-full relative">
                 <iframe 
-                    src="Chapter1.HTML" 
+                    src="Chapter2.HTML" 
                     className="w-full h-full border-0" 
                     title="The Resurgence"
                 />
@@ -529,7 +529,7 @@
         const SplitViewPage = ({ onNext }) => (
             <div className="viewport-container w-full h-full relative">
                 <iframe 
-                    src="chapter2-1.html" 
+                    src="chapter1-1.html" 
                     className="w-full h-full border-0" 
                     title="Folding Time Analysis"
                 />

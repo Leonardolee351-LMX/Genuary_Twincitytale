@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 1.2 | Counterflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { accent:"#E11D48" }, fontFamily: { sans:["Inter","sans-serif"], serif:["Noto Serif","serif"], mono:["JetBrains Mono","monospace"] } } } };
+  </script>
+  <style>
+    :root{--glass-bg:rgba(255,255,255,.82);--glass-border:rgba(255,255,255,.78);--glass-shadow:0 16px 40px -18px rgba(225,29,72,.24)}
+    body{background:radial-gradient(1200px 500px at 10% -10%,#ffe9ee 0%,#f8fafc 40%,#f1f5f9 100%);color:#0f172a}
+    .card{background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:22px;box-shadow:var(--glass-shadow)}
+    .hero-card{padding-top:28px;padding-bottom:24px}
+    .panel-card{transition:transform .28s ease,box-shadow .28s ease}
+    .panel-card:hover{transform:translateY(-2px);box-shadow:0 18px 38px -18px rgba(225,29,72,.3)}
+    .chip{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#64748b}
+    .insight-card{background:#fff;border:1px solid #fecdd3;border-radius:18px;padding:14px;box-shadow:0 10px 24px -18px rgba(225,29,72,.42);transition:all .28s ease}
+    .insight-card:hover{transform:translateY(-2px);border-color:#fda4af}
+    .insight-card.emphasis{background:linear-gradient(145deg,#fff 0%,#fff1f2 100%)}
+    .insight-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#94a3b8}
+    .insight-value{font-family:"JetBrains Mono",monospace;font-size:42px;font-weight:700;line-height:1;color:#0f172a}
+    .insight-value.accent{color:#be123c}
+    .insight-value.growth{color:#ea580c}
+    .insight-note{margin-top:10px;padding:9px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-size:12px;line-height:1.45;color:#475569}
+    .layout-main{display:grid;grid-template-columns:minmax(0,9fr) minmax(340px,3fr);gap:28px;min-height:calc(100dvh - 128px)}
+    .frame-shell{overflow:hidden;height:100%}
+    .frame-full{height:calc(100dvh - 160px);min-height:620px}
+    .key-btn{min-height:44px;border:1px solid #fecdd3;background:#fff;border-radius:12px;padding:8px 10px;text-align:left;transition:all .22s ease}
+    .key-btn.active{border-color:#e11d48;background:#fff1f2;box-shadow:0 8px 16px -12px rgba(225,29,72,.55)}
+    .reset-btn{border:1px solid #fda4af;background:#fff;color:#be123c;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;line-height:1.2;transition:all .2s ease}
+    .reset-btn:hover{background:#fff1f2;border-color:#fb7185}
+    @media (max-width:1279px){.layout-main{grid-template-columns:1fr;min-height:auto}.frame-full{height:62vh;min-height:520px}}
+  </style>
+</head>
+<body>
+  <script src="global-nav.js"></script>
+
+  <main class="w-screen max-w-none mx-auto pl-3 pr-6 md:pl-4 md:pr-10 xl:pr-12 pt-24 pb-4">
+    <section class="layout-main items-start">
+      <article class="card frame-shell">
+        <iframe id="counterflow-frame" src="observable/observable_distance.html?focus=2023-01-08&rangeStart=2022-12-20&rangeEnd=2023-02-20&stage=s1&v=20260313-layout" class="w-full frame-full border-0" title="Counterflow Dynamics" loading="lazy"></iframe>
+      </article>
+      <aside class="space-y-4 pl-2 xl:pl-3">
+        <section class="card hero-card p-5 space-y-3">
+          <div class="chip">Chapter 1.2 / Counterflow</div>
+          <h1 class="text-2xl md:text-3xl font-extrabold leading-tight">From "Southbound Consumption" to <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-orange-500">"Northbound Living"</span></h1>
+          <p id="lead" class="text-sm text-slate-600">The directional shift is not a short-term fluctuation, but a rewriting of the dual-city living radius.</p>
+          <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
+            <a href="Chapter2_Recovery.html" class="text-center rounded-lg border border-slate-300 bg-white px-2 py-2 text-slate-700">2.1 Recovery</a>
+            <a href="Chapter2_Counterflow.html" class="text-center rounded-lg border border-accent bg-accent text-white px-2 py-2">2.2 Counterflow</a>
+            <a href="index.html?step=4" class="text-center rounded-lg border border-accent bg-accent text-white px-2 py-2">Next Chapter</a>
+          </div>
+        </section>
+        <section class="card panel-card p-4"><div class="chip mb-2">Key Milestones</div><div id="key-filters" class="grid grid-cols-2 gap-2"></div></section>
+        <section class="card panel-card p-4 space-y-2"><div class="flex items-center justify-between gap-2"><div class="chip">Milestone Brief</div><button id="reset-insights" class="reset-btn" type="button">Reset View</button></div><h3 id="story-title" class="text-lg font-bold"></h3><p id="story-text" class="text-sm leading-relaxed text-slate-700"></p></section>
+        <section class="card panel-card p-4 space-y-2"><div class="chip">Visual Insight</div><div id="point-visual" class="insight-card emphasis"></div></section>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const stages = [
+      { id:"s1",tag:"2023.01",name:"Trial Recovery",focus:"2023-01-08",range:["2022-12-20","2023-02-20"],title:"Border Reopened",lead:"Early 2023 saw the return of 'action': family visits, work, and school resumed as capacity healed.",kpi:"~85% of 2019 Levels",event:"Phase 1 Normality",img:"images/2023全面恢复正常通关.jpg",body:"The significance lay not in peaks, but in certainty: shifting from 'can we cross?' to 'crossing has started'." },
+      { id:"s2",tag:"2023.02",name:"Full Reopening",focus:"2023-02-06",range:["2023-01-20","2023-04-15"],title:"From Action to Rhythm",lead:"After full reopening, crossings moved from ad-hoc to planned, entering a sustained growth channel.",kpi:"+190% YoY",event:"Full Reopening",img:"images/2023全面恢复正常通关.jpg",body:"Single-day peaks breached 1.24M, showing recovery moving from short-term rebound to structural growth." },
+      { id:"s3",tag:"2024.03",name:"Counterflow Formed",focus:"2024-03-18",range:["2023-10-01","2024-12-31"],title:"Northbound Living Replaces Shopping",lead:"2024 saw a directional realignment: Northbound vs Southbound flow hit ~2:1, making 'Northbound Living' the dominant narrative.",kpi:"+40% Weekend Surge",event:"5+2 Dual-City Life",img:"images/2024“灵活行”延伸至深圳北站.jpg",body:"Hong Kong residents heading north outnumbered mainland visitors heading south by 2x. The 'Work in HK, Weekend North' rhythm solidified." },
+      { id:"s4",tag:"2025.10",name:"Fusion Accelerated",focus:"2025-10-12",range:["2025-06-01","2025-12-31"],title:"Efficiency Infrastructure Matured",lead:"By 2025, high-frequency travel was driven by system efficiency: identity, payment, and transport integration.",kpi:"~75% E-channel Use",event:"Million-Level Platform",img:"images/2025.png",body:"Biometrics and digital payments minimized friction, turning the border from a dividing line into a high-frequency seam." }
+    ];
+
+    const buttons = document.getElementById("key-filters");
+    const lead = document.getElementById("lead");
+    const title = document.getElementById("story-title");
+    const text = document.getElementById("story-text");
+    const visual = document.getElementById("point-visual");
+    const resetBtn = document.getElementById("reset-insights");
+    const frame = document.getElementById("counterflow-frame");
+    const toTs=d=>new Date(d+"T00:00:00").getTime();
+    const nearestStageByDate=(dateStr)=>{const t=toTs(dateStr);return stages.reduce((p,c)=>Math.abs(toTs(c.focus)-t)<Math.abs(toTs(p.focus)-t)?c:p,stages[0]);};
+    const setActive=(id)=>{buttons.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.id===id));};
+    const syncFrame=(s)=>frame?.contentWindow?.postMessage({type:"counterflow-node",node:{...s,focus:s.focus,rangeStart:s.range[0],rangeEnd:s.range[1]}},"*");
+    const renderDefaultInsights=()=>{
+      title.textContent="No Milestone Selected | Key Findings First";
+      text.textContent="Click the four key milestones above to view the \"Counterflow Phase\" narrative and timeline.";
+      visual.innerHTML=`<div class="space-y-3"><article class="insight-card"><div class="flex justify-between items-start mb-1"><span class="insight-kicker">Direction Shift</span><i class="fas fa-right-left text-slate-300"></i></div><div class="insight-value">2:1</div><p class="text-sm text-slate-500 mt-1">Northbound vs Southbound (2024)</p><div class="insight-note"><strong>Context:</strong> A directional reversal has formed. The main narrative shifted from "Southbound Consumption" to "Northbound Living".</div></article><article class="insight-card emphasis"><div class="flex justify-between items-start mb-1"><span class="insight-kicker text-accent">Weekend Surge</span><span class="text-[9px] rounded px-2 py-0.5 bg-accent/10 text-accent font-bold">5+2 RHYTHM</span></div><div class="insight-value accent">+40%</div><p class="text-sm text-accent/70 mt-1">Weekend Uplift vs Weekday</p><div class="insight-note"><strong>Impact:</strong> "Work in HK, Weekend North": The dual-city rhythm has stabilized into predictable behavior.</div></article><article class="insight-card"><div class="flex justify-between items-start mb-1"><span class="insight-kicker">Friction Drop</span><i class="fas fa-fingerprint text-orange-500"></i></div><div class="insight-value growth">75%</div><p class="text-sm text-slate-500 mt-1">E-channel Penetration</p><div class="insight-note"><strong>Trend:</strong> Border friction continues to drop; crossing has evolved from an "event" to a "lightweight, high-frequency habit".</div></article></div>`;
+    };
+
+    function render(activeId,fromChart=false){
+      const s=stages.find(x=>x.id===activeId)||stages[0];
+      setActive(s.id);
+      lead.textContent=s.lead;
+      title.textContent=`${s.title}｜${s.focus}`;
+      text.textContent=s.body;
+      visual.innerHTML=`<div class="space-y-3"><div class="flex items-start justify-between gap-2"><div><div class="insight-kicker">${s.name}</div><div class="insight-value accent mt-1">${s.kpi}</div></div><div class="text-xs rounded px-2 py-1 bg-accent/10 text-accent font-semibold">${s.range[0]} ~ ${s.range[1]}</div></div><p class="text-sm text-slate-600">${s.lead}</p><figure class="overflow-hidden rounded-xl border border-slate-200 bg-white"><img src="${s.img}" alt="${s.title}" class="w-full h-44 object-cover" loading="lazy"><figcaption class="px-3 py-2 text-[11px] text-slate-500 bg-slate-50 border-t border-slate-100">${s.event}</figcaption></figure></div>`;
+      if(!fromChart)syncFrame(s);
+    }
+
+    function resetToDefault(){
+      setActive("__none__");
+      lead.textContent="The directional shift is not a short-term fluctuation, but a rewriting of the dual-city living radius.";
+      renderDefaultInsights();
+    }
+
+    buttons.innerHTML=stages.map(s=>`<button class="key-btn" data-id="${s.id}" type="button"><div class="text-xs text-slate-500">${s.focus}</div><div class="font-semibold text-sm mt-1">${s.title}</div></button>`).join("");
+    document.addEventListener("click",e=>{const btn=e.target.closest("[data-id]");if(btn)render(btn.dataset.id,false);});
+    resetBtn?.addEventListener("click",resetToDefault);
+    window.addEventListener("message",e=>{
+      const m=e.data;
+      if(!m) return;
+      if(m.type==="reset-view"){
+        resetToDefault();
+        return;
+      }
+      if(m.type!=="observable-range-changed")return;
+      const picked=m.focusDate||m.rangeCenter;
+      if(!picked)return;
+      render(nearestStageByDate(picked).id,true);
+    });
+    resetToDefault();
+  </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 1.1 | Recovery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: "#0E7490", secondary: "#06B6D4" },
+          fontFamily: { sans: ["Inter", "sans-serif"], serif: ["Noto Serif", "serif"], mono: ["JetBrains Mono", "monospace"] }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root{--glass-bg:rgba(255,255,255,.82);--glass-border:rgba(255,255,255,.78);--glass-shadow:0 16px 40px -18px rgba(14,116,144,.28)}
+    body{background:radial-gradient(1200px 500px at 10% -10%,#e6f7fb 0%,#f8fafc 40%,#f1f5f9 100%);color:#0f172a}
+    .card{background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:22px;box-shadow:var(--glass-shadow)}
+    .hero-card{padding-top:28px;padding-bottom:24px}
+    .panel-card{transition:transform .28s ease,box-shadow .28s ease}
+    .panel-card:hover{transform:translateY(-2px);box-shadow:0 18px 38px -18px rgba(14,116,144,.32)}
+    .serif{font-family:"Noto Serif",serif;line-height:1.85}
+    .chip{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#64748b}
+    .anchor-btn{min-height:44px;border:1px solid #cfe4ec;background:rgba(255,255,255,.9);color:#334155;border-radius:14px;transition:all .25s ease}
+    .anchor-btn.active{border-color:#0e7490;background:#ecfeff;color:#0f766e;box-shadow:0 10px 22px -14px rgba(14,116,144,.58)}
+    .stage-card{border-radius:14px;transition:all .25s ease}
+    .stage-card.active{border-color:#06b6d4;background:#f0fdfa;box-shadow:0 10px 22px -16px rgba(6,182,212,.45)}
+    .insight-card{background:#fff;border:1px solid #b9e8f6;border-radius:18px;padding:14px;box-shadow:0 10px 24px -18px rgba(14,116,144,.42);transition:all .28s ease}
+    .insight-card:hover{transform:translateY(-2px);border-color:#7dd3fc}
+    .insight-card.emphasis{background:linear-gradient(145deg,#fff 0%,#f0f9ff 100%)}
+    .insight-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#94a3b8}
+    .insight-value{font-family:"JetBrains Mono",monospace;font-size:42px;font-weight:700;line-height:1;color:#0f172a}
+    .insight-value.primary{color:#0369a1}
+    .insight-value.growth{color:#16a34a}
+    .insight-note{margin-top:10px;padding:9px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-size:12px;line-height:1.45;color:#475569}
+    .finding-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .finding-heading{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;display:flex;align-items:center;gap:8px}
+    .finding-heading::before{content:"";width:8px;height:8px;background:currentColor;border-radius:50%}
+    .finding-dots{display:flex;align-items:center;gap:7px}
+    .finding-dot{width:10px;height:10px;border-radius:999px;border:1px solid #cbd5e1;background:#e2e8f0;transition:all .2s ease}
+    .finding-dot.active{background:#0e7490;border-color:#0e7490;transform:scale(1.08)}
+    .finding-stage{width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.9);border-radius:20px;padding:24px;min-height:320px;display:flex;flex-direction:column;justify-content:space-between;transition:all .3s cubic-bezier(.25,.8,.25,1)}
+    .finding-stage:focus-visible{outline:2px solid #0284c7;outline-offset:2px}
+    .finding-stage:hover{transform:translateY(-4px);box-shadow:0 20px 40px -10px rgba(14,116,144,.1);background:rgba(255,255,255,.95)}
+    .layout-main{display:grid;grid-template-columns:minmax(0,9fr) minmax(340px,3fr);gap:28px;min-height:calc(100dvh - 128px)}
+    .frame-shell{overflow:hidden;height:100%}
+    .frame-full{height:calc(100dvh - 160px);min-height:620px}
+    .key-btn{min-height:44px;border:1px solid #dbeafe;background:#fff;border-radius:12px;padding:8px 10px;text-align:left;transition:all .22s ease}
+    .key-btn.active{border-color:#06b6d4;background:#ecfeff;box-shadow:0 8px 16px -12px rgba(14,116,144,.55)}
+    .range-chip{border:1px solid #bae6fd;background:#f0f9ff;color:#0c4a6e;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600}
+    .reset-btn{border:1px solid #bfdbfe;background:#f8fbff;color:#0369a1;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;line-height:1.2;transition:all .2s ease}
+    .reset-btn:hover{background:#eff6ff;border-color:#93c5fd}
+    @media (max-width:1279px){.layout-main{grid-template-columns:1fr;min-height:auto}.frame-full{height:62vh;min-height:520px}}
+    @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <script src="global-nav.js"></script>
+
+  <main class="w-screen max-w-none mx-auto pl-3 pr-6 md:pl-4 md:pr-10 xl:pr-12 pt-24 pb-4">
+    <section class="layout-main items-start">
+      <article class="card frame-shell">
+        <iframe id="recovery-frame" src="observable/observable.html?focus=2023-01-08&rangeStart=2022-12-20&rangeEnd=2023-02-20&stage=stage1&v=20260313-layout" class="w-full frame-full border-0" title="Recovery 控制+图表+拉杆" loading="lazy"></iframe>
+      </article>
+      <aside class="space-y-4 pl-2 xl:pl-3">
+        <section class="card hero-card p-5 space-y-3">
+          <div class="chip">Chapter 1.1 / Recovery</div>
+          <h1 class="text-2xl md:text-3xl font-extrabold leading-tight">Recovery is Not Returning to the Past, <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">But Finding New Meaning in Life</span></h1>
+          <p id="lead" class="text-sm text-slate-600">A structural reconstruction from "Passable" to "Planned" to "Habitual".</p>
+          <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
+            <a href="Chapter2_Recovery.html" class="text-center rounded-lg border border-primary bg-primary text-white px-2 py-2">2.1 Recovery</a>
+            <a href="Chapter2_Counterflow.html" class="text-center rounded-lg border border-slate-300 bg-white px-2 py-2 text-slate-700">2.2 Counterflow</a>
+            <a href="index.html?step=4" class="text-center rounded-lg border border-primary bg-primary text-white px-2 py-2">Next Chapter</a>
+          </div>
+        </section>
+        <section class="card panel-card p-4"><div class="chip mb-2">Key Milestones</div><div id="key-filters" class="grid grid-cols-2 gap-2"></div></section>
+        <section class="card panel-card p-4 space-y-2"><div class="flex items-center justify-between gap-2"><div class="chip">Milestone Brief</div><button id="reset-insights" class="reset-btn" type="button">Reset View</button></div><h3 id="story-title" class="text-lg font-bold"></h3><p id="story-text" class="text-sm leading-relaxed text-slate-700"></p></section>
+        <section class="card panel-card p-4 space-y-2"><div class="chip">Visual Insight</div><div id="point-visual" class="insight-card emphasis"></div></section>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const nodes=[
+      {id:"a1",d:"2023-01-08",s:"2023 Trial",t:"The Restart",x:"After reopening, border crossings quickly shook off the pandemic gloom, returning to daily possibilities.",range:["2022-12-20","2023-02-20"],metric:"85%",tag:"Recovery Speed"},
+      {id:"a2",d:"2023-02-06",s:"Full Reopening",t:"Full Reopening",x:"Cross-border travel shifted from temporary arrangements to planned schedules; work, study, and family visits steadily rebounded.",range:["2023-01-20","2023-04-15"],metric:"+190%",tag:"YoY Growth"},
+      {id:"a3",d:"2023-07-01",s:"Structural Split",t:"Structural Divergence",x:"Port functions and timing rhythms stabilized; crossings became predictable rather than just peak-driven.",range:["2023-05-01","2024-03-31"],metric:"Layered",tag:"Functional Evolution"},
+      {id:"a4",d:"2025-10-12",s:"Habitual Platform",t:"Habitual Platform",x:"Million-level daily volume became the norm; biometrics and e-channels turned dual-city life into a high-frequency rhythm.",range:["2025-06-01","2025-12-31"],metric:"1.24M",tag:"Peak Volume"}
+    ];
+    const nodeVisuals={
+      a1:{img:"images/The Reopening.jpg",alt:"Border reopening scene",cap:"Restart Signal: Shifting from pause back to daily routine."},
+      a2:{img:"images/2023全面恢复正常通关.jpg",alt:"Crowds after full reopening",cap:"Full Reopening: From temporary plans to predictable rhythms."},
+      a3:{img:"images/Port Function Split.jpg",alt:"Port function divergence",cap:"Structural Split: Distinct ports for distinct functions and times."},
+      a4:{img:"images/Smart Clearance Evolution.jpg",alt:"Smart clearance evolution",cap:"Habitual Platform: Smart clearance cements dual-city commuting as infrastructure."}
+    };
+    const lead=document.getElementById("lead"),title=document.getElementById("story-title"),text=document.getElementById("story-text"),filters=document.getElementById("key-filters"),visual=document.getElementById("point-visual"),resetBtn=document.getElementById("reset-insights");
+    const frames=[document.getElementById("recovery-frame")];
+    const toTs=d=>new Date(d+"T00:00:00").getTime();
+    const nearestNodeByDate=(dateStr)=>{const t=toTs(dateStr);return nodes.reduce((p,c)=>Math.abs(toTs(c.d)-t)<Math.abs(toTs(p.d)-t)?c:p,nodes[0]);};
+    const setActive=(id)=>{filters.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.id===id));};
+    const syncFrames=(n)=>frames.forEach(f=>f?.contentWindow?.postMessage({type:"recovery-node",node:{...n,focus:n.d,rangeStart:n.range[0],rangeEnd:n.range[1]}},"*"));
+    const findingItems=[
+      {cardClass:"hover:border-primary/50 group",body:`<div><div class="flex justify-between items-start mb-2"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recovery Speed</span><i class="fas fa-stopwatch text-slate-300 group-hover:text-primary transition-colors"></i></div><div class="text-3xl font-bold text-slate-800 font-mono tracking-tight">85%</div><p class="text-xs text-slate-500 mt-1">Recovery of 2019 levels in just 3 months</p></div><div class="relative h-24 w-full flex items-center justify-center mt-4"><svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" stroke="#f1f5f9" stroke-width="8" fill="none"></circle><circle cx="48" cy="48" r="40" stroke="#0E7490" stroke-width="8" fill="none" stroke-dasharray="251.2" stroke-dashoffset="37.6" stroke-linecap="round"></circle></svg><div class="absolute inset-0 flex items-center justify-center flex-col"><span class="text-[10px] text-primary font-bold">Q1 '23</span></div></div><div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 leading-relaxed"><strong>Context:</strong> Unlike other global borders which took ~12 months to normalize, the SZ-HK border saw a V-shaped rebound immediately after reopening.</div>`},
+      {cardClass:"border-primary/30 bg-gradient-to-br from-white to-primary/5 group",body:`<div><div class="flex justify-between items-start mb-2"><span class="text-[10px] font-bold text-primary uppercase tracking-widest">Peak Volume</span><span class="px-2 py-0.5 bg-primary/10 text-primary rounded text-[9px] font-bold">NEW RECORD</span></div><div class="text-3xl font-bold text-primary font-mono tracking-tight">1.24M</div><p class="text-xs text-primary/70 mt-1">Single Day Crossings (Easter 2025)</p></div><div class="h-24 w-full mt-4 relative"><svg class="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none"><defs><linearGradient id="peakGradientRecovery" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0E7490" stop-opacity="0.3"></stop><stop offset="100%" stop-color="#0E7490" stop-opacity="0"></stop></linearGradient></defs><path d="M0,35 Q20,35 40,20 T80,5 L90,2 L100,35 Z" fill="url(#peakGradientRecovery)"></path><path d="M0,35 Q20,35 40,20 T80,5 L90,2" fill="none" stroke="#0E7490" stroke-width="2"></path><circle cx="90" cy="2" r="3" fill="#06B6D4"></circle></svg><div class="absolute top-[40%] left-0 w-full border-t border-dashed border-slate-400/50 text-[9px] text-slate-400"><span class="bg-white/50 px-1">2017 Avg</span></div></div><div class="mt-4 p-3 bg-white/60 rounded-lg border border-primary/10 text-[11px] text-slate-600 leading-relaxed"><strong>Impact:</strong> Surpassing pre-pandemic highs indicates total integration. The "One-Hour Living Circle" is physically realized.</div>`},
+      {cardClass:"hover:border-green-500/50 group",body:`<div><div class="flex justify-between items-start mb-2"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Momentum</span><i class="fas fa-chart-line text-green-500"></i></div><div class="text-3xl font-bold text-green-600 font-mono tracking-tight">+190%</div><p class="text-xs text-slate-500 mt-1">YoY Growth Rate (2023-2024)</p></div><div class="h-24 w-full mt-4 flex items-end justify-between gap-2 px-2"><div class="w-1/4 h-[30%] bg-slate-200 rounded-t flex flex-col justify-end items-center"><span class="text-[8px] mb-1 text-slate-500">Q1</span></div><div class="w-1/4 h-[50%] bg-slate-200 rounded-t flex flex-col justify-end items-center"><span class="text-[8px] mb-1 text-slate-500">Q2</span></div><div class="w-1/4 h-[75%] bg-green-200 rounded-t flex flex-col justify-end items-center"><span class="text-[8px] mb-1 text-green-700">Q3</span></div><div class="w-1/4 h-[100%] bg-green-500 rounded-t shadow-lg shadow-green-500/20 flex flex-col justify-end items-center"><span class="text-[8px] mb-1 text-white font-bold">Q4</span></div></div><div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 leading-relaxed"><strong>Trend:</strong> Growth was not seasonal but structural. Each quarter set a new baseline, driven by policy relaxation.</div>`}
+    ];
+    let findingIndex=0;
+
+    function renderFindingCard(){
+      const item=findingItems[findingIndex];
+      const stage=visual.querySelector("#finding-stage");
+      if(!stage)return;
+      stage.className=`finding-stage ${item.cardClass}`;
+      stage.innerHTML=item.body;
+      visual.querySelectorAll(".finding-dot").forEach((dot,i)=>dot.classList.toggle("active",i===findingIndex));
+    }
+
+    function nextFinding(){
+      findingIndex=(findingIndex+1)%findingItems.length;
+      renderFindingCard();
+    }
+
+    function renderDefaultInsights(){
+      title.textContent="No Milestone Selected | Key Findings First";
+      text.textContent="Click anywhere on the card below to switch findings, or use the dots to jump directly.";
+      visual.innerHTML=`<div class="space-y-3"><div class="finding-top"><div class="finding-heading">Key Findings: The Resurgence Phase</div><div class="finding-dots">${findingItems.map((_,i)=>`<button class='finding-dot ${i===findingIndex?"active":""}' type='button' data-finding='${i}' aria-label='Switch to finding ${i+1}'></button>`).join("")}</div></div><button class="finding-stage group" id="finding-stage" type="button" aria-label="Click for next finding"></button></div>`;
+      renderFindingCard();
+      visual.querySelector("#finding-stage")?.addEventListener("click",nextFinding);
+      visual.querySelectorAll("[data-finding]").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();findingIndex=Number(btn.dataset.finding)||0;renderFindingCard();}));
+    }
+
+    function setNode(id,fromChart=false){
+      const n=nodes.find(i=>i.id===id)||nodes[0];
+      setActive(n.id);
+      lead.textContent=`${n.s}：${n.x}`;
+      title.textContent=`${n.t}｜${n.d}`;
+      text.textContent=n.x;
+      const media=nodeVisuals[n.id];
+      visual.innerHTML=`<div class="space-y-3"><div class="flex items-start justify-between gap-2"><div><div class="insight-kicker">${n.tag}</div><div class="insight-value primary mt-1">${n.metric}</div></div><div class="text-xs rounded px-2 py-1 bg-primary/10 text-primary font-semibold">${n.range[0]} ~ ${n.range[1]}</div></div><p class="text-sm text-slate-600">${n.x}</p><figure class="overflow-hidden rounded-xl border border-slate-200 bg-white"><img src="${media?.img||"images/The Reopening.jpg"}" alt="${media?.alt||n.t}" class="w-full h-44 object-cover" loading="lazy"><figcaption class="px-3 py-2 text-[11px] text-slate-500 bg-slate-50 border-t border-slate-100">${media?.cap||"跨境流动进入稳定恢复轨道"}</figcaption></figure></div>`;
+      if(!fromChart)syncFrames(n);
+    }
+
+    function resetToDefault(){
+      setActive("__none__");
+      lead.textContent="A structural reconstruction from \"Passable\" to \"Planned\" to \"Habitual\".";
+      findingIndex=0;
+      renderDefaultInsights();
+    }
+    filters.innerHTML=nodes.map(n=>`<button class="key-btn" data-id="${n.id}"><div class="text-xs text-slate-500">${n.d}</div><div class="font-semibold text-sm mt-1">${n.t}</div></button>`).join("");
+    
+    document.addEventListener("click",e=>{const btn=e.target.closest("[data-id]");if(btn)setNode(btn.dataset.id,false);});
+    resetBtn?.addEventListener("click",resetToDefault);
+    window.addEventListener("message",e=>{
+      const m=e.data;
+      if(!m) return;
+      if(m.type==="reset-view"){
+        resetToDefault();
+        return;
+      }
+      if(m.type!=="observable-range-changed")return;
+      const picked=m.focusDate||m.rangeCenter;
+      if(!picked)return;
+      setNode(nearestNodeByDate(picked).id,true);
+    });
+    resetToDefault();
+  </script>
+</body>
+</html>

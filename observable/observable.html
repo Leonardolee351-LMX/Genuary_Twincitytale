@@ -39,12 +39,14 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1420px;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            padding-bottom: 40px;
+            display: grid;
+            grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+            gap: 30px;
+            padding: 10px 14px 24px;
+            min-height: calc(100vh - 40px);
+            align-items: stretch;
         }
 
         /* Glassmorphism Card */
@@ -64,12 +66,15 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            height: 100%;
+            overflow: auto;
         }
 
         .header-top {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            flex-direction: column;
+            gap: 10px;
+            align-items: stretch;
         }
         .header-top h1 { margin: 0 0 4px 0; font-size: 24px; font-weight: 700; }
         .header-top p { margin: 0; color: var(--text-secondary); font-size: 14px; }
@@ -164,7 +169,7 @@
 
         /* --- Chart Area --- */
         .chart-wrapper {
-            height: 500px;
+            height: clamp(480px, 68vh, 760px);
             width: 100%;
             position: relative;
         }
@@ -172,35 +177,117 @@
         /* Stats Summary */
         .summary-row {
             display: flex;
-            gap: 24px;
+            flex-wrap: wrap;
+            gap: 10px 24px;
+            width: 100%;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0,0,0,0.06);
         }
-        .stat-item { display: flex; flex-direction: column; }
+        .stat-item { display: flex; flex-direction: column; min-width: 120px; }
         .stat-val { font-size: 20px; font-weight: 700; color: var(--text-primary); }
         .stat-lbl { font-size: 11px; color: var(--text-secondary); }
 
         /* Detail Popup */
-        #detail-card {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 280px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(30px);
-            border-radius: 18px;
-            box-shadow: var(--shadow-lg);
-            padding: 20px;
-            display: none;
-            z-index: 100;
-            border: 1px solid rgba(255,255,255,0.5);
-            animation: fadeIn 0.2s ease-out;
+        .daily-detail-group {
+            width: 100%;
+            padding: 0 8px;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
+        #detail-card {
+            width: min(100%, 320px);
+            margin: 10px auto;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 14px;
+            box-shadow: var(--shadow-sm);
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.55);
+            min-height: 160px;
+        }
+        .detail-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 130px;
+            border: 1px dashed rgba(48,176,199,0.45);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: center;
+            background: rgba(240, 249, 255, 0.7);
+            padding: 12px;
+        }
+        .detail-content { display: none; }
         .donut-container { height: 160px; display: flex; justify-content: center; margin: 10px 0; }
         .stats-table { width: 100%; font-size: 12px; border-collapse: collapse; }
         .stats-table td { padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .stats-table tr:last-child td { border-bottom: none; }
         .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .anchor-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; background: #facc15; box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.22); }
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-width: 100%;
+            margin-bottom: 8px;
+        }
+        .chart-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 999px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        .chart-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .brush-hint {
+            margin: 0 0 12px 0;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .reset-icon-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 0 12px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            z-index: 10;
+        }
+        .reset-icon-btn:hover {
+            background: white;
+            color: var(--accent-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .reset-icon-btn svg {
+            margin-right: 6px;
+            transition: transform 0.3s ease;
+        }
+        .reset-icon-btn:hover svg {
+            transform: rotate(-180deg);
+        }
+        .chart-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .brush-zone {
+            margin-top: 10px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+        }
 
         /* Tooltip */
         .tooltip {
@@ -227,6 +314,19 @@
             color: var(--text-secondary);
         }
 
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+            .controls-header {
+                overflow: visible;
+            }
+            .chart-wrapper {
+                height: 520px;
+            }
+        }
+
         /* Scrollbar styling */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -240,9 +340,11 @@
         <!-- Top Controls Panel -->
         <div class="glass-card controls-header">
             <div class="header-top">
-                <div>
-                    <h1>Flow Analytics</h1>
-                    <p>Hong Kong Passenger Traffic</p>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h1>Flow Analytics</h1>
+                        <p>Hong Kong Passenger Traffic</p>
+                    </div>
                 </div>
                 <div class="summary-row">
                     <div class="stat-item">
@@ -308,31 +410,43 @@
                 </div>
                 <div class="chip-scroll-container">
                     <div class="chip-scroll" id="cp-list">
-                        <!-- Chips injected here -->
+                    </div>
+                </div>
+            </div>
+            <div class="control-group daily-detail-group" style="margin-top:4px;">
+                <span class="control-label">Daily Detail</span>
+                <div id="detail-card">
+                    <div id="detail-placeholder" class="detail-placeholder">Click any point on the chart to view daily traffic details</div>
+                    <div id="detail-content" class="detail-content">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <strong id="card-date" style="font-size:16px;">Date</strong>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;" id="card-cp">All Control Points</div>
+                        <div id="donut-chart" class="donut-container"></div>
+                        <table class="stats-table" id="stats-table"></table>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Chart Card -->
-        <div class="glass-card">
+        <div class="glass-card chart-panel">
+            <button id="btn-reset" class="reset-icon-btn" title="Reset View" onclick="resetAll()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+                <span style="font-size:12px; font-weight:600;">Reset</span>
+            </button>
+            <div id="chart-legend" class="chart-legend"></div>
             <div class="chart-wrapper">
                 <div id="chart" style="width:100%; height:100%;">
                     <div class="loading">Loading data...</div>
                 </div>
-                <!-- Detail Popup -->
-                <div id="detail-card">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <strong id="card-date" style="font-size:16px;">Date</strong>
-                        <span onclick="document.getElementById('detail-card').style.display='none'" style="cursor:pointer; font-size:18px; color:var(--text-secondary);">&times;</span>
-                    </div>
-                    <div style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;" id="card-cp">All Control Points</div>
-                    <div id="donut-chart" class="donut-container"></div>
-                    <table class="stats-table" id="stats-table"></table>
-                </div>
             </div>
-            <!-- Brush Chart -->
-            <div id="brush-chart" style="height: 60px; margin-top: 20px;"></div>
+            <div class="brush-zone">
+                <div class="brush-hint">Drag the brush to select a time range</div>
+                <div id="brush-chart" style="height: 64px; margin-top: 2px;"></div>
+            </div>
         </div>
     </div>
 
@@ -375,13 +489,57 @@
                 type: new Set(["Hong Kong Residents", "Mainland Visitors", "Other Visitors"]),
                 cp: new Set() // Will init with all
             },
-            dateRange: null
+            dateRange: null,
+            selectedDate: null
         };
 
         // Globals
         let svg, x, y, xAxis, yAxis, lineGroup, focus;
-        let brushSvg, brushX, brushY, brushGroup, brush;
+        let brushSvg, brushX, brushY, brushGroup, brush, brushLayer;
         let width, height;
+        let isProgrammaticBrush = false;
+        let lastRangeEmitKey = "";
+        const parseISODate = d3.timeParse("%Y-%m-%d");
+        
+        function resetAll() {
+            // Reset State
+            state.groupBy = "direction";
+            state.filters.direction = new Set(["Arrival", "Departure"]);
+            state.filters.type = new Set(["Hong Kong Residents", "Mainland Visitors", "Other Visitors"]);
+            // CP filter reset to all
+            const allCPs = Array.from(new Set(state.rawData.map(d => d.ControlPoint))).sort();
+            state.filters.cp = new Set(allCPs);
+            state.dateRange = null;
+            state.selectedDate = null;
+
+            // Reset Detail Card
+            d3.select("#detail-placeholder").style("display", "flex");
+            d3.select("#detail-content").style("display", "none");
+
+            // Update Controls UI
+            d3.selectAll(".segment-opt").classed("active", function() { return this.getAttribute("data-val") === "direction"; });
+            d3.selectAll(".filter-dir").property("checked", true);
+            d3.selectAll(".filter-type").property("checked", true);
+            d3.selectAll(".chip").classed("active", true);
+
+            // Reset Charts
+            update();
+            
+            // Reset Brush
+            if(brushGroup && brush) {
+                brushGroup.call(brush.move, null);
+            }
+
+            // Notify Parent
+            window.parent.postMessage({ type: "reset-view" }, "*");
+        }
+
+        const NARRATIVE_ANCHORS = [
+            { date: "2023-01-08", event: "动作恢复起点" },
+            { date: "2023-02-06", event: "全面通关" },
+            { date: "2023-07-01", event: "高弹性节点" },
+            { date: "2025-10-12", event: "习惯化平台" }
+        ];
 
         // --- Init ---
         async function main() {
@@ -404,9 +562,11 @@
                 state.filters.cp = new Set(allCPs);
 
                 initControls(allCPs);
-                initLayout(); // Calc dimensions
+                initLayout();
                 initCharts();
                 update();
+                bindNarrativeSync();
+                applyInitialNarrativeFocus();
                 
                 // Resize listener
                 window.addEventListener('resize', () => {
@@ -433,7 +593,7 @@
                 // Update State
                 state.groupBy = this.getAttribute("data-val");
                 update();
-                document.getElementById('detail-card').style.display = 'none';
+                if (state.selectedDate) updateDetailView(state.selectedDate);
             });
 
             // Direction Filters
@@ -573,7 +733,7 @@
                 .extent([[0, 0], [width, brushHeight]])
                 .on("brush end", brushed);
             
-            brushSvg.append("g").call(brush);
+            brushLayer = brushSvg.append("g").call(brush);
             
             // Style the brush selection
             brushSvg.selectAll(".selection")
@@ -584,6 +744,7 @@
             
             // Brush Axis
             brushSvg.append("g")
+                .attr("class", "axis")
                 .attr("transform", `translate(0,${brushHeight})`)
                 .call(d3.axisBottom(brushX).ticks(5).tickFormat(d3.timeFormat("%b %d")))
                 .select(".domain").remove();
@@ -676,6 +837,10 @@
                 return COLOR_MAP[k] || "#999";
             };
 
+            d3.select("#chart-legend").html(keys.slice(0, 8).map(k => `
+                <span class="chart-legend-item"><span class="chart-legend-dot" style="background:${getColor(k)}"></span>${k}</span>
+            `).join(""));
+
             const lines = lineGroup.selectAll(".line-path").data(keys, d => d);
             
             lines.exit().remove();
@@ -710,8 +875,8 @@
                 d3.select("#peak-date").text(d3.timeFormat("%b %d")(peakRow.date));
             }
 
-            // Brush
             updateBrush(data, fullExtent);
+            syncBrushToState();
         }
 
         function updateBrush(data, extent) {
@@ -746,17 +911,181 @@
         }
 
         function brushed(event) {
-            if (event.selection) {
-                state.dateRange = [brushX.invert(event.selection[0]), brushX.invert(event.selection[1])];
-            } else {
-                state.dateRange = null;
+            if (isProgrammaticBrush) return;
+            if (event.selection) state.dateRange = [brushX.invert(event.selection[0]), brushX.invert(event.selection[1])];
+            else state.dateRange = null;
+            update();
+            emitRangeToParent();
+        }
+
+        function syncBrushToState() {
+            if (!brushLayer || !brushX) return;
+            isProgrammaticBrush = true;
+            const sel = state.dateRange ? state.dateRange.map(brushX) : null;
+            brushLayer.call(brush.move, sel);
+            isProgrammaticBrush = false;
+        }
+
+        function toISODate(dateObj){ return d3.timeFormat("%Y-%m-%d")(dateObj); }
+        function emitRangeToParent() {
+            const center = state.dateRange ? new Date((state.dateRange[0].getTime()+state.dateRange[1].getTime())/2) : x.domain()[0];
+            const key = state.dateRange ? `${toISODate(state.dateRange[0])}_${toISODate(state.dateRange[1])}` : "full";
+            if (key === lastRangeEmitKey) return;
+            lastRangeEmitKey = key;
+            window.parent?.postMessage({type:"observable-range-changed",rangeStart:state.dateRange?toISODate(state.dateRange[0]):null,rangeEnd:state.dateRange?toISODate(state.dateRange[1]):null,rangeCenter:toISODate(center)}, "*");
+        }
+
+        function applyNarrativeFocus(payload) {
+            if (!payload) return;
+            const from = payload.rangeStart ? parseISODate(payload.rangeStart) : null;
+            const to = payload.rangeEnd ? parseISODate(payload.rangeEnd) : null;
+            const focus = payload.focus || payload.focusDate;
+            if (from && to) state.dateRange = [from, to];
+            else if (focus) {
+                const d = parseISODate(focus);
+                if (d) state.dateRange = [d3.timeDay.offset(d, -30), d3.timeDay.offset(d, 45)];
             }
-            // Quick update (just chart, no full re-calc needed really, but update() is safe)
-            // For performance, we could separate logic, but for N<1000 rows it's fine.
-            update(); 
+            update();
+            emitRangeToParent();
+        }
+
+        function bindNarrativeSync() {
+            window.addEventListener("message", (event) => {
+                const msg = event.data;
+                if (!msg || msg.type !== "recovery-node") return;
+                applyNarrativeFocus(msg.node || msg);
+            });
+        }
+
+        function applyInitialNarrativeFocus() {
+            const p = new URLSearchParams(window.location.search);
+            applyNarrativeFocus({focus: p.get("focus"), rangeStart: p.get("rangeStart"), rangeEnd: p.get("rangeEnd")});
         }
 
         // --- Interaction ---
+        function onChartClick(event) {
+            const d = getHoverData(event);
+            if (!d) return;
+            state.selectedDate = d.date;
+            updateDetailView(d);
+        }
+
+        function updateDetailView(d) {
+            d3.select("#detail-placeholder").style("display", "none");
+            d3.select("#detail-content").style("display", "block");
+
+            d3.select("#card-date").text(d3.timeFormat("%b %d, %Y")(d.date));
+            d3.select("#card-cp").text(state.filters.cp.size === 0 ? "No Control Point Selected" : state.filters.cp.size === 1 ? Array.from(state.filters.cp)[0] : `${state.filters.cp.size} Control Points Selected`);
+            
+            // Notify Parent
+            window.parent?.postMessage({
+                type: "observable-range-changed",
+                focusDate: toISODate(d.date),
+                rangeCenter: toISODate(d.date)
+            }, "*");
+            
+            // Get raw data for the day
+            const dayRaw = state.rawData.filter(r => 
+                r.timestamp === d.date.getTime() &&
+                state.filters.cp.has(r.ControlPoint) &&
+                state.filters.direction.has(r.Arrival_or_Departure)
+            );
+
+            let donutData = [];
+            
+            if (state.groupBy === "direction") {
+                let arrival = 0, departure = 0;
+                dayRaw.forEach(r => {
+                    if (r.Arrival_or_Departure === "Arrival") arrival += r.total;
+                    else if (r.Arrival_or_Departure === "Departure") departure += r.total;
+                });
+                donutData = [
+                    {k: "Arrival", v: arrival, c: COLOR_MAP["Arrival"]},
+                    {k: "Departure", v: departure, c: COLOR_MAP["Departure"]}
+                ];
+            } else if (state.groupBy === "type") {
+                let hk = 0, mainland = 0, other = 0;
+                dayRaw.forEach(r => {
+                    hk += (+r.HongKongResidents || 0);
+                    mainland += (+r.MainlandVisitors || 0);
+                    other += (+r.OtherVisitors || 0);
+                });
+                donutData = [
+                    {k: "Hong Kong Residents", v: hk, c: COLOR_MAP["Hong Kong Residents"]},
+                    {k: "Mainland Visitors", v: mainland, c: COLOR_MAP["Mainland Visitors"]},
+                    {k: "Other Visitors", v: other, c: COLOR_MAP["Other Visitors"]}
+                ];
+            } else if (state.groupBy === "cp") {
+                // Aggregate by CP
+                const cpMap = new Map();
+                dayRaw.forEach(r => {
+                    const v = r.total; // Total for this row (already summed types)
+                    cpMap.set(r.ControlPoint, (cpMap.get(r.ControlPoint) || 0) + v);
+                });
+                // Top 5 + Other
+                let sorted = Array.from(cpMap.entries()).sort((a,b) => b[1] - a[1]);
+                if (sorted.length > 5) {
+                    const top5 = sorted.slice(0, 5);
+                    const others = sorted.slice(5).reduce((acc, curr) => acc + curr[1], 0);
+                    donutData = top5.map(e => ({k: e[0], v: e[1], c: CP_COLOR_SCALE(e[0])}));
+                    donutData.push({k: "Others", v: others, c: "#ccc"});
+                } else {
+                    donutData = sorted.map(e => ({k: e[0], v: e[1], c: CP_COLOR_SCALE(e[0])}));
+                }
+            }
+
+            renderDonut(donutData);
+            renderStatsTable(donutData);
+        }
+
+        function renderDonut(data) {
+            const container = d3.select("#donut-chart");
+            container.html("");
+            const width = 160, height = 160, radius = Math.min(width, height) / 2;
+            
+            const svg = container.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width/2},${height/2})`);
+            
+            const pie = d3.pie().value(d => d.v).sort(null);
+            const arc = d3.arc().innerRadius(radius * 0.6).outerRadius(radius);
+            
+            const paths = svg.selectAll("path")
+                .data(pie(data))
+                .enter().append("path")
+                .attr("d", arc)
+                .attr("fill", d => d.data.c)
+                .attr("stroke", "white")
+                .style("stroke-width", "2px");
+
+            // Center Text
+            const total = d3.sum(data, d => d.v);
+            svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", "-0.2em")
+                .style("font-size", "14px")
+                .style("font-weight", "bold")
+                .text(d3.format(".2s")(total));
+            svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", "1.2em")
+                .style("font-size", "10px")
+                .style("fill", "#666")
+                .text("Daily Total");
+        }
+
+        function renderStatsTable(data) {
+            const table = d3.select("#stats-table");
+            table.html("");
+            data.forEach(d => {
+                const tr = table.append("tr");
+                tr.append("td").html(`<span class="dot" style="background:${d.c}"></span>${d.k}`);
+                tr.append("td").style("text-align", "right").style("font-weight", "600").text(d3.format(",")(d.v));
+            });
+        }
+
         function getHoverData(event) {
             const mx = d3.pointer(event)[0];
             const date = x.invert(mx);
@@ -836,37 +1165,62 @@
             const d = getHoverData(event);
             if(!d) return;
             
-            const card = d3.select("#detail-card");
-            card.style("display", "block");
-            
+            state.selectedDate = d;
+            updateDetailView(d);
+        }
+
+        function updateDetailView(d) {
+            d3.select("#detail-placeholder").style("display", "none");
+            d3.select("#detail-content").style("display", "block");
+
             d3.select("#card-date").text(d3.timeFormat("%b %d, %Y")(d.date));
+            d3.select("#card-cp").text(state.filters.cp.size === 0 ? "No Control Point Selected" : state.filters.cp.size === 1 ? Array.from(state.filters.cp)[0] : `${state.filters.cp.size} Control Points Selected`);
+            const anchorHit = NARRATIVE_ANCHORS.find(a => a.date === toISODate(d.date)) || null;
+            window.parent?.postMessage({type:"observable-range-changed",focusDate:toISODate(d.date),rangeCenter:toISODate(d.date)}, "*");
             
-            // Build donut data: Aggregate based on current view context
-            // Actually, for the popup, it's nice to show the Composition of the selected slice
-            // If grouped by Direction -> Show Dir split
-            // If grouped by Type -> Show Type split
-            // Let's standardise: Show Type breakdown for the clicked day (filtered by current CP/Dir filters)
-            
-            // We need to query raw data again for this specific date
+            // Get raw data for the day
             const dayRaw = state.rawData.filter(r => 
                 r.timestamp === d.date.getTime() &&
                 state.filters.cp.has(r.ControlPoint) &&
                 state.filters.direction.has(r.Arrival_or_Departure)
             );
-            
-            let hk = 0, mainland = 0, other = 0;
-            dayRaw.forEach(r => {
-                if(state.filters.type.has("Hong Kong Residents")) hk += (+r.HongKongResidents||0);
-                if(state.filters.type.has("Mainland Visitors")) mainland += (+r.MainlandVisitors||0);
-                if(state.filters.type.has("Other Visitors")) other += (+r.OtherVisitors||0);
-            });
 
-            // Draw Donut
-            const donutData = [
-                {k: "HK Residents", v: hk, c: COLOR_MAP["Hong Kong Residents"]},
-                {k: "Mainland", v: mainland, c: COLOR_MAP["Mainland Visitors"]},
-                {k: "Other", v: other, c: COLOR_MAP["Other Visitors"]}
-            ].filter(x => x.v > 0);
+            let donutData = [];
+            
+            if (state.groupBy === "direction") {
+                let arrival = 0, departure = 0;
+                dayRaw.forEach(r => {
+                    if (r.Arrival_or_Departure === "Arrival") arrival += r.total;
+                    else if (r.Arrival_or_Departure === "Departure") departure += r.total;
+                });
+                donutData = [
+                    {k: "Arrival", v: arrival, c: COLOR_MAP["Arrival"]},
+                    {k: "Departure", v: departure, c: COLOR_MAP["Departure"]}
+                ];
+            } else if (state.groupBy === "type") {
+                let hk = 0, mainland = 0, other = 0;
+                dayRaw.forEach(r => {
+                    if(state.filters.type.has("Hong Kong Residents")) hk += (+r.HongKongResidents||0);
+                    if(state.filters.type.has("Mainland Visitors")) mainland += (+r.MainlandVisitors||0);
+                    if(state.filters.type.has("Other Visitors")) other += (+r.OtherVisitors||0);
+                });
+                donutData = [
+                    {k: "HK Residents", v: hk, c: COLOR_MAP["Hong Kong Residents"]},
+                    {k: "Mainland", v: mainland, c: COLOR_MAP["Mainland Visitors"]},
+                    {k: "Other", v: other, c: COLOR_MAP["Other Visitors"]}
+                ];
+            } else if (state.groupBy === "cp") {
+                const cpMap = new Map();
+                dayRaw.forEach(r => {
+                    cpMap.set(r.ControlPoint, (cpMap.get(r.ControlPoint) || 0) + r.total);
+                });
+                donutData = Array.from(cpMap.entries())
+                    .map(([k, v]) => ({k, v, c: CP_COLOR_SCALE(k)}))
+                    .sort((a, b) => b.v - a.v)
+                    .slice(0, 5);
+            }
+
+            donutData = donutData.filter(x => x.v > 0);
 
             const arc = d3.arc().innerRadius(50).outerRadius(70);
             const pie = d3.pie().value(d => d.v);
@@ -883,15 +1237,24 @@
             // Draw Table
             const tbody = d3.select("#stats-table");
             tbody.html("");
+            if (anchorHit) {
+                tbody.append("tr").html(`
+                    <td><span class="anchor-dot"></span>${anchorHit.event}</td>
+                    <td style="text-align:right; font-weight:600; color:#ca8a04;">Anchor</td>
+                `);
+            }
             donutData.forEach(item => {
                 tbody.append("tr").html(`
                     <td><span class="dot" style="background:${item.c}"></span>${item.k}</td>
                     <td style="text-align:right; font-weight:600;">${d3.format(",")(item.v)}</td>
                 `);
             });
+            
+            // Total
+            const total = d3.sum(dayRaw, r => r.total);
             tbody.append("tr").html(`
                 <td style="font-weight:700; padding-top:8px;">Total</td>
-                <td style="text-align:right; font-weight:700; padding-top:8px;">${d3.format(",")(hk+mainland+other)}</td>
+                <td style="text-align:right; font-weight:700; padding-top:8px;">${d3.format(",")(total)}</td>
             `);
         }
 

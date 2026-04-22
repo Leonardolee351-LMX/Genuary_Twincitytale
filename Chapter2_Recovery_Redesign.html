@@ -196,7 +196,7 @@
       const n=nodes.find(x=>x.id===id)||nodes[0];
       setActive(n.id);
       leadEl.textContent=`${n.s}: ${n.x}`;
-      storyTitleEl.textContent=`${n.t}｜${n.d}`;
+      storyTitleEl.textContent=`${n.t} | ${n.d}`;
       storyTextEl.textContent=n.x;
       statRange.textContent=`${n.range[0]} ~ ${n.range[1]}`;
       statMetric.textContent=n.metric;

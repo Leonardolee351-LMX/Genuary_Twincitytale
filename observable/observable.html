@@ -197,32 +197,6 @@
             height: 100%;
             border-radius: 14px;
         }
-        body.embedded .embedded-summary {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(0,0,0,0.06);
-            background: rgba(255,255,255,0.72);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        body.embedded .embedded-summary-title {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-        }
-        body.embedded .embedded-summary .summary-row {
-            border-top: 0;
-            padding-top: 0;
-            gap: 8px 14px;
-        }
-        body.embedded .embedded-summary .stat-item { min-width: 0; }
-        body.embedded .embedded-summary .stat-lbl { font-size: 10px; }
-        body.embedded .embedded-summary .stat-val { font-size: 16px; }
         body.embedded .chart-panel { display: grid; grid-template-rows: auto 1fr auto; gap: 6px; min-height: 0; }
         body.embedded .chart-legend { margin-bottom: 6px; }
         body.embedded .chart-wrapper {
@@ -234,19 +208,6 @@
         body.embedded #brush-chart { height: 86px !important; margin-top: 6px !important; }
 
         body.embedded .embedded-side { min-height: 0; }
-        body.embedded .embedded-side {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            overflow: hidden;
-        }
-        body.embedded .embedded-block {
-            border: 1px solid rgba(0,0,0,0.06);
-            background: rgba(255,255,255,0.72);
-            border-radius: 12px;
-            padding: 10px;
-            min-height: 0;
-        }
         body.embedded .embedded-side-head {
             display: flex;
             align-items: center;
@@ -265,86 +226,6 @@
             font-size: 11px;
             color: var(--text-secondary);
             white-space: nowrap;
-        }
-        body.embedded .embedded-side-action {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            height: 34px;
-            padding: 0 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(0,0,0,0.10);
-            background: rgba(255,255,255,0.86);
-            color: var(--text-primary);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.15s ease;
-        }
-        body.embedded .embedded-side-action:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 14px 28px -18px rgba(14,116,144,.28);
-            border-color: rgba(48, 176, 199, 0.35);
-        }
-        body.embedded .embedded-filters-body .control-row { gap: 12px; }
-        body.embedded .embedded-filters-body .control-group { gap: 6px; }
-        body.embedded .embedded-filters-body .segmented-control { border-radius: 999px; padding: 4px; }
-        body.embedded .embedded-filters-body .segment-opt { font-size: 12px; padding: 6px 10px; border-radius: 999px; }
-        body.embedded .embedded-filters-body .toggle-group { gap: 8px; flex-wrap: wrap; }
-        body.embedded .embedded-filters-body .custom-toggle { font-size: 12px; }
-        body.embedded .embedded-filters-body .custom-toggle input { transform: translateY(1px); }
-
-        body.embedded .embedded-modal {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        body.embedded .embedded-modal.open { display: flex; }
-        body.embedded .embedded-modal-backdrop {
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.46);
-        }
-        body.embedded .embedded-modal-panel {
-            position: relative;
-            width: min(780px, calc(100vw - 24px));
-            max-height: min(78vh, 720px);
-            overflow: auto;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.25);
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            box-shadow: 0 30px 70px -30px rgba(15, 23, 42, 0.40);
-            padding: 14px;
-        }
-        body.embedded .embedded-modal-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 6px 4px 12px;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            margin-bottom: 12px;
-        }
-        body.embedded .embedded-modal-title {
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 0.10em;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-        }
-        body.embedded .embedded-modal-close {
-            height: 34px;
-            width: 34px;
-            border-radius: 10px;
-            border: 1px solid rgba(0,0,0,0.10);
-            background: rgba(255,255,255,0.88);
-            cursor: pointer;
         }
         body.embedded #detail-card {
             width: 100%;
@@ -534,79 +415,12 @@
             const detailCard = document.getElementById("detail-card");
             const chartPanel = document.querySelector(".chart-panel");
             const container = document.querySelector(".container");
-            const controlsHeader = document.querySelector(".controls-header");
-            if (!detailCard || !chartPanel || !container || !controlsHeader) return;
-
-            const summaryRow = controlsHeader.querySelector(".summary-row");
-            if (summaryRow) {
-                const summaryWrap = document.createElement("div");
-                summaryWrap.className = "embedded-summary";
-                summaryWrap.innerHTML = `<div class="embedded-summary-title">Flow Analytics</div>`;
-                summaryWrap.appendChild(summaryRow);
-                chartPanel.insertBefore(summaryWrap, chartPanel.firstChild);
-            }
-
-            const controlRow = controlsHeader.querySelector(".control-row");
-            const cpList = controlsHeader.querySelector("#cp-list");
-            const cpGroup = cpList ? cpList.closest(".control-group") : null;
-            const dailyDetailGroup = controlsHeader.querySelector(".daily-detail-group");
-            if (dailyDetailGroup) dailyDetailGroup.style.display = "none";
-
+            if (!detailCard || !chartPanel) return;
             const side = document.createElement("div");
             side.className = "glass-card embedded-side";
-            side.innerHTML = `
-                <div class="embedded-block">
-                    <div class="embedded-side-head">
-                        <div class="embedded-side-title">Filters</div>
-                        <button id="cp-open" class="embedded-side-action" type="button" aria-haspopup="dialog" aria-controls="cp-modal">
-                            Control Points
-                        </button>
-                    </div>
-                    <div class="embedded-filters-body" data-slot="filters"></div>
-                </div>
-                <div class="embedded-block" style="flex:1;">
-                    <div class="embedded-side-head">
-                        <div class="embedded-side-title">Daily Detail</div>
-                        <div class="embedded-side-hint">Click the line/points to view</div>
-                    </div>
-                    <div data-slot="detail" style="min-height:0; height:100%;"></div>
-                </div>
-                <div id="cp-modal" class="embedded-modal" role="dialog" aria-modal="true" aria-label="Control Points">
-                    <div class="embedded-modal-backdrop" data-close="1"></div>
-                    <div class="embedded-modal-panel">
-                        <div class="embedded-modal-head">
-                            <div class="embedded-modal-title">Control Points</div>
-                            <button class="embedded-modal-close" type="button" aria-label="Close" data-close="1">✕</button>
-                        </div>
-                        <div data-slot="cp"></div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(side);
-
-            const filtersSlot = side.querySelector('[data-slot="filters"]');
-            if (filtersSlot && controlRow) filtersSlot.appendChild(controlRow);
-
-            const cpSlot = side.querySelector('[data-slot="cp"]');
-            if (cpSlot && cpGroup) cpSlot.appendChild(cpGroup);
-
-            const detailSlot = side.querySelector('[data-slot="detail"]');
-            if (detailSlot) detailSlot.appendChild(detailCard);
-
-            const modal = side.querySelector("#cp-modal");
-            const openBtn = side.querySelector("#cp-open");
-            const setOpen = (v) => {
-                if (!modal) return;
-                modal.classList.toggle("open", !!v);
-            };
-            openBtn?.addEventListener("click", () => setOpen(true));
-            modal?.addEventListener("click", (e) => {
-                const t = e.target;
-                if (t && t.getAttribute && t.getAttribute("data-close") === "1") setOpen(false);
-            });
-            document.addEventListener("keydown", (e) => {
-                if (e.key === "Escape") setOpen(false);
-            });
+            side.innerHTML = `<div class="embedded-side-head"><div class="embedded-side-title">Daily Detail</div><div class="embedded-side-hint">Click the line/points to view</div></div>`;
+            container?.appendChild(side);
+            side.appendChild(detailCard);
         });
     </script>
     <div class="container">

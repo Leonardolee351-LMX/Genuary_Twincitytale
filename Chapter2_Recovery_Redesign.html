@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -60,10 +60,38 @@
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">But Finding New Meaning in Life</span>
           </h1>
           <p id="lead" class="mt-2 text-sm leading-relaxed text-slate-600">A structural reconstruction from "Passable" to "Planned" to "Habitual".</p>
-          <nav class="mt-3 grid grid-cols-2 gap-2 text-xs font-semibold">
-            <a href="Chapter2_Counterflow_Redesign.html" class="text-center rounded-lg border border-slate-300 bg-white px-2 py-2 text-slate-700">Counterflow</a>
-            <a href="index.html?step=4" class="text-center rounded-lg border border-primary bg-primary text-white px-2 py-2">Chapter 3 Cover</a>
-          </nav>
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a href="Chapter2_Counterflow_Redesign.html" class="group min-h-[56px] rounded-xl border border-slate-200 bg-white/80 px-4 py-3 flex items-center justify-between gap-4 hover:border-secondary/40 hover:shadow-lg transition-all">
+              <div class="min-w-0">
+                <div class="text-[10px] font-mono tracking-widest uppercase text-slate-400">Next</div>
+                <div class="text-sm font-extrabold text-slate-900 leading-tight">2.2 Counterflow</div>
+                <div class="text-[11px] text-slate-500 leading-snug truncate">From “southbound spending” to “northbound living”.</div>
+              </div>
+              <div class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center shadow-sm">
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+              </div>
+            </a>
+            <a href="index.html?step=3" class="group min-h-[56px] rounded-xl border border-slate-200 bg-white/70 px-4 py-3 flex items-center justify-between gap-4 hover:border-slate-300 hover:shadow-md transition-all">
+              <div class="min-w-0">
+                <div class="text-[10px] font-mono tracking-widest uppercase text-slate-400">Chapter Hub</div>
+                <div class="text-sm font-extrabold text-slate-900 leading-tight">Chapter 2 Cover</div>
+                <div class="text-[11px] text-slate-500 leading-snug truncate">Overview + choose 2.1 / 2.2</div>
+              </div>
+              <div class="w-10 h-10 shrink-0 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 group-hover:text-slate-900 transition-colors">
+                <i class="fa-solid fa-compass text-sm"></i>
+              </div>
+            </a>
+            <a href="index.html?step=4" class="group min-h-[56px] rounded-xl border border-slate-900 bg-slate-900 px-4 py-3 flex items-center justify-between gap-4 hover:shadow-xl transition-all">
+              <div class="min-w-0">
+                <div class="text-[10px] font-mono tracking-widest uppercase text-white/70">Go to Chapter 3</div>
+                <div class="text-sm font-extrabold text-white leading-tight">Concrete Lives</div>
+                <div class="text-[11px] text-white/70 leading-snug truncate">Personas + timelines across the border.</div>
+              </div>
+              <div class="w-10 h-10 shrink-0 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center">
+                <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+              </div>
+            </a>
+          </div>
         </div>
 
         <div class="w-full lg:w-[420px] flex flex-col gap-3">
@@ -171,7 +199,7 @@
     function applyNode(id,fromChart=false){
       const n=nodes.find(x=>x.id===id)||nodes[0];
       setActive(n.id);
-      leadEl.textContent=`${n.s}：${n.x}`;
+      leadEl.textContent=`${n.s}: ${n.x}`;
       storyTitleEl.textContent=`${n.t}｜${n.d}`;
       storyTextEl.textContent=n.x;
       statRange.textContent=`${n.range[0]} ~ ${n.range[1]}`;

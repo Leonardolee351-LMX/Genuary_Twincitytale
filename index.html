@@ -190,8 +190,8 @@
                     "We conducted data cleaning on the data from January 2021 to December 2025 through the open data set of the Hong Kong government and obtained the daily entry and exit figures of different control points. Through this data visualization chart, we can more clearly perceive the recovery of cross-border travel after the pandemic and the joy and rhythm of life in the northward flow of people. "
                 ],
                 subchapters: [
-                    { title: "2.1 Recovery", url: "Chapter2_Recovery.html" },
-                    { title: "2.2 Counterflow", url: "Chapter2_Counterflow.html" }
+                    { title: "2.1 Recovery", url: "Chapter2_Recovery_Redesign.html" },
+                    { title: "2.2 Counterflow", url: "Chapter2_Counterflow_Redesign.html" }
                 ]
             },
             { 
@@ -444,6 +444,8 @@
                 }
             ];
 
+            const isChapter2 = data.chapter === "02";
+
             return (
                 <div className="viewport-container px-12 md:px-32 justify-start relative overflow-hidden bg-white">
                     
@@ -498,12 +500,71 @@
                                 ))}
                             </div>
                             
-                            <NextButton onClick={() => {
-                        if (data.id === 1) window.location.href = 'Chapter2_Recovery_Redesign.html';
-                        else if (data.id === 2) window.location.href = 'chapter1-1.html';
-                        else if (data.id === 3) window.location.href = 'Chapter3_Persona.HTML';
-                        else onNext();
-                    }} text="ENTER CHAPTER" />
+                            {isChapter2 ? (
+                                <div className="w-full max-w-2xl">
+                                    <div className="font-mono text-[10px] tracking-[0.28em] uppercase text-slate-400 mb-4">
+                                        Choose a track
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a
+                                            href="Chapter2_Recovery_Redesign.html"
+                                            className="group block rounded-2xl border border-slate-200 bg-white/80 backdrop-blur p-6 hover:border-accentCyan/50 hover:shadow-xl transition-all duration-500"
+                                        >
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <div className="font-mono text-[10px] tracking-widest uppercase text-slate-400">02 · 2.1</div>
+                                                    <div className="mt-2 text-xl font-extrabold text-slate-900">Recovery</div>
+                                                    <div className="mt-2 text-xs text-slate-500 leading-relaxed">
+                                                        Read the rebound and the re-stabilized rhythm after reopening.
+                                                    </div>
+                                                </div>
+                                                <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-accentCyan group-hover:text-white group-hover:border-transparent transition-all duration-500">
+                                                    <i className="fas fa-arrow-right text-sm"></i>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                                <div className="h-full w-2/3 bg-gradient-to-r from-accentCyan to-emerald-500"></div>
+                                            </div>
+                                        </a>
+                                        <a
+                                            href="Chapter2_Counterflow_Redesign.html"
+                                            className="group block rounded-2xl border border-slate-200 bg-white/80 backdrop-blur p-6 hover:border-rose-300/70 hover:shadow-xl transition-all duration-500"
+                                        >
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <div className="font-mono text-[10px] tracking-widest uppercase text-slate-400">02 · 2.2</div>
+                                                    <div className="mt-2 text-xl font-extrabold text-slate-900">Counterflow</div>
+                                                    <div className="mt-2 text-xs text-slate-500 leading-relaxed">
+                                                        Follow the directional shift from “southbound spending” to “northbound living”.
+                                                    </div>
+                                                </div>
+                                                <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-rose-500 group-hover:text-white group-hover:border-transparent transition-all duration-500">
+                                                    <i className="fas fa-arrow-right text-sm"></i>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                                <div className="h-full w-2/3 bg-gradient-to-r from-rose-500 to-orange-400"></div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <a
+                                        href="index.html?step=4"
+                                        className="inline-flex items-center gap-2 mt-6 text-xs font-mono tracking-widest uppercase text-slate-400 hover:text-accentCyan transition-colors"
+                                    >
+                                        Skip to Chapter 3 cover <i className="fas fa-arrow-right text-[10px]"></i>
+                                    </a>
+                                </div>
+                            ) : (
+                                <NextButton
+                                    onClick={() => {
+                                        if (data.id === 2) window.location.href = 'chapter1-1.html?section=1';
+                                        else if (data.id === 3) window.location.href = 'Chapter3_Persona.HTML';
+                                        else if (data.id === 1) window.location.href = 'Chapter2_Recovery_Redesign.html';
+                                        else if (onNext) onNext();
+                                    }}
+                                    text="ENTER CHAPTER"
+                                />
+                            )}
                         </motion.div>
                     </div>
                 </div>

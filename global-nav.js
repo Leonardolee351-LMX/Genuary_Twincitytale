@@ -36,8 +36,8 @@
         { 
             id: 'ch1', 
             title: 'CHAPTER 2', 
-            subtitle: 'RECOVERY', 
-            url: 'Chapter2_Recovery_Redesign.html', 
+            subtitle: 'REBOOTED BOUNDARY', 
+            url: 'index.html?step=3', 
             match: (path, step) => path.includes("chapter2.html") || path.includes("chapter2_recovery.html") || path.includes("chapter2_counterflow.html") || path.includes("chapter2_recovery_redesign.html") || path.includes("chapter2_counterflow_redesign.html") || (path.includes("index.html") && step === '3'),
             subchapters: [
                 { title: '2.1 RECOVERY', url: 'Chapter2_Recovery_Redesign.html' },

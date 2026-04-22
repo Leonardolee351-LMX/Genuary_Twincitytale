@@ -124,6 +124,9 @@
     </style>
 </head>
 <body>
+    <div style="position: fixed; top: 0; left: 0; width: 100%; text-align: center; background: rgba(255,255,255,0.9); z-index: 9999; padding: 5px; font-size: 12px; color: #666; font-family: sans-serif; pointer-events: none;">
+        Loading images resources may take some time, please wait patiently for the resources to load.
+    </div>
     <!-- Global Nav -->
     <script src="global-nav.js"></script>
 
@@ -283,9 +286,11 @@
                         Prologue / Scroll Inside
                     </div>
                 </div>
+                {/* Button removed as requested
                 <div className="absolute bottom-8 right-8 z-50">
                     <NextButton onClick={onNext} text="ENTER CHAPTER 1" />
                 </div>
+                */}
             </div>
         );
 
@@ -496,7 +501,7 @@
                             </div>
                             
                             <NextButton onClick={() => {
-                        if (data.id === 1) window.location.href = 'Chapter2_Recovery.html';
+                        if (data.id === 1) window.location.href = 'Chapter2_Recovery_Redesign.html';
                         else if (data.id === 2) window.location.href = 'chapter1-1.html';
                         else if (data.id === 3) window.location.href = 'Chapter3_Persona.HTML';
                         else onNext();
@@ -515,7 +520,7 @@
         const DataVizPage = ({ onNext }) => (
             <div className="viewport-container w-full h-full relative">
                 <iframe 
-                    src="Chapter2.HTML" 
+                    src="Chapter2_Recovery_Redesign.html" 
                     className="w-full h-full border-0" 
                     title="The Resurgence"
                 />

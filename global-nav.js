@@ -37,7 +37,7 @@
             id: 'ch1', 
             title: 'CHAPTER 2', 
             subtitle: 'RECOVERY', 
-            url: 'index.html?step=3', 
+            url: 'Chapter2_Recovery_Redesign.html', 
             match: (path, step) => path.includes("Chapter2.HTML") || path.toLowerCase().includes("chapter2_recovery.html") || path.toLowerCase().includes("chapter2_counterflow.html") || path.toLowerCase().includes("chapter2_recovery_redesign.html") || path.toLowerCase().includes("chapter2_counterflow_redesign.html") || (path.includes("index.html") && step === '3'),
             subchapters: [
                 { title: '2.1 RECOVERY', url: 'Chapter2_Recovery_Redesign.html' },
@@ -48,7 +48,7 @@
             id: 'ch3', 
             title: 'CHAPTER 3', 
             subtitle: 'CONCRETE LIVES', 
-            url: 'index.html?step=4', 
+            url: 'Chapter3_Persona.HTML', 
             match: (path, step) => path.includes("chapter3_persona.html") || path.includes("chapter3_timeline.html") || (path.includes("index.html") && step === '4'),
             subchapters: [
                 { title: '3.1 PERSONA', url: 'Chapter3_Persona.HTML' },
@@ -73,6 +73,24 @@
             ]
         }
     ];
+
+    const segmentMeta = [
+        { label: 'INTRO', url: 'index.html?step=0' },
+        { label: 'PROLOGUE', url: 'index.html?step=1' },
+        { label: '1.1 FLOWS', url: 'chapter1-1.html?section=1' },
+        { label: '1.2 ANALYSIS', url: 'chapter1-1.html?section=2' },
+        { label: '1.3 DUAL CITY', url: 'chapter1_DualCity.html' },
+        { label: '2.1 RECOVERY', url: 'Chapter2_Recovery_Redesign.html' },
+        { label: '2.2 COUNTERFLOW', url: 'Chapter2_Counterflow_Redesign.html' },
+        { label: '3.1 PERSONA', url: 'Chapter3_Persona.HTML' },
+        { label: '3.2 TIMELINE', url: 'Chapter3_Timeline.HTML' },
+        { label: 'REFLECTION', url: 'Chapter3_Phenomenon.HTML' },
+        { label: 'EPILOGUE · REVIEW', url: 'index.html?step=5' },
+        { label: 'EPILOGUE · REF', url: 'index.html?step=6' }
+    ];
+
+    const TOTAL_SEGMENTS = segmentMeta.length;
+    const boundaryTickIndex = new Set([0, 1, 2, 5, 7, 9, 10, TOTAL_SEGMENTS]);
 
     const path = window.location.pathname.toLowerCase();
     const urlParams = new URLSearchParams(window.location.search);
@@ -162,15 +180,16 @@
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.96);
-            background: rgba(15, 23, 42, 0.92);
-            border: 1px solid rgba(255,255,255,0.14);
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+            color: rgba(15, 23, 42, 0.92);
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
             margin-right: 10px;
             white-space: nowrap;
             max-width: 240px;
             overflow: hidden;
             text-overflow: ellipsis;
+            pointer-events: none;
         }
 
         .nav-logo {
@@ -222,6 +241,9 @@
             padding-top: 5px;
             min-width: 0;
             overflow: visible; /* Allow dropdowns to show */
+            gap: clamp(6px, 1.4vw, 18px);
+            padding-left: clamp(8px, 1.4vw, 22px);
+            padding-right: clamp(8px, 1.4vw, 22px);
         }
 
         /* Hidden state for smart hide (unpinned & scrolling down) */
@@ -294,24 +316,6 @@
             outline: 2px solid rgba(14, 165, 233, 0.55);
             outline-offset: 3px;
         }
-        .progress-label {
-            position: absolute;
-            top: 24px;
-            right: 12px;
-            transform: none;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.96);
-            background: rgba(15, 23, 42, 0.92);
-            border: 1px solid rgba(255,255,255,0.14);
-            border-radius: 999px;
-            padding: 4px 10px;
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
-            pointer-events: none;
-        }
 
         /* Nav Items Styles */
         .nav-item-wrapper {
@@ -320,9 +324,9 @@
              align-items: stretch;
              justify-content: center;
              flex-direction: column;
-             margin: 0 6px;
+             margin: 0;
              padding: 0 2px;
-             min-width: 128px;
+             min-width: clamp(92px, 10vw, 160px);
              cursor: pointer;
         }
         .nav-item-wrapper:hover {
@@ -350,6 +354,7 @@
             font-weight: 700;
             letter-spacing: 0.05em;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .nav-subtitle {
             font-family: 'Inter', sans-serif; /* Changed to Sans-serif */
@@ -358,6 +363,7 @@
             letter-spacing: 0.1em;
             margin-top: 4px;
             opacity: 0.7;
+            white-space: nowrap;
         }
 
         /* SUBCHAPTER DROPDOWN */
@@ -444,6 +450,52 @@
             color: #666;
             border-left-color: transparent;
         }
+
+        .nav-capsule {
+            display: none !important;
+        }
+
+        @media (max-width: 1100px) {
+            .nav-progress-chip {
+                display: none;
+            }
+            .nav-logo-wrapper {
+                width: 160px;
+                min-width: 160px;
+                padding-left: 14px;
+            }
+            .nav-pin-wrapper {
+                min-width: 56px;
+                padding-right: 10px;
+            }
+            .nav-subtitle {
+                display: none;
+            }
+            .main-nav-bar {
+                justify-content: flex-start;
+                overflow-x: auto;
+                overscroll-behavior-x: contain;
+                scrollbar-width: none;
+            }
+            .main-nav-bar::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .nav-logo-title {
+                font-size: 14px;
+            }
+            .nav-logo-subtitle {
+                font-size: 9px;
+            }
+            .nav-item-wrapper {
+                min-width: 96px;
+            }
+            .nav-title {
+                font-size: 10px;
+            }
+        }
     `;
     document.head.appendChild(style);
 
@@ -471,19 +523,15 @@
     progressBar.setAttribute('aria-hidden', 'true');
     const progressTicks = document.createElement('div');
     progressTicks.className = 'progress-ticks';
-    for (let i = 0; i <= 8; i++) {
+    for (let i = 0; i <= TOTAL_SEGMENTS; i++) {
         const tick = document.createElement('div');
-        tick.className = `progress-tick ${i === 0 || i === 3 || i === 5 || i === 7 || i === 8 ? 'strong' : ''}`;
+        tick.className = `progress-tick ${boundaryTickIndex.has(i) ? 'strong' : ''}`;
         progressTicks.appendChild(tick);
     }
     const progressSegments = document.createElement('div');
     progressSegments.className = 'progress-segments';
-    const progressLabel = document.createElement('div');
-    progressLabel.className = 'progress-label';
-    progressLabel.textContent = '0%';
     progressBarContainer.appendChild(progressTicks);
     progressBarContainer.appendChild(progressSegments);
-    progressBarContainer.appendChild(progressLabel);
     navContainer.appendChild(progressBarContainer);
 
     // Logo
@@ -578,18 +626,6 @@
     let lastScrollTop = 0;
     let ticking = false;
 
-    // Total segments calculation
-    // Ch1: 2 segments
-    // Ch2: 3 segments
-    // Ch3: 2 segments
-    // Reflection: 1 segment
-    // Total = 8 segments for the main content
-    // We map the progress bar 0-100% to these 8 segments.
-    // Intro/Prologue/Epilogue are ignored for the "reading progress" or we can map them to 0% and 100%.
-    // Let's stick to the user's request: "2.1 is 1/3 of Chapter 2".
-    
-    const TOTAL_SEGMENTS = 8; 
-
     const getScrollContext = () => {
         const content = document.getElementById('contentSection');
         if (content && content.scrollHeight > content.clientHeight) {
@@ -607,17 +643,6 @@
             setTop: (v, behavior = 'smooth') => { window.scrollTo({ top: v, behavior }); }
         };
     };
-
-    const segmentMeta = [
-        { label: '1.1 FLOWS', url: 'chapter1-1.html?section=1' },
-        { label: '1.2 ANALYSIS', url: 'chapter1-1.html?section=2' },
-        { label: '1.3 DUAL CITY', url: 'chapter1_DualCity.html' },
-        { label: '2.1 RECOVERY', url: 'Chapter2_Recovery_Redesign.html' },
-        { label: '2.2 COUNTERFLOW', url: 'Chapter2_Counterflow_Redesign.html' },
-        { label: '3.1 PERSONA', url: 'Chapter3_Persona.HTML' },
-        { label: '3.2 TIMELINE', url: 'Chapter3_Timeline.HTML' },
-        { label: 'REFLECTION', url: 'Chapter3_Phenomenon.HTML' }
-    ];
 
     const buildSegmentButtons = () => {
         progressSegments.innerHTML = '';
@@ -657,75 +682,67 @@
 
         // 2. Global Progress Logic
         let globalProgress = 0;
-        let segmentIndex = 0; // 0 to 7
+        let segmentIndex = 0;
         let localPercent = 0;
-        let isValidChapter = false;
 
         let currentTitle = '';
         if (currentParentIndex !== -1) {
             const currentChapter = navStructure[currentParentIndex];
             currentTitle = currentChapter.title || '';
 
-            // CHAPTER 1
-            if (currentChapter.id === 'ch2') {
-                isValidChapter = true;
+            const localScrollHeight = scrollCtx.getHeight();
+            const localClientHeight = scrollCtx.getClient();
+            if (localScrollHeight > localClientHeight + 2) {
+                localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
+            } else {
+                localPercent = 1;
+            }
+
+            if (currentChapter.id === 'intro') {
+                segmentIndex = 0;
+            }
+            else if (currentChapter.id === 'prologue') {
+                segmentIndex = 1;
+            }
+            else if (currentChapter.id === 'ch2') {
                 if (path.includes('chapter1_dualcity.html')) {
-                    segmentIndex = 2;
+                    segmentIndex = 4;
                 } else {
                     const section = urlParams.get('section') || '1';
                     const subIndex = Math.max(0, Math.min(1, parseInt(section) - 1));
-                    segmentIndex = subIndex;
+                    segmentIndex = 2 + subIndex;
                 }
-                const localScrollHeight = scrollCtx.getHeight();
-                const localClientHeight = scrollCtx.getClient();
-                if (localScrollHeight > localClientHeight) localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
-                globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
             }
-            // CHAPTER 2
             else if (currentChapter.id === 'ch1') {
-                isValidChapter = true;
                 if (path.includes('chapter2_counterflow_redesign.html') || path.includes('chapter2_counterflow.html')) {
-                    segmentIndex = 4;
+                    segmentIndex = 6;
                 } else {
-                    segmentIndex = 3;
+                    segmentIndex = 5;
                 }
-                const localScrollHeight = scrollCtx.getHeight();
-                const localClientHeight = scrollCtx.getClient();
-                if (localScrollHeight > localClientHeight) localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
-                globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
             }
-            // CHAPTER 3
             else if (currentChapter.id === 'ch3') {
-                isValidChapter = true;
-                segmentIndex = path.includes('timeline') ? 6 : 5;
-                const localScrollHeight = scrollCtx.getHeight();
-                const localClientHeight = scrollCtx.getClient();
-                if (localScrollHeight > localClientHeight) localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
-                globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
+                segmentIndex = path.includes('timeline') ? 8 : 7;
             }
-            // REFLECTION PAGE
             else if (currentChapter.id === 'reflection') {
-                isValidChapter = true;
-                segmentIndex = 7;
-                const localScrollHeight = scrollCtx.getHeight();
-                const localClientHeight = scrollCtx.getClient();
-                if (localScrollHeight > localClientHeight) localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
-                globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
+                segmentIndex = 9;
+            }
+            else if (currentChapter.id === 'epilogue') {
+                segmentIndex = stepParam === '6' ? 11 : 10;
             }
         }
 
         // Clamp
-        globalProgress = Math.max(0, Math.min(1, globalProgress));
+        localPercent = Math.max(0, Math.min(1, localPercent));
+        globalProgress = Math.max(0, Math.min(1, (segmentIndex + localPercent) / TOTAL_SEGMENTS));
         progressBar.style.width = `${globalProgress * 100}%`;
         const pct = Math.round(globalProgress * 100);
         progressBarContainer.setAttribute('aria-valuenow', String(pct));
-        const segLabel = segmentMeta[segmentIndex]?.label || currentTitle || 'Progress';
-        const labelText = `${isValidChapter ? segLabel : currentTitle || 'Progress'} · ${pct}%`;
-        progressLabel.textContent = labelText;
+        const segLabel = segmentMeta[Math.max(0, Math.min(TOTAL_SEGMENTS - 1, segmentIndex))]?.label || currentTitle || 'Progress';
+        const labelText = `${segLabel} · ${pct}%`;
         progressChip.textContent = labelText;
         Array.from(progressSegments.children).forEach((el, i) => {
-            el.classList.toggle('active', isValidChapter && i === segmentIndex);
-            if (isValidChapter && i === segmentIndex) {
+            el.classList.toggle('active', i === segmentIndex);
+            if (i === segmentIndex) {
                 el.setAttribute('aria-current', 'true');
             } else {
                 el.removeAttribute('aria-current');

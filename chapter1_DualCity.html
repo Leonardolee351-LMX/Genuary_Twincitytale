@@ -36,14 +36,14 @@
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
                         'shimmer': 'shimmer 2.5s infinite linear',
-                        'progress-bar': 'progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite', // 新增：渐进式移动动画
+                        'progress-bar': 'progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite', // Added: progressive sweep animation
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
                         slideUp: { '0%': { transform: 'translateY(40px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
                         shimmer: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(100%)' } },
-                        progress: { '0%': { width: '0%', opacity: '1' }, '80%': { width: '100%', opacity: '1' }, '100%': { width: '100%', opacity: '0' } } // 新增关键帧
+                        progress: { '0%': { width: '0%', opacity: '1' }, '80%': { width: '100%', opacity: '1' }, '100%': { width: '100%', opacity: '0' } } // Added keyframes
                     }
                 }
             }
@@ -212,7 +212,7 @@
                 {/* Old: Black Plate */}
                 <div className="flex items-center gap-2 opacity-40">
                     <div className="bg-slate-800 text-white px-2 py-1 rounded text-[9px] font-mono border border-slate-600 w-20 text-center">
-                        粤Z•0000港
+                        GD Z•0000 HK
                     </div>
                     <span className="text-[9px] text-slate-500">Privileged</span>
                 </div>

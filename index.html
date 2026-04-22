@@ -379,7 +379,7 @@
             
             const cards = [
                 { 
-                    title: "跨境学童", 
+                    title: "Cross-border Student", 
                     titleEn: "Cross-border Student", 
                     x: "10%", 
                     y: "20%",
@@ -387,7 +387,7 @@
                     type: "SZ"
                 },
                 { 
-                    title: "深港通勤族", 
+                    title: "SZ-HK Commuters", 
                     titleEn: "SZ-HK Commuters", 
                     x: "75%", 
                     y: "15%",
@@ -395,7 +395,7 @@
                     type: "SZ"
                 },
                 { 
-                    title: "周末特种兵", 
+                    title: "Weekend Raiders", 
                     titleEn: "Weekend Raiders", 
                     x: "80%", 
                     y: "60%",
@@ -403,7 +403,7 @@
                     type: "HK"
                 },
                 { 
-                    title: "北上安老长者", 
+                    title: "Elderly Moving North", 
                     titleEn: "Elderly Moving North", 
                     x: "15%", 
                     y: "70%",
@@ -411,7 +411,7 @@
                     type: "HK"
                 },
                 { 
-                    title: "留学硕博通勤者", 
+                    title: "Postgrad Commuters", 
                     titleEn: "Postgrad Commuters", 
                     x: "60%", 
                     y: "80%",
@@ -419,7 +419,7 @@
                     type: "SZ"
                 },
                 { 
-                    title: "远程协作人", 
+                    title: "Remote Collaborators", 
                     titleEn: "Remote Collaborators", 
                     x: "45%", 
                     y: "55%",
@@ -427,7 +427,7 @@
                     type: "SZ"
                 },
                 { 
-                    title: "商务精英", 
+                    title: "Business Elite", 
                     titleEn: "Business Elite", 
                     x: "50%", 
                     y: "10%",
@@ -435,7 +435,7 @@
                     type: "HK"
                 },
                 { 
-                    title: "生活探索者", 
+                    title: "Life Explorer", 
                     titleEn: "Life Explorer", 
                     x: "85%", 
                     y: "35%",
@@ -447,9 +447,7 @@
             return (
                 <div className="viewport-container px-12 md:px-32 justify-start relative overflow-hidden bg-white">
                     
-                    {/* Background Image Container on the RIGHT 
-                        使用 clip-path 替代 skew，确保斜线从顶到底绝对笔直
-                    */}
+                    {/* Background Image Container on the RIGHT (uses clip-path to keep the diagonal edge perfectly straight) */}
                     <div 
                         className="absolute right-0 top-0 h-full w-[70%] z-0" 
                         style={{ clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)" }}
@@ -618,21 +616,15 @@
                 <div className="max-w-3xl px-8 text-center">
                     <div className="text-accentCyan font-mono text-[10px] tracking-[0.5em] mb-8 uppercase">Epilogue</div>
                     <h2 className="text-4xl md:text-5xl font-bold font-serif mb-12 tracking-widest uppercase text-black">
-                        <span data-zh="边界消融，生活共生" data-en="Border Dissolution, Life Symbiosis">Border Dissolution, Life Symbiosis</span>
+                        Border Dissolution, Life Symbiosis
                     </h2>
                     
                     <div className="space-y-8 text-black/70 font-serif leading-loose text-lg md:text-xl">
                         <p>
-                            <span data-zh="2.98 亿次的往返，已经给出了时代的答案：边界逐渐成为双向交流的窗口，疫情后的深港两地正从物理上的“邻居”，真正走向情感与生活上的“同城”。这种融合的势头，如同不可逆转的潮汐，将每一个普通人的未来紧密缝合。" 
-                                  data-en="298 million crossings have delivered the era's verdict: the border is evolving from a barrier into a window for two-way exchange. Post-pandemic, Shenzhen and Hong Kong are transitioning from physical 'neighbors' to genuine 'city-mates' in emotion and lifestyle. This integration, like an irreversible tide, stitches together the future of every individual.">
-                                298 million crossings have delivered the era's verdict: the border is evolving from a barrier into a window for two-way exchange. Post-pandemic, Shenzhen and Hong Kong are transitioning from physical "neighbors" to genuine "city-mates" in emotion and lifestyle. This integration, like an irreversible tide, stitches together the future of every individual.
-                            </span>
+                            298 million crossings have delivered the era's verdict: the border is evolving from a barrier into a window for two-way exchange. Post-pandemic, Shenzhen and Hong Kong are transitioning from physical "neighbors" to genuine "city-mates" in emotion and lifestyle. This integration, like an irreversible tide, stitches together the future of every individual.
                         </p>
                         <p>
-                            <span data-zh="虽然在加速融合的过程中，我们仍需面对链路效率与生活归属感等细微的褶皱，还要跨越一大片的荒野。但这些成长的阵痛，终将在“一小时生活圈”的完善中逐渐抚平。这里的每一步往返，都在丈量一个无界时代的到来。 未来，不再有“跨境”，只有“生活”。" 
-                                  data-en="While we still face wrinkles in efficiency and belonging—a wilderness yet to be crossed—these growing pains will eventually smooth out within the perfecting 'One Hour Living Circle.' Every step back and forth measures the arrival of a borderless era. In the future, there will be no 'cross-border,' only 'living.'">
-                                While we still face wrinkles in efficiency and belonging—a wilderness yet to be crossed—these growing pains will eventually smooth out within the perfecting "One Hour Living Circle." Every step back and forth measures the arrival of a borderless era. In the future, there will be no "cross-border," only "living."
-                            </span>
+                            While we still face wrinkles in efficiency and belonging—a wilderness yet to be crossed—these growing pains will eventually smooth out within the perfecting "One Hour Living Circle." Every step back and forth measures the arrival of a borderless era. In the future, there will be no "cross-border," only "living."
                         </p>
                     </div>
 

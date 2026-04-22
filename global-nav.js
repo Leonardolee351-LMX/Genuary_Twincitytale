@@ -26,7 +26,7 @@
             title: 'CHAPTER 1', 
             subtitle: 'THE FOLDED CITY', 
             url: 'index.html?step=2', 
-            match: (path, step) => path.includes("Chapter1.HTML") || path.toLowerCase().includes("chapter1-1.html") || path.toLowerCase().includes("chapter1_dualcity.html") || (path.includes("index.html") && step === '2'),
+            match: (path, step) => path.includes("chapter1.html") || path.includes("chapter1-1.html") || path.includes("chapter1_dualcity.html") || (path.includes("index.html") && step === '2'),
             subchapters: [
                 { title: '1.1 FLOWS', url: 'chapter1-1.html?section=1' },
                 { title: '1.2 ANALYSIS', url: 'chapter1-1.html?section=2' },
@@ -38,7 +38,7 @@
             title: 'CHAPTER 2', 
             subtitle: 'RECOVERY', 
             url: 'Chapter2_Recovery_Redesign.html', 
-            match: (path, step) => path.includes("Chapter2.HTML") || path.toLowerCase().includes("chapter2_recovery.html") || path.toLowerCase().includes("chapter2_counterflow.html") || path.toLowerCase().includes("chapter2_recovery_redesign.html") || path.toLowerCase().includes("chapter2_counterflow_redesign.html") || (path.includes("index.html") && step === '3'),
+            match: (path, step) => path.includes("chapter2.html") || path.includes("chapter2_recovery.html") || path.includes("chapter2_counterflow.html") || path.includes("chapter2_recovery_redesign.html") || path.includes("chapter2_counterflow_redesign.html") || (path.includes("index.html") && step === '3'),
             subchapters: [
                 { title: '2.1 RECOVERY', url: 'Chapter2_Recovery_Redesign.html' },
                 { title: '2.2 COUNTERFLOW', url: 'Chapter2_Counterflow_Redesign.html' }
@@ -48,7 +48,7 @@
             id: 'ch3', 
             title: 'CHAPTER 3', 
             subtitle: 'CONCRETE LIVES', 
-            url: 'Chapter3_Persona.HTML', 
+            url: 'index.html?step=4', 
             match: (path, step) => path.includes("chapter3_persona.html") || path.includes("chapter3_timeline.html") || (path.includes("index.html") && step === '4'),
             subchapters: [
                 { title: '3.1 PERSONA', url: 'Chapter3_Persona.HTML' },
@@ -90,7 +90,6 @@
     ];
 
     const TOTAL_SEGMENTS = segmentMeta.length;
-    const boundaryTickIndex = new Set([0, 1, 2, 5, 7, 9, 10, TOTAL_SEGMENTS]);
 
     const path = window.location.pathname.toLowerCase();
     const urlParams = new URLSearchParams(window.location.search);
@@ -167,29 +166,6 @@
             flex-shrink: 0;
             z-index: 10001;
             background-color: white;
-        }
-
-        .nav-progress-chip {
-            display: inline-flex;
-            align-items: center;
-            height: 34px;
-            padding: 0 12px;
-            border-radius: 999px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(15, 23, 42, 0.92);
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(15, 23, 42, 0.10);
-            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
-            margin-right: 10px;
-            white-space: nowrap;
-            max-width: 240px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            pointer-events: none;
         }
 
         .nav-logo {
@@ -272,46 +248,6 @@
             box-shadow: 0 10px 22px rgba(0, 153, 122, 0.20);
         }
 
-        .progress-ticks {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: stretch;
-            pointer-events: none;
-        }
-        .progress-tick {
-            width: 1px;
-            background: rgba(15, 23, 42, 0.18);
-            opacity: 0.5;
-        }
-        .progress-tick.strong {
-            opacity: 0.85;
-        }
-
-        .progress-segments {
-            position: absolute;
-            inset: 0;
-            pointer-events: auto;
-        }
-        .progress-segment {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 12px;
-            height: 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.78);
-            background: rgba(15, 23, 42, 0.42);
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55), 0 10px 22px rgba(15, 23, 42, 0.14);
-            pointer-events: auto;
-            cursor: pointer;
-        }
-        .progress-segment.active {
-            background: rgba(255, 255, 255, 0.98);
-            border-color: rgba(0, 153, 122, 0.78);
-            box-shadow: 0 0 0 3px rgba(0, 153, 122, 0.22), 0 12px 26px rgba(0, 153, 122, 0.18);
-        }
         .progress-bar-container:focus-visible {
             outline: 2px solid rgba(14, 165, 233, 0.55);
             outline-offset: 3px;
@@ -456,9 +392,6 @@
         }
 
         @media (max-width: 1100px) {
-            .nav-progress-chip {
-                display: none;
-            }
             .nav-logo-wrapper {
                 width: 160px;
                 min-width: 160px;
@@ -521,17 +454,6 @@
     progressBar.className = 'progress-bar';
     progressBarContainer.appendChild(progressBar);
     progressBar.setAttribute('aria-hidden', 'true');
-    const progressTicks = document.createElement('div');
-    progressTicks.className = 'progress-ticks';
-    for (let i = 0; i <= TOTAL_SEGMENTS; i++) {
-        const tick = document.createElement('div');
-        tick.className = `progress-tick ${boundaryTickIndex.has(i) ? 'strong' : ''}`;
-        progressTicks.appendChild(tick);
-    }
-    const progressSegments = document.createElement('div');
-    progressSegments.className = 'progress-segments';
-    progressBarContainer.appendChild(progressTicks);
-    progressBarContainer.appendChild(progressSegments);
     navContainer.appendChild(progressBarContainer);
 
     // Logo
@@ -590,9 +512,6 @@
     // Pin Button
     const pinWrapper = document.createElement('div');
     pinWrapper.className = 'nav-pin-wrapper';
-    const progressChip = document.createElement('div');
-    progressChip.className = 'nav-progress-chip';
-    progressChip.textContent = 'Progress · 0%';
     const pinButton = document.createElement('button');
     pinButton.className = 'nav-pin-button';
     pinButton.innerHTML = '<i class="fas fa-thumbtack"></i>';
@@ -614,7 +533,6 @@
         pinButton.style.color = pinned ? '#00997A' : '#ccc';
         if (pinned) navContainer.classList.remove('nav-hidden');
     };
-    pinWrapper.appendChild(progressChip);
     pinWrapper.appendChild(pinButton);
     navContainer.appendChild(pinWrapper);
 
@@ -643,26 +561,6 @@
             setTop: (v, behavior = 'smooth') => { window.scrollTo({ top: v, behavior }); }
         };
     };
-
-    const buildSegmentButtons = () => {
-        progressSegments.innerHTML = '';
-        const len = segmentMeta.length;
-        for (let i = 0; i < len; i++) {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'progress-segment';
-            btn.style.left = `${((i + 0.5) / len) * 100}%`;
-            btn.title = segmentMeta[i].label;
-            btn.setAttribute('aria-label', `Go to ${segmentMeta[i].label}`);
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                window.location.href = segmentMeta[i].url;
-            });
-            progressSegments.appendChild(btn);
-        }
-    };
-
-    buildSegmentButtons();
 
     const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
@@ -739,15 +637,7 @@
         progressBarContainer.setAttribute('aria-valuenow', String(pct));
         const segLabel = segmentMeta[Math.max(0, Math.min(TOTAL_SEGMENTS - 1, segmentIndex))]?.label || currentTitle || 'Progress';
         const labelText = `${segLabel} · ${pct}%`;
-        progressChip.textContent = labelText;
-        Array.from(progressSegments.children).forEach((el, i) => {
-            el.classList.toggle('active', i === segmentIndex);
-            if (i === segmentIndex) {
-                el.setAttribute('aria-current', 'true');
-            } else {
-                el.removeAttribute('aria-current');
-            }
-        });
+        progressBarContainer.setAttribute('aria-valuetext', labelText);
 
         ticking = false;
     };

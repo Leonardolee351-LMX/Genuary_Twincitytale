@@ -81,12 +81,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
         }
-        .glass-card:hover {
-            transform: translateY(-4px);
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 20px 40px -4px rgba(14, 116, 144, 0.1);
-            border-color: #06B6D4;
-        }
 
         /* Typography */
         .section-tag { 
@@ -129,7 +123,6 @@
             transition: all 0.3s ease;
         }
         .nav-btn.active { background: #0f172a; color: white; }
-        .nav-btn:hover:not(.active) { background: rgba(0,0,0,0.04); }
 
         /* Hide Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
@@ -344,15 +337,15 @@
         const CatchmentViz = () => (
             <div className="flex items-end justify-center gap-4 h-full pb-2">
                 <div className="flex flex-col items-center">
-                    <div className="w-8 bg-primary/20 border border-primary rounded-t-md relative group">
+                    <div className="w-8 bg-primary/20 border border-primary rounded-t-md relative">
                         <div className="h-12 w-full"></div>
-                        <span className="absolute -top-6 text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Jobs</span>
+                        <span className="absolute -top-6 text-xs font-bold text-primary opacity-100">Jobs</span>
                     </div>
                 </div>
                 <div className="flex flex-col items-center">
-                    <div className="w-8 bg-warning/20 border border-warning rounded-t-md relative group">
+                    <div className="w-8 bg-warning/20 border border-warning rounded-t-md relative">
                         <div className="h-4 w-full"></div>
-                         <span className="absolute -top-6 text-xs font-bold text-warning opacity-0 group-hover:opacity-100 transition-opacity">Home</span>
+                         <span className="absolute -top-6 text-xs font-bold text-warning opacity-100">Home</span>
                     </div>
                 </div>
                 <div className="absolute top-2 right-2 text-warning font-mono text-xs font-bold">-45%</div>
@@ -430,77 +423,63 @@
             </header>
         );
 
-        // --- UPDATED ARCHIVE SECTION ---
-
-        const ReferenceSection = () => {
-            const groups = [
-                { id: "01", title: "SZ–HK Commuters", viz: <CommuterViz/> },
-                { id: "02", title: "Weekend Raiders", viz: <RaiderViz/> },
-                { id: "03", title: "Elderly Moving North", viz: <ElderlyViz/> },
-                { id: "04", title: "Postgrad Commuters", viz: <StudentViz/> },
-            ];
-
-            return (
-                <section className="mb-24 animate-slide-up" style={{animationDelay: '0.2s'}}>
-                    <div className="section-tag">Quantitative Reference: 2017</div>
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-                        
-                        {/* LEFT: DASHBOARD (Updated with Donut) */}
-                        <div className="lg:col-span-7 glass-card p-6 md:p-8 rounded-3xl">
-                            <div className="flex justify-between mb-8 items-center border-b border-slate-100 pb-4">
-                                <h3 className="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <i className="ph-chart-pie-slice text-primary"></i>
-                                    Cross-Border Purpose
-                                </h3>
-                                <span className="font-mono text-slate-400 font-bold text-[10px] bg-slate-50 px-2 py-1 rounded border border-slate-200">REF: 2017 SURVEY</span>
-                            </div>
-                            
-                            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-                                {/* Visual */}
-                                <DonutChart />
-                                
-                                {/* Data Bars */}
-                                <div className="flex-1 w-full space-y-4">
-                                    <AnimatedBar label="Shopping/Leisure" percentage={54} colorClass="bg-primary" icon="ph-shopping-bag" />
-                                    <AnimatedBar label="Visit Friends/Family" percentage={22} colorClass="bg-secondary" icon="ph-users" />
-                                    <AnimatedBar label="Business/Work" percentage={15} colorClass="bg-slate-400" icon="ph-briefcase" />
+        const IssuesOverview = () => (
+            <section className="mb-20 animate-slide-up" style={{animationDelay: '0.2s'}}>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                    <div className="lg:col-span-4 space-y-4">
+                        <div className="section-tag text-danger">Three Issues</div>
+                        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-850 leading-tight">
+                            Post‑pandemic Cross‑border Life<br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning to-danger">3 persistent problems</span>
+                        </h2>
+                        <p className="text-slate-500 leading-relaxed text-sm">
+                            Faster connections do not mean life is truly stitched together. The three points below are the most common and concrete sources of friction in post‑pandemic cross‑border living.
+                        </p>
+                    </div>
+                    <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="glass-card p-6 rounded-2xl flex flex-col justify-between">
+                            <div className="flex items-start justify-between gap-3 mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-danger/10 text-danger"><i className="ph ph-buildings"></i></div>
+                                    <h3 className="font-bold text-slate-800 text-sm">Structural Issues</h3>
                                 </div>
+                                <span className="font-mono text-3xl font-bold text-slate-200">01</span>
                             </div>
-
-                            <div className="mt-8 text-slate-500 text-xs leading-relaxed bg-slate-50/50 p-4 rounded-xl border border-dashed border-slate-200">
-                                <i className="ph-info mr-1 text-primary"></i> 2017 crossings were strongly one-way (South to North for luxury, North to South for work). Luohu and Lok Ma Chau dominated the flow before the structural shift.
+                            <div className="h-16 w-full bg-white/50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-slate-100">
+                                <CatchmentViz />
                             </div>
+                            <p className="text-xs text-slate-500 font-medium">Asymmetric urban density and functions keep ports as mere corridors, unable to carry everyday life.</p>
                         </div>
-
-                        {/* RIGHT: GROUPS (Updated with Viz) */}
-                        <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-                            {groups.map(g => (
-                                <div key={g.id} className="glass-card p-4 rounded-2xl flex flex-col justify-between hover:border-secondary group transition-all cursor-default">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="font-mono text-[10px] text-slate-300 group-hover:text-secondary">{g.id}</span>
-                                    </div>
-                                    <div className="mb-2">
-                                        {g.viz}
-                                    </div>
-                                    <h4 className="font-bold text-slate-700 text-xs md:text-sm leading-tight text-center">{g.title}</h4>
+                        <div className="glass-card p-6 rounded-2xl flex flex-col justify-between">
+                            <div className="flex items-start justify-between gap-3 mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-warning/10 text-warning"><i className="ph ph-timer"></i></div>
+                                    <h3 className="font-bold text-slate-800 text-sm">Chain Issues</h3>
                                 </div>
-                            ))}
-                            
-                            {/* Summary Stat Card */}
-                            <div className="col-span-2 glass-card p-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl flex items-center justify-between shadow-lg">
-                                <div>
-                                    <div className="text-secondary text-[10px] uppercase tracking-widest font-bold mb-1">Avg Frequency</div>
-                                    <div className="text-xs text-slate-400">Weekly trips per person</div>
-                                </div>
-                                <div className="text-4xl font-mono font-bold text-white flex items-baseline gap-1">
-                                    2.8 <span className="text-sm font-normal text-slate-400">trips</span>
-                                </div>
+                                <span className="font-mono text-3xl font-bold text-slate-200">02</span>
                             </div>
+                            <div className="h-16 w-full bg-white/50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-slate-100">
+                                <ChainViz />
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium">“Fast clearance” does not mean “fast home”: the real cost lies in transfers and uncertainty along the chain.</p>
+                        </div>
+                        <div className="glass-card p-6 rounded-2xl flex flex-col justify-between">
+                            <div className="flex items-start justify-between gap-3 mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-slate-900/5 text-slate-700"><i className="ph ph-hourglass-low"></i></div>
+                                    <h3 className="font-bold text-slate-800 text-sm">Life Consequences</h3>
+                                </div>
+                                <span className="font-mono text-3xl font-bold text-slate-200">03</span>
+                            </div>
+                            <div className="h-16 w-full bg-white/50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-slate-100">
+                                <BatteryViz />
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium">Time poverty compresses community participation, making crossing feel like rushing through—not living in one city.</p>
                         </div>
                     </div>
-                </section>
-            );
-        };
+                </div>
+            </section>
+        );
 
         const AnalysisSection = () => (
             <section className="mb-24 animate-slide-up" style={{animationDelay: '0.4s'}}>
@@ -563,7 +542,7 @@
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {cards.map((card, idx) => (
-                            <div key={idx} className={`glass-card p-6 rounded-2xl flex flex-col justify-between group cursor-pointer hover:border-${card.alert ? 'warning' : 'primary'} ${card.span ? 'md:col-span-2' : ''}`}>
+                            <div key={idx} className={`glass-card p-6 rounded-2xl flex flex-col justify-between ${card.span ? 'md:col-span-2' : ''}`}>
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded-lg ${card.alert ? 'bg-warning/10 text-warning' : 'bg-primary/10 text-primary'}`}>
@@ -572,7 +551,7 @@
                                         <h3 className="font-bold text-slate-800 text-sm">{card.title}</h3>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`block text-2xl font-mono font-bold ${card.alert ? 'text-warning' : 'text-primary'} group-hover:scale-110 transition-transform`}>{card.stat}</span>
+                                        <span className={`block text-2xl font-mono font-bold ${card.alert ? 'text-warning' : 'text-primary'}`}>{card.stat}</span>
                                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{card.label}</span>
                                     </div>
                                 </div>
@@ -594,9 +573,9 @@
                 <p className="text-xl md:text-2xl text-slate-600 font-serif italic leading-relaxed max-w-3xl mx-auto mb-12">
                     "Structural imbalance creates rigid cross-border demand, chain inefficiency amplifies time costs, and time poverty conversely compresses the depth of cross-border life."
                 </p>
-                <a href="index.html?step=5" className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-full font-bold hover:bg-primary transition-colors shadow-lg hover:shadow-cyan-500/30 group">
+                <a href="index.html?step=5" className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-full font-bold shadow-lg">
                     <span>Next Page: EPILOGUE</span>
-                    <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    <i className="fas fa-arrow-right"></i>
                 </a>
             </footer>
         );
@@ -675,7 +654,7 @@
                     
                     <div className="max-w-7xl mx-auto space-y-16 mt-20 relative z-10">
                         <Header />
-                        <ReferenceSection />
+                        <IssuesOverview />
                         <AnalysisSection />
                         
                         <DeepDiveSection 

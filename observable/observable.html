@@ -418,7 +418,7 @@
             if (!detailCard || !chartPanel) return;
             const side = document.createElement("div");
             side.className = "glass-card embedded-side";
-            side.innerHTML = `<div class="embedded-side-head"><div class="embedded-side-title">Daily Detail</div><div class="embedded-side-hint">点击折线/点查看</div></div>`;
+            side.innerHTML = `<div class="embedded-side-head"><div class="embedded-side-title">Daily Detail</div><div class="embedded-side-hint">Click the line/points to view</div></div>`;
             container?.appendChild(side);
             side.appendChild(detailCard);
         });
@@ -622,10 +622,9 @@
         }
 
         const NARRATIVE_ANCHORS = [
-            { date: "2023-01-08", event: "动作恢复起点" },
-            { date: "2023-02-06", event: "全面通关" },
-            { date: "2023-07-01", event: "高弹性节点" },
-            { date: "2025-10-12", event: "习惯化平台" }
+            { date: "2023-01-08", event: "Restart Trigger" },
+            { date: "2023-02-06", event: "Full Reopening" },
+            { date: "2023-07-01", event: "Stabilized Rhythm" }
         ];
 
         // --- Init ---

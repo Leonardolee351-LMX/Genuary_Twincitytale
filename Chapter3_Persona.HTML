@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>跨境生活 - Cross-Boundary Living</title>
+  <title>Cross-Boundary Living</title>
   
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -213,7 +213,7 @@
 
   <script>
     // Global language state
-    let lang = localStorage.getItem('lang') || 'en';
+    let lang = 'en';
   </script>
   
   <div id="app" class="min-h-screen w-full overflow-hidden bg-gradient-to-br from-[#F0F9F9] to-white">
@@ -454,13 +454,14 @@
           contentEn: "As a consumer, the border is the line of 'cost-performance ratio'. I hope payment and logistics will be fully integrated, so I can truly treat Shenzhen as my backyard."
         },
         timeline: [
-          { time: "10:00", title: "Start Journey", titleEn: "Start Journey", description: "周末早晨，准备北上消费", descriptionEn: "Weekend morning, ready to go north for shopping.", image: ASSETS.timeline1 },
-          { time: "11:00", title: "Arrive Shenzhen", titleEn: "Arrive Shenzhen", description: "顺利过关，开始购物之旅", descriptionEn: "Smooth crossing, start the shopping spree.", image: ASSETS.timeline2 },
-          { time: "12:30", title: "Lunch Time", titleEn: "Lunch Time", description: "品尝深圳美食", descriptionEn: "Tasting Shenzhen cuisine.", image: ASSETS.timeline3 },
-          { time: "14:00", title: "Shopping", titleEn: "Shopping", description: "商场扫货，买买买", descriptionEn: "Mall shopping, buy buy buy.", image: ASSETS.timeline4 },
-          { time: "16:30", title: "Beauty Treatment", titleEn: "Beauty Treatment", description: "享受美容服务", descriptionEn: "Enjoying beauty treatment.", image: ASSETS.timeline5 },
-          { time: "18:00", title: "Dinner", titleEn: "Dinner", description: "晚餐聚会", descriptionEn: "Dinner gathering.", image: ASSETS.timeline6 },
-          { time: "20:00", title: "Return Home", titleEn: "Return Home", description: "满载而归，准备回香港", descriptionEn: "Returning to HK with a full load.", image: ASSETS.timeline7 }
+          { time: "10:00", title: "Start Journey", titleEn: "Start Journey", description: "周末早晨，准备北上消费", descriptionEn: "Weekend morning, ready to go north for shopping.", image: "./images/ImgPolinTL (1).png" },
+          { time: "11:00", title: "Arrive Shenzhen", titleEn: "Arrive Shenzhen", description: "顺利过关，开始购物之旅", descriptionEn: "Smooth crossing, start the shopping spree.", image: "./images/ImgPolinTL (2).png" },
+          { time: "12:30", title: "Lunch Time", titleEn: "Lunch Time", description: "品尝深圳美食", descriptionEn: "Tasting Shenzhen cuisine.", image: "./images/ImgPolinTL (3).png" },
+          { time: "14:00", title: "Shopping", titleEn: "Shopping", description: "商场扫货，买买买", descriptionEn: "Mall shopping, buy buy buy.", image: "./images/ImgPolinTL (4).png" },
+          { time: "16:30", title: "Beauty Treatment", titleEn: "Beauty Treatment", description: "享受美容服务", descriptionEn: "Enjoying beauty treatment.", image: "./images/ImgPolinTL (5).png" },
+          { time: "18:00", title: "Dinner", titleEn: "Dinner", description: "晚餐聚会", descriptionEn: "Dinner gathering.", image: "./images/ImgPolinTL (6).png" },
+          { time: "20:00", title: "Return Home", titleEn: "Return Home", description: "满载而归，准备回香港", descriptionEn: "Returning to HK with a full load.", image: "./images/ImgPolinTL (7).png" },
+          { time: "22:00", title: "Rest", titleEn: "Rest", description: "整理战利品，期待下一次北上", descriptionEn: "Organizing the loot, looking forward to the next trip.", image: "./images/ImgPolinTL (8).png" }
         ]
       }
     ];
@@ -803,16 +804,16 @@
     function applyLang(l) {
       // Update static text elements
       document.querySelectorAll('[data-zh]').forEach(el => {
-        const txt = el.getAttribute(l === 'zh' ? 'data-zh' : 'data-en');
+        const txt = el.getAttribute('data-en');
         if (txt) el.textContent = txt;
       });
       
       // Update HTML lang attribute
-      document.documentElement.lang = l === 'zh' ? 'zh-CN' : 'en';
+      document.documentElement.lang = 'en';
       
       // Update toggle button text
       const btn = document.getElementById('lang-toggle');
-      if (btn) btn.textContent = l === 'zh' ? 'EN' : '中文';
+      if (btn) btn.textContent = 'EN';
       
       // Re-render dynamic content
       renderPersonaCards();
@@ -832,16 +833,6 @@
         const el = document.querySelector('.nav-btn[href*="Chapter3_Phenomenon"]'); if(el) el.classList.add('active');
       } else if (currentFile.includes("Chapter3_Timeline.HTML")) {
         const el = document.querySelector('.nav-btn[href*="Timeline"]'); if(el) el.classList.add('active');
-      }
-
-      // Handle Language Toggle
-      const toggle = document.getElementById('lang-toggle');
-      if (toggle) {
-        toggle.addEventListener('click', () => {
-          lang = lang === 'zh' ? 'en' : 'zh';
-          localStorage.setItem('lang', lang);
-          applyLang(lang);
-        });
       }
 
       // Initial render

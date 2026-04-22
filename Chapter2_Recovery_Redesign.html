@@ -26,8 +26,8 @@
     .card{background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:20px;box-shadow:var(--glass-shadow)}
     .chip{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#64748b}
     .clamp-2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-    .segmented-nav{display:flex;gap:6px;padding:6px;border-radius:999px;border:1px solid rgba(2,132,199,.18);background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-    .segmented-item{min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 14px;border-radius:999px;text-decoration:none;transition:all .18s ease;color:#0f172a}
+    .segmented-nav{display:flex;gap:6px;padding:6px;border-radius:999px;border:1px solid rgba(2,132,199,.18);background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);flex:1;max-width:560px}
+    .segmented-item{min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:10px 18px;border-radius:999px;text-decoration:none;transition:all .18s ease;color:#0f172a;flex:1;align-items:center;text-align:center}
     .segmented-item:hover{background:rgba(14,116,144,.06)}
     .segmented-item.active{background:linear-gradient(90deg,#0E7490 0%,#06B6D4 100%);color:white;box-shadow:0 12px 26px -18px rgba(14,116,144,.55)}
     .seg-k{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
@@ -178,6 +178,101 @@
     const nearestNodeByDate=(dateStr)=>{const t=toTs(dateStr);return nodes.reduce((p,c)=>Math.abs(toTs(c.d)-t)<Math.abs(toTs(p.d)-t)?c:p,nodes[0]);};
     const setActive=(id)=>{milestonesEl.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.id===id));};
     const syncFrame=(n)=>frame?.contentWindow?.postMessage({type:"recovery-node",node:{...n,focus:n.d,rangeStart:n.range[0],rangeEnd:n.range[1]}} ,"*");
+
+    function mergeObservableFiltersIntoSidebar(){
+      let attempts=0;
+      const maxAttempts=120;
+      const tick=()=>{
+        attempts++;
+        let doc=null;
+        try{doc=frame?.contentDocument;}catch(_){doc=null;}
+        if(!doc){
+          if(attempts<maxAttempts) return setTimeout(tick,50);
+          return;
+        }
+
+        const side=doc.querySelector(".embedded-side");
+        const header=doc.querySelector(".controls-header");
+        const controlRow=header?.querySelector(".control-row");
+        const summaryRow=header?.querySelector(".summary-row");
+        const cpList=header?.querySelector("#cp-list");
+        const cpGroup=cpList?.closest(".control-group");
+        const detailCard=doc.getElementById("detail-card");
+
+        if(!side || !header || !controlRow || !cpGroup || !detailCard){
+          if(attempts<maxAttempts) return setTimeout(tick,50);
+          return;
+        }
+
+        if(side.querySelector('[data-host="filters"]')) return;
+
+        const styleId="recovery-embed-style";
+        if(!doc.getElementById(styleId)){
+          const st=doc.createElement("style");
+          st.id=styleId;
+          st.textContent=`
+            .embedded-side{overflow:auto;}
+            .embedded-filter-host{
+              margin:10px 0 12px;
+              padding:10px;
+              border-radius:12px;
+              border:1px solid rgba(0,0,0,0.06);
+              background:rgba(255,255,255,0.86);
+            }
+            .embedded-filter-title{
+              font-size:11px;
+              font-weight:800;
+              letter-spacing:.12em;
+              text-transform:uppercase;
+              color:rgba(100,116,139,0.95);
+              margin:0 0 10px 0;
+            }
+            .embedded-filter-host .summary-row{gap:10px 14px; margin:0 0 10px 0;}
+            .embedded-filter-host .stat-lbl{font-size:10px;}
+            .embedded-filter-host .stat-val{font-size:16px;}
+            .embedded-side .control-row{flex-direction:column;align-items:stretch;gap:12px;}
+            .embedded-side .toggle-group{flex-wrap:wrap;gap:10px;}
+            .embedded-side .segmented-control{border-radius:999px;padding:4px;}
+            .embedded-side .segment-opt{border-radius:999px;padding:6px 10px;font-size:12px;}
+            .embedded-cp-details{margin-top:10px;border-top:1px solid rgba(0,0,0,0.06);padding-top:10px;}
+            .embedded-cp-details > summary{
+              list-style:none;
+              cursor:pointer;
+              user-select:none;
+              font-size:11px;
+              font-weight:700;
+              letter-spacing:.08em;
+              text-transform:uppercase;
+              color:rgba(100,116,139,0.95);
+              padding:6px 0;
+            }
+            .embedded-cp-details > summary::-webkit-details-marker{display:none;}
+            .embedded-cp-details[open] > summary{color:rgba(15,23,42,0.9);}
+            .embedded-side .chip-scroll{max-height:220px;overflow:auto;}
+          `;
+          doc.head.appendChild(st);
+        }
+
+        const host=doc.createElement("div");
+        host.className="embedded-filter-host";
+        host.setAttribute("data-host","filters");
+        host.innerHTML=`<div class="embedded-filter-title">Filters</div>`;
+
+        side.insertBefore(host, detailCard);
+        if(summaryRow) host.appendChild(summaryRow);
+        host.appendChild(controlRow);
+
+        const details=doc.createElement("details");
+        details.className="embedded-cp-details";
+        details.open=false;
+        details.innerHTML=`<summary>Control points</summary>`;
+        details.appendChild(cpGroup);
+        host.appendChild(details);
+      };
+      tick();
+    }
+
+    frame?.addEventListener("load", mergeObservableFiltersIntoSidebar);
 
     function renderMilestones(){
       milestonesEl.innerHTML=nodes.map(n=>(

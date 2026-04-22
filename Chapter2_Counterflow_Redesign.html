@@ -26,16 +26,16 @@
     .card{background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:20px;box-shadow:var(--glass-shadow)}
     .chip{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#64748b}
     .clamp-2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-    .segmented-nav{display:flex;gap:6px;padding:6px;border-radius:999px;border:1px solid rgba(225,29,72,.18);background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-    .segmented-item{min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 14px;border-radius:999px;text-decoration:none;transition:all .18s ease;color:#0f172a}
+    .segmented-nav{display:flex;gap:6px;padding:0;height:56px;border-radius:999px;border:1px solid rgba(225,29,72,.18);background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);flex:1;max-width:560px}
+    .segmented-item{height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:0 18px;border-radius:999px;text-decoration:none;transition:all .18s ease;color:#0f172a;flex:1;align-items:center;text-align:center}
     .segmented-item:hover{background:rgba(225,29,72,.06)}
     .segmented-item.active{background:linear-gradient(90deg,#E11D48 0%,#FB7185 55%,#FB923C 100%);color:white;box-shadow:0 12px 26px -18px rgba(225,29,72,.55)}
-    .seg-k{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
-    .seg-v{font-weight:900;font-size:13px;letter-spacing:-.01em}
-    .primary-cta{min-height:44px;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;border:1px solid rgba(15,23,42,.12);background:rgba(15,23,42,.92);color:white;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
+    .seg-k{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;line-height:1.05}
+    .seg-v{font-weight:900;font-size:13px;letter-spacing:-.01em;line-height:1.05}
+    .primary-cta{height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;border-radius:14px;border:1px solid rgba(15,23,42,.12);background:rgba(15,23,42,.92);color:white;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
     .primary-cta:hover{transform:translateY(-1px);box-shadow:0 18px 40px -22px rgba(15,23,42,.45)}
-    .cta-k{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
-    .cta-v{font-weight:900;font-size:12px;letter-spacing:-.01em}
+    .cta-k{display:block;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;line-height:1.05}
+    .cta-v{display:block;font-weight:900;font-size:12px;letter-spacing:-.01em;line-height:1.05}
     .primary-cta i{margin-left:auto;opacity:.9}
     .milestone-btn{min-height:44px;border:1px solid rgba(225,29,72,.14);background:rgba(255,255,255,.60);border-radius:14px;padding:10px 12px;text-align:left;transition:transform .14s ease,background-color .14s ease,border-color .14s ease}
     .milestone-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.78);border-color:rgba(225,29,72,.24)}
@@ -71,7 +71,7 @@
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-orange-500">"Northbound Living"</span>
           </h1>
           <p id="lead" class="mt-2 text-sm leading-relaxed text-slate-600">The directional shift is not a short-term fluctuation, but a rewriting of the dual-city living radius.</p>
-          <div class="mt-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+          <div class="mt-4 flex flex-col sm:flex-row gap-3 sm:items-stretch sm:justify-between">
             <div class="segmented-nav" role="tablist" aria-label="Chapter 2 Sections">
               <a class="segmented-item" role="tab" aria-selected="false" href="Chapter2_Recovery_Redesign.html">
                 <span class="seg-k">02 · 2.1</span>

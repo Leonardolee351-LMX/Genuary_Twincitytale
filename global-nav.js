@@ -38,10 +38,10 @@
             title: 'CHAPTER 2', 
             subtitle: 'RECOVERY', 
             url: 'index.html?step=3', 
-            match: (path, step) => path.includes("Chapter2.HTML") || path.toLowerCase().includes("chapter2_recovery.html") || path.toLowerCase().includes("chapter2_counterflow.html") || (path.includes("index.html") && step === '3'),
+            match: (path, step) => path.includes("Chapter2.HTML") || path.toLowerCase().includes("chapter2_recovery.html") || path.toLowerCase().includes("chapter2_counterflow.html") || path.toLowerCase().includes("chapter2_recovery_redesign.html") || path.toLowerCase().includes("chapter2_counterflow_redesign.html") || (path.includes("index.html") && step === '3'),
             subchapters: [
-                { title: '2.1 RECOVERY', url: 'Chapter2_Recovery.html' },
-                { title: '2.2 COUNTERFLOW', url: 'Chapter2_Counterflow.html' }
+                { title: '2.1 RECOVERY', url: 'Chapter2_Recovery_Redesign.html' },
+                { title: '2.2 COUNTERFLOW', url: 'Chapter2_Counterflow_Redesign.html' }
             ]
         },
         { 
@@ -111,6 +111,7 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             transition: transform 0.3s ease-in-out;
             transform: translateY(0);
+            isolation: isolate;
             
             /* Flexbox layout to prevent overlap */
             display: flex;
@@ -141,12 +142,35 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            gap: 10px;
             padding-right: 20px;
-            width: 80px;
+            width: auto;
             min-width: 80px;
             flex-shrink: 0;
             z-index: 10001;
             background-color: white;
+        }
+
+        .nav-progress-chip {
+            display: inline-flex;
+            align-items: center;
+            height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.96);
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+            margin-right: 10px;
+            white-space: nowrap;
+            max-width: 240px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .nav-logo {
@@ -210,17 +234,83 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 5px;
-            background-color: #f0f0f0;
+            height: 12px;
+            background: rgba(224, 242, 254, 0.95);
             transition: opacity 0.3s;
-            z-index: 10003; /* Above everything */
+            z-index: 10006;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(14, 165, 233, 0.28);
+            cursor: pointer;
         }
 
         .progress-bar {
             width: 0%;
             height: 100%;
-            background-color: #00997A; /* Green progress */
-            transition: width 0.2s ease-out;
+            background: linear-gradient(90deg, #06B6D4 0%, #00997A 55%, #0EA5E9 100%);
+            transition: width 0.18s ease-out;
+            box-shadow: 0 10px 22px rgba(0, 153, 122, 0.20);
+        }
+
+        .progress-ticks {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            pointer-events: none;
+        }
+        .progress-tick {
+            width: 1px;
+            background: rgba(15, 23, 42, 0.18);
+            opacity: 0.5;
+        }
+        .progress-tick.strong {
+            opacity: 0.85;
+        }
+
+        .progress-segments {
+            position: absolute;
+            inset: 0;
+            pointer-events: auto;
+        }
+        .progress-segment {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.78);
+            background: rgba(15, 23, 42, 0.42);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55), 0 10px 22px rgba(15, 23, 42, 0.14);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .progress-segment.active {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(0, 153, 122, 0.78);
+            box-shadow: 0 0 0 3px rgba(0, 153, 122, 0.22), 0 12px 26px rgba(0, 153, 122, 0.18);
+        }
+        .progress-bar-container:focus-visible {
+            outline: 2px solid rgba(14, 165, 233, 0.55);
+            outline-offset: 3px;
+        }
+        .progress-label {
+            position: absolute;
+            top: 24px;
+            right: 12px;
+            transform: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.96);
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 999px;
+            padding: 4px 10px;
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+            pointer-events: none;
         }
 
         /* Nav Items Styles */
@@ -230,9 +320,9 @@
              align-items: stretch;
              justify-content: center;
              flex-direction: column;
-             margin: 0 8px; /* Reduced margin further */
-             padding: 0 4px; /* Very small padding */
-             min-width: 160px; /* Increased width significantly */
+             margin: 0 6px;
+             padding: 0 2px;
+             min-width: 128px;
              cursor: pointer;
         }
         .nav-item-wrapper:hover {
@@ -336,6 +426,24 @@
             transform: rotate(180deg);
             opacity: 1;
         }
+
+        body[data-no-hover="true"] .nav-item-wrapper:hover {
+            background-color: transparent;
+        }
+        body[data-no-hover="true"] .nav-item-wrapper:hover .subchapter-dropdown {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-50%) translateY(10px);
+        }
+        body[data-no-hover="true"] .nav-pin-button:hover {
+            color: #ccc;
+            transform: none;
+        }
+        body[data-no-hover="true"] .subchapter-item:hover {
+            background-color: transparent;
+            color: #666;
+            border-left-color: transparent;
+        }
     `;
     document.head.appendChild(style);
 
@@ -345,12 +453,37 @@
     const navContainer = document.createElement('div');
     navContainer.className = 'global-nav-container pinned'; // Default to pinned for now
 
+    if (path.includes('chapter3_phenomenon.html')) {
+        document.body.setAttribute('data-no-hover', 'true');
+    }
+
     // Progress Bar
     const progressBarContainer = document.createElement('div');
     progressBarContainer.className = 'progress-bar-container';
+    progressBarContainer.setAttribute('tabindex', '0');
+    progressBarContainer.setAttribute('role', 'slider');
+    progressBarContainer.setAttribute('aria-label', 'Reading progress');
+    progressBarContainer.setAttribute('aria-valuemin', '0');
+    progressBarContainer.setAttribute('aria-valuemax', '100');
     const progressBar = document.createElement('div');
     progressBar.className = 'progress-bar';
     progressBarContainer.appendChild(progressBar);
+    progressBar.setAttribute('aria-hidden', 'true');
+    const progressTicks = document.createElement('div');
+    progressTicks.className = 'progress-ticks';
+    for (let i = 0; i <= 8; i++) {
+        const tick = document.createElement('div');
+        tick.className = `progress-tick ${i === 0 || i === 3 || i === 5 || i === 7 || i === 8 ? 'strong' : ''}`;
+        progressTicks.appendChild(tick);
+    }
+    const progressSegments = document.createElement('div');
+    progressSegments.className = 'progress-segments';
+    const progressLabel = document.createElement('div');
+    progressLabel.className = 'progress-label';
+    progressLabel.textContent = '0%';
+    progressBarContainer.appendChild(progressTicks);
+    progressBarContainer.appendChild(progressSegments);
+    progressBarContainer.appendChild(progressLabel);
     navContainer.appendChild(progressBarContainer);
 
     // Logo
@@ -409,6 +542,9 @@
     // Pin Button
     const pinWrapper = document.createElement('div');
     pinWrapper.className = 'nav-pin-wrapper';
+    const progressChip = document.createElement('div');
+    progressChip.className = 'nav-progress-chip';
+    progressChip.textContent = 'Progress · 0%';
     const pinButton = document.createElement('button');
     pinButton.className = 'nav-pin-button';
     pinButton.innerHTML = '<i class="fas fa-thumbtack"></i>';
@@ -428,7 +564,9 @@
         const pinned = navContainer.classList.contains('pinned');
         localStorage.setItem('navPinned', pinned);
         pinButton.style.color = pinned ? '#00997A' : '#ccc';
+        if (pinned) navContainer.classList.remove('nav-hidden');
     };
+    pinWrapper.appendChild(progressChip);
     pinWrapper.appendChild(pinButton);
     navContainer.appendChild(pinWrapper);
 
@@ -452,9 +590,61 @@
     
     const TOTAL_SEGMENTS = 8; 
 
+    const getScrollContext = () => {
+        const content = document.getElementById('contentSection');
+        if (content && content.scrollHeight > content.clientHeight) {
+            return {
+                getTop: () => content.scrollTop,
+                getHeight: () => content.scrollHeight,
+                getClient: () => content.clientHeight,
+                setTop: (v, behavior = 'auto') => { content.scrollTo({ top: v, behavior }); }
+            };
+        }
+        return {
+            getTop: () => (window.scrollY || document.documentElement.scrollTop || 0),
+            getHeight: () => (document.documentElement.scrollHeight || 0),
+            getClient: () => (document.documentElement.clientHeight || 0),
+            setTop: (v, behavior = 'smooth') => { window.scrollTo({ top: v, behavior }); }
+        };
+    };
+
+    const segmentMeta = [
+        { label: '1.1 FLOWS', url: 'chapter1-1.html?section=1' },
+        { label: '1.2 ANALYSIS', url: 'chapter1-1.html?section=2' },
+        { label: '1.3 DUAL CITY', url: 'chapter1_DualCity.html' },
+        { label: '2.1 RECOVERY', url: 'Chapter2_Recovery_Redesign.html' },
+        { label: '2.2 COUNTERFLOW', url: 'Chapter2_Counterflow_Redesign.html' },
+        { label: '3.1 PERSONA', url: 'Chapter3_Persona.HTML' },
+        { label: '3.2 TIMELINE', url: 'Chapter3_Timeline.HTML' },
+        { label: 'REFLECTION', url: 'Chapter3_Phenomenon.HTML' }
+    ];
+
+    const buildSegmentButtons = () => {
+        progressSegments.innerHTML = '';
+        const len = segmentMeta.length;
+        for (let i = 0; i < len; i++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'progress-segment';
+            btn.style.left = `${((i + 0.5) / len) * 100}%`;
+            btn.title = segmentMeta[i].label;
+            btn.setAttribute('aria-label', `Go to ${segmentMeta[i].label}`);
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = segmentMeta[i].url;
+            });
+            progressSegments.appendChild(btn);
+        }
+    };
+
+    buildSegmentButtons();
+
+    const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
     const updateState = () => {
         // 1. Smart Hide Logic
-        let currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+        const scrollCtx = getScrollContext();
+        let currentScrollTop = scrollCtx.getTop();
         
         if (!navContainer.classList.contains('pinned')) {
             if (currentScrollTop > lastScrollTop && currentScrollTop > 100) {
@@ -471,95 +661,55 @@
         let localPercent = 0;
         let isValidChapter = false;
 
+        let currentTitle = '';
         if (currentParentIndex !== -1) {
             const currentChapter = navStructure[currentParentIndex];
+            currentTitle = currentChapter.title || '';
 
             // CHAPTER 1
-            if (currentChapter.id === 'ch1') {
+            if (currentChapter.id === 'ch2') {
                 isValidChapter = true;
-                // Detect if we are in 1.1 or 1.2
-                // Since 1.2 is an anchor #section-4, we use scroll position approximation if on same page
-                // Or if we assume the user just scrolls down.
-                // Let's treat Ch1 as one big page with 2 segments.
-                // So localPercent of the page maps to 2 segments.
-                const localScrollTop = window.scrollY || document.documentElement.scrollTop;
-                const localScrollHeight = document.documentElement.scrollHeight;
-                const localClientHeight = document.documentElement.clientHeight;
-                
-                if (localScrollHeight > localClientHeight) {
-                    localPercent = localScrollTop / (localScrollHeight - localClientHeight);
-                }
-
-                // Ch1 is segment 0 and 1.
-                // So progress = (0 + localPercent * 2) / 8
-                segmentIndex = 0;
-                globalProgress = (segmentIndex + (localPercent * 2)) / TOTAL_SEGMENTS;
-            }
-            // CHAPTER 2
-            else if (currentChapter.id === 'ch2') {
-                isValidChapter = true;
-                // Ch2 has 3 segments: 2.1 (Index 2), 2.2 (Index 3), 2.3 (Index 4)
-                let subIndex = 0;
-                
-                if (path.toLowerCase().includes('chapter1_dualcity.html')) {
-                    subIndex = 2;
+                if (path.includes('chapter1_dualcity.html')) {
+                    segmentIndex = 2;
                 } else {
                     const section = urlParams.get('section') || '1';
-                    subIndex = parseInt(section) - 1; // 0, 1
+                    const subIndex = Math.max(0, Math.min(1, parseInt(section) - 1));
+                    segmentIndex = subIndex;
                 }
-                
-                segmentIndex = 2 + subIndex;
-                
-                let localScrollTop = window.scrollY || document.documentElement.scrollTop;
-                let localScrollHeight = document.documentElement.scrollHeight;
-                let localClientHeight = document.documentElement.clientHeight;
-                
-                if (localScrollHeight > localClientHeight) {
-                    localPercent = localScrollTop / (localScrollHeight - localClientHeight);
+                const localScrollHeight = scrollCtx.getHeight();
+                const localClientHeight = scrollCtx.getClient();
+                if (localScrollHeight > localClientHeight) localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
+                globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
+            }
+            // CHAPTER 2
+            else if (currentChapter.id === 'ch1') {
+                isValidChapter = true;
+                if (path.includes('chapter2_counterflow_redesign.html') || path.includes('chapter2_counterflow.html')) {
+                    segmentIndex = 4;
+                } else {
+                    segmentIndex = 3;
                 }
-
+                const localScrollHeight = scrollCtx.getHeight();
+                const localClientHeight = scrollCtx.getClient();
+                if (localScrollHeight > localClientHeight) localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
                 globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
             }
             // CHAPTER 3
             else if (currentChapter.id === 'ch3') {
                 isValidChapter = true;
-                // Ch3 has 2 segments: 3.1 (Index 5), 3.2 (Index 6)
-                let subIndex = 0;
-                if (path.includes('timeline')) subIndex = 1;
-
-                segmentIndex = 5 + subIndex;
-
-                let localScrollTop = window.scrollY || document.documentElement.scrollTop;
-                let localScrollHeight = document.documentElement.scrollHeight;
-                let localClientHeight = document.documentElement.clientHeight;
-
-                const content = document.getElementById('contentSection');
-                if (content && content.scrollHeight > content.clientHeight) {
-                     localScrollTop = content.scrollTop;
-                     localScrollHeight = content.scrollHeight;
-                     localClientHeight = content.clientHeight;
-                     currentScrollTop = localScrollTop;
-                }
-
-                if (localScrollHeight > localClientHeight) {
-                    localPercent = localScrollTop / (localScrollHeight - localClientHeight);
-                }
-
+                segmentIndex = path.includes('timeline') ? 6 : 5;
+                const localScrollHeight = scrollCtx.getHeight();
+                const localClientHeight = scrollCtx.getClient();
+                if (localScrollHeight > localClientHeight) localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
                 globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
             }
             // REFLECTION PAGE
             else if (currentChapter.id === 'reflection') {
                 isValidChapter = true;
                 segmentIndex = 7;
-
-                let localScrollTop = window.scrollY || document.documentElement.scrollTop;
-                let localScrollHeight = document.documentElement.scrollHeight;
-                let localClientHeight = document.documentElement.clientHeight;
-
-                if (localScrollHeight > localClientHeight) {
-                    localPercent = localScrollTop / (localScrollHeight - localClientHeight);
-                }
-
+                const localScrollHeight = scrollCtx.getHeight();
+                const localClientHeight = scrollCtx.getClient();
+                if (localScrollHeight > localClientHeight) localPercent = scrollCtx.getTop() / (localScrollHeight - localClientHeight);
                 globalProgress = (segmentIndex + localPercent) / TOTAL_SEGMENTS;
             }
         }
@@ -567,9 +717,75 @@
         // Clamp
         globalProgress = Math.max(0, Math.min(1, globalProgress));
         progressBar.style.width = `${globalProgress * 100}%`;
+        const pct = Math.round(globalProgress * 100);
+        progressBarContainer.setAttribute('aria-valuenow', String(pct));
+        const segLabel = segmentMeta[segmentIndex]?.label || currentTitle || 'Progress';
+        const labelText = `${isValidChapter ? segLabel : currentTitle || 'Progress'} · ${pct}%`;
+        progressLabel.textContent = labelText;
+        progressChip.textContent = labelText;
+        Array.from(progressSegments.children).forEach((el, i) => {
+            el.classList.toggle('active', isValidChapter && i === segmentIndex);
+            if (isValidChapter && i === segmentIndex) {
+                el.setAttribute('aria-current', 'true');
+            } else {
+                el.removeAttribute('aria-current');
+            }
+        });
 
         ticking = false;
     };
+
+    const getRatioFromClientX = (clientX) => {
+        const rect = progressBarContainer.getBoundingClientRect();
+        const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        return rect.width ? (x / rect.width) : 0;
+    };
+
+    const seekToRatio = (ratio, behavior = 'smooth') => {
+        const r = clamp01(ratio);
+        const scrollCtx = getScrollContext();
+        const h = scrollCtx.getHeight();
+        const c = scrollCtx.getClient();
+        if (h <= c) return;
+        scrollCtx.setTop(r * (h - c), behavior);
+    };
+
+    let suppressClickUntil = 0;
+    let isPointerSeeking = false;
+    progressBarContainer.addEventListener('pointerdown', (e) => {
+        suppressClickUntil = Date.now() + 450;
+        isPointerSeeking = true;
+        try { progressBarContainer.setPointerCapture(e.pointerId); } catch (_) {}
+        seekToRatio(getRatioFromClientX(e.clientX), 'auto');
+    });
+    progressBarContainer.addEventListener('pointermove', (e) => {
+        if (!isPointerSeeking) return;
+        seekToRatio(getRatioFromClientX(e.clientX), 'auto');
+    });
+    const endPointerSeek = (e) => {
+        if (!isPointerSeeking) return;
+        isPointerSeeking = false;
+        seekToRatio(getRatioFromClientX(e.clientX), 'smooth');
+        try { progressBarContainer.releasePointerCapture(e.pointerId); } catch (_) {}
+    };
+    progressBarContainer.addEventListener('pointerup', endPointerSeek);
+    progressBarContainer.addEventListener('pointercancel', () => { isPointerSeeking = false; });
+
+    progressBarContainer.addEventListener('click', (e) => {
+        if (Date.now() < suppressClickUntil) return;
+        seekToRatio(getRatioFromClientX(e.clientX), 'smooth');
+    });
+
+    progressBarContainer.addEventListener('keydown', (e) => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) return;
+        e.preventDefault();
+        const current = parseFloat(progressBar.style.width) / 100 || 0;
+        const big = e.shiftKey ? 0.2 : 0.05;
+        const delta = (e.key === 'ArrowRight' || e.key === 'PageDown') ? big : (e.key === 'ArrowLeft' || e.key === 'PageUp') ? -big : 0;
+        if (e.key === 'Home') seekToRatio(0, 'smooth');
+        else if (e.key === 'End') seekToRatio(1, 'smooth');
+        else seekToRatio(current + delta, 'smooth');
+    });
 
     window.addEventListener('scroll', () => {
         if (!ticking) {

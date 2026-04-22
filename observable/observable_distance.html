@@ -27,6 +27,7 @@
             --color-2017: #ff9500;      /* Orange for 2017 comparison */
         }
 
+        html, body { height: 100%; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-body);
@@ -83,13 +84,22 @@
             position: relative;
         }
 
-        body.embedded .container { gap: 8px; }
-        body.embedded .glass-card { padding: 12px; }
-        body.embedded .dashboard-grid { grid-template-columns: 1fr; gap: 10px; }
+        body.embedded { padding: 0; min-height: 0; overflow: hidden; }
+        body.embedded .container {
+            height: 100dvh;
+            min-height: 0;
+            padding: 0;
+            gap: 8px;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            box-sizing: border-box;
+        }
+        body.embedded .glass-card { padding: 12px; border-radius: 0; }
+        body.embedded .dashboard-grid { height: 100%; min-height: 0; grid-template-columns: 1fr; gap: 0; }
         body.embedded .dashboard-grid > .glass-card:nth-child(2) { display: none; }
-        body.embedded .chart-panel { padding: 10px 10px 8px; }
-        body.embedded .chart-wrapper { height: calc(100dvh - 190px); min-height: 560px; }
-        body.embedded #brush-chart { height: 74px !important; margin-top: 8px !important; }
+        body.embedded .chart-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; padding: 12px; }
+        body.embedded .chart-wrapper { height: auto; flex: 1; min-height: 0; }
+        body.embedded #brush-chart { height: 86px !important; margin-top: 8px !important; flex: 0 0 86px; }
 
         /* Stats / Rhythm Panel */
         .stat-card {
@@ -272,7 +282,8 @@
     </div>
 
     <script>
-        const isEmbedded = window.self !== window.top;
+        const params = new URLSearchParams(location.search);
+        const isEmbedded = window.self !== window.top || params.get("embedded") === "1";
         if (isEmbedded) document.body.classList.add("embedded");
         const emitFrameHeight = () => {
             if (!isEmbedded) return;

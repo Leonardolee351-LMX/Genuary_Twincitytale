@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 2.2 | Counterflow (Redesign)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { accent: "#E11D48" },
+          fontFamily: { sans: ["Inter", "sans-serif"], serif: ["Noto Serif", "serif"], mono: ["JetBrains Mono", "monospace"] }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root{--glass-bg:rgba(255,255,255,.82);--glass-border:rgba(255,255,255,.78);--glass-shadow:0 18px 44px -20px rgba(225,29,72,.22)}
+    html,body{height:100%}
+    body{background:radial-gradient(1100px 520px at 8% -12%,#ffe4ea 0%,#f8fafc 42%,#f1f5f9 100%);color:#0f172a}
+    .card{background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:20px;box-shadow:var(--glass-shadow)}
+    .chip{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#64748b}
+    .clamp-2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+    .milestone-btn{min-height:44px;border:1px solid rgba(225,29,72,.18);background:rgba(255,255,255,.86);border-radius:14px;padding:10px 12px;text-align:left;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background-color .18s ease}
+    .milestone-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px -18px rgba(225,29,72,.28)}
+    .milestone-btn.active{border-color:#e11d48;background:#fff1f2;box-shadow:0 16px 30px -18px rgba(225,29,72,.42)}
+    .stat{border:1px solid rgba(225,29,72,.18);background:rgba(255,255,255,.78);border-radius:14px;padding:10px 12px}
+    .stat-k{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#94a3b8}
+    .stat-v{font-family:"JetBrains Mono",monospace;font-size:18px;font-weight:800;line-height:1.1;color:#0f172a}
+    .stat-v.accent{color:#be123c}
+    .story-panel{border:1px solid rgba(225,29,72,.16);background:rgba(255,255,255,.72);border-radius:16px}
+    .toggle-btn{min-height:44px;border:1px solid rgba(225,29,72,.18);background:rgba(255,255,255,.86);color:#0f172a;border-radius:14px;padding:10px 12px;display:inline-flex;align-items:center;gap:10px;transition:all .18s ease}
+    .toggle-btn:hover{border-color:rgba(225,29,72,.46);box-shadow:0 14px 28px -18px rgba(225,29,72,.28)}
+    .frame-wrap{border:1px solid rgba(225,29,72,.12);border-radius:18px;background:rgba(255,255,255,.72)}
+    .frame-full{width:100%;height:min(78vh, 920px);min-height:720px}
+    @media (max-height: 860px){
+      .hero-title{font-size:22px!important;line-height:1.2!important}
+      .hero-card-pad{padding:14px!important}
+      .story-pad{padding:14px!important}
+      .story-img{display:none!important}
+    }
+    @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <script src="global-nav.js"></script>
+
+  <main class="w-screen max-w-none mx-auto px-4 md:px-8 xl:px-12 pt-24 pb-6 flex flex-col gap-3">
+    <header class="card hero-card-pad p-4 md:p-4">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div class="min-w-0">
+          <div class="chip">Chapter 2.2 / Counterflow · Redesigned</div>
+          <h1 class="hero-title mt-2 text-[24px] md:text-[28px] font-extrabold leading-tight">
+            From "Southbound Consumption" to
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-orange-500">"Northbound Living"</span>
+          </h1>
+          <p id="lead" class="mt-2 text-sm leading-relaxed text-slate-600">The directional shift is not a short-term fluctuation, but a rewriting of the dual-city living radius.</p>
+          <nav class="mt-3 grid grid-cols-2 gap-2 text-xs font-semibold">
+            <a href="Chapter2_Recovery_Redesign.html" class="text-center rounded-lg border border-slate-300 bg-white px-2 py-2 text-slate-700">Recovery</a>
+            <a href="Chapter3_Persona.HTML" class="text-center rounded-lg border border-accent bg-accent text-white px-2 py-2">Chapter 3 扉页</a>
+          </nav>
+        </div>
+
+        <div class="w-full lg:w-[420px] flex flex-col gap-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="stat">
+              <div class="stat-k">Selected Range</div>
+              <div id="stat-range" class="stat-v">—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-k">Key Metric</div>
+              <div id="stat-metric" class="stat-v accent">—</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="reset" class="toggle-btn" type="button" title="Reset View">
+              <i class="fa-solid fa-rotate-left text-slate-600"></i>
+              <span class="text-sm font-semibold">Reset</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <section class="mt-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="chip">Key Milestones (3)</div>
+          <div class="text-xs text-slate-500">点击节点同步图表时间窗口</div>
+        </div>
+        <div id="milestones" class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2"></div>
+      </section>
+
+      <section id="story" class="story-panel mt-3" aria-live="polite">
+        <div class="story-pad p-4 md:p-4 grid grid-cols-1 lg:grid-cols-[1.35fr_.65fr] gap-4">
+          <div class="min-w-0">
+            <div class="chip">Milestone Brief</div>
+            <h2 id="story-title" class="mt-2 text-lg md:text-xl font-extrabold leading-snug">No Milestone Selected</h2>
+            <p id="story-text" class="mt-2 text-sm leading-relaxed text-slate-700">选择上方任意节点，在不占用图表视野的前提下获得关键叙事与提示。</p>
+          </div>
+          <div class="min-w-0">
+            <div class="chip">Visual Insight</div>
+            <figure class="story-img mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white">
+              <img id="story-img" src="images/2023全面恢复正常通关.jpg" alt="Counterflow visual" class="w-full h-24 md:h-28 object-cover" loading="lazy" />
+              <figcaption id="story-cap" class="px-3 py-2 text-[11px] text-slate-500 bg-slate-50 border-t border-slate-100">Direction Shift: northbound flow becomes the dominant narrative.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <section>
+      <div class="frame-wrap p-2 md:p-3 h-full">
+        <iframe
+          id="counterflow-frame"
+          src="observable/observable_distance.html?embedded=1&focus=2023-01-08&rangeStart=2022-12-20&rangeEnd=2023-02-20&stage=s1&v=20260415-redesign"
+          class="frame-full border-0"
+          title="Counterflow 图表"
+          loading="eager"
+        ></iframe>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const stages = [
+      { id:"s1",tag:"2023.01",name:"Trial Recovery",focus:"2023-01-08",range:["2022-12-20","2023-02-20"],title:"Border Reopened",lead:"Early 2023 saw the return of 'action': family visits, work, and school resumed as capacity healed.",kpi:"~85% of 2019 Levels",event:"Phase 1 Normality",img:"images/2023全面恢复正常通关.jpg",body:"The significance lay not in peaks, but in certainty: shifting from 'can we cross?' to 'crossing has started'." },
+      { id:"s2",tag:"2023.02",name:"Full Reopening",focus:"2023-02-06",range:["2023-01-20","2023-04-15"],title:"From Action to Rhythm",lead:"After full reopening, crossings moved from ad-hoc to planned, entering a sustained growth channel.",kpi:"+190% YoY",event:"Full Reopening",img:"images/2023全面恢复正常通关.jpg",body:"Single-day peaks breached 1.24M, showing recovery moving from short-term rebound to structural growth." },
+      { id:"s3",tag:"2024.03",name:"Counterflow Formed",focus:"2024-03-18",range:["2023-10-01","2024-12-31"],title:"Northbound Living Replaces Shopping",lead:"2024 saw a directional realignment: Northbound vs Southbound flow hit ~2:1, making 'Northbound Living' the dominant narrative.",kpi:"2:1 Direction Shift",event:"5+2 Dual-City Life",img:"images/2024“灵活行”延伸至深圳北站.jpg",body:"Hong Kong residents heading north outnumbered mainland visitors heading south by 2x. The 'Work in HK, Weekend North' rhythm solidified." }
+    ];
+
+    const stageVisualCap={
+      s1:"Restart: from pause back to daily crossings.",
+      s2:"Rhythm: planned schedules replace ad-hoc trips.",
+      s3:"Counterflow: 'northbound living' becomes the dominant behavior."
+    };
+
+    const milestonesEl=document.getElementById("milestones");
+    const leadEl=document.getElementById("lead");
+    const storyEl=document.getElementById("story");
+    const storyTitleEl=document.getElementById("story-title");
+    const storyTextEl=document.getElementById("story-text");
+    const storyImgEl=document.getElementById("story-img");
+    const storyCapEl=document.getElementById("story-cap");
+    const statRange=document.getElementById("stat-range");
+    const statMetric=document.getElementById("stat-metric");
+    const resetBtn=document.getElementById("reset");
+    const frame=document.getElementById("counterflow-frame");
+
+    const toTs=d=>new Date(d+"T00:00:00").getTime();
+    const nearestStageByDate=(dateStr)=>{const t=toTs(dateStr);return stages.reduce((p,c)=>Math.abs(toTs(c.focus)-t)<Math.abs(toTs(p.focus)-t)?c:p,stages[0]);};
+    const setActive=(id)=>{milestonesEl.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.id===id));};
+    const syncFrame=(s)=>frame?.contentWindow?.postMessage({type:"counterflow-node",node:{...s,focus:s.focus,rangeStart:s.range[0],rangeEnd:s.range[1]}} ,"*");
+
+    function renderMilestones(){
+      milestonesEl.innerHTML=stages.map(s=>(
+        `<button class="milestone-btn" type="button" data-id="${s.id}">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-xs text-slate-500 font-medium">${s.focus}</div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-accent/80">${s.tag}</div>
+          </div>
+          <div class="mt-1 text-sm font-extrabold text-slate-900 leading-snug">${s.title}</div>
+          <div class="mt-1 text-xs text-slate-600 clamp-2">${s.lead}</div>
+        </button>`
+      )).join("");
+    }
+
+    function applyStage(id,fromChart=false){
+      const s=stages.find(x=>x.id===id)||stages[0];
+      setActive(s.id);
+      leadEl.textContent=s.lead;
+      storyTitleEl.textContent=`${s.title}｜${s.focus}`;
+      storyTextEl.textContent=s.body;
+      statRange.textContent=`${s.range[0]} ~ ${s.range[1]}`;
+      statMetric.textContent=s.kpi;
+      storyImgEl.src=s.img;
+      storyImgEl.alt=s.title;
+      storyCapEl.textContent=stageVisualCap[s.id]||s.event;
+      if(!fromChart)syncFrame(s);
+    }
+
+    function reset(){
+      applyStage(stages[0].id,false);
+    }
+
+    renderMilestones();
+    reset();
+
+    milestonesEl.addEventListener("click",e=>{
+      const btn=e.target.closest("[data-id]");
+      if(!btn) return;
+      applyStage(btn.dataset.id,false);
+    });
+    resetBtn.addEventListener("click",reset);
+
+    window.addEventListener("message",e=>{
+      const m=e.data;
+      if(!m) return;
+      if(m.type!=='observable-range-changed') return;
+      const picked=m.focusDate||m.rangeCenter;
+      if(!picked) return;
+      const s=nearestStageByDate(picked);
+      applyStage(s.id,true);
+    });
+  </script>
+</body>
+</html>
